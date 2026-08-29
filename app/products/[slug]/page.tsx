@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { ChevronRight, ShoppingCart, Heart, ShieldCheck, ArrowRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { HistoricalPriceChart } from '@/components/HistoricalPriceChart';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
+import { ProductImage } from '@/components/ProductImage';
 
 export default async function ProductDetailPage({
   params,
@@ -57,11 +58,12 @@ export default async function ProductDetailPage({
       <div className="mt-6 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         {/* Left: Product Images */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex h-80 w-full items-center justify-center rounded-2xl bg-[#F7FAFC] p-6">
-            <img
+          <div className="flex h-80 w-full items-center justify-center rounded-2xl bg-white border border-slate-100 p-6 shadow-xs">
+            <ProductImage
               src={mainImage}
               alt={product.name}
-              className="max-h-64 max-w-full object-contain"
+              brandName={product.brand?.name || undefined}
+              className="max-h-72 max-w-full object-contain"
             />
           </div>
           {product.images.length > 1 && (

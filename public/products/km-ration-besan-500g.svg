@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#FFFDE7"/>
+      <stop offset="100%" stop-color="#FFF59D" stop-opacity="0.25"/>
+    </linearGradient>
+
+    <!-- Header Banner Gradient -->
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F57F17"/>
+      <stop offset="100%" stop-color="#FFF59D"/>
+    </linearGradient>
+
+    <!-- Card Shadow -->
+    <filter id="packShadow" x="-10%" y="-10%" width="125%" height="125%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#073B6F" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="500" height="500" rx="32" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Border Frame -->
+  <rect x="8" y="8" width="484" height="484" rx="26" fill="none" stroke="#F57F17" stroke-opacity="0.15" stroke-width="2"/>
+
+  <!-- Product Packaging Box Canvas -->
+  <g filter="url(#packShadow)">
+    <rect x="45" y="45" width="410" height="410" rx="24" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+
+    <!-- Brand Header Ribbon -->
+    <path d="M 45 69 Q 45 45 69 45 L 431 45 Q 455 45 455 69 L 455 130 L 45 130 Z" fill="url(#primaryGrad)"/>
+
+    <!-- Brand Name Text -->
+    <text x="250" y="92" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="900" text-anchor="middle" fill="#FFFFFF" letter-spacing="1">
+      TATA
+    </text>
+    <text x="250" y="116" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#FFFFFF" opacity="0.9" letter-spacing="0.5">
+      KIRANAMART AUTHENTIC FMCG PACK
+    </text>
+
+    <!-- Price Tag Badge (Top Right) -->
+    <g transform="translate(365, 25)">
+      <rect width="80" height="42" rx="12" fill="#0D47A1" stroke="#FFFFFF" stroke-width="2"/>
+      <text x="40" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="900" text-anchor="middle" fill="#FFFFFF">
+        ₹58
+      </text>
+    </g>
+
+    <!-- Central Product Graphic Illustration -->
+    <g transform="translate(250, 235)">
+      <!-- Outer Accent Ring -->
+      <circle r="75" fill="#FFFDE7" stroke="#FFF59D" stroke-width="2.5" stroke-dasharray="6 3"/>
+      <circle r="65" fill="#FFFFFF"/>
+      
+      <!-- Realistic Category Product Art -->
+      <path d="M -30 -35 Q 0 -50 30 -35 Q 45 0 30 35 Q 0 50 -30 35 Q -45 0 -30 -35 Z" fill="#F57F17" opacity="0.12"/>
+      <circle r="40" fill="#F57F17" opacity="0.9"/>
+      
+      <!-- Stylized FMCG Pack Emblem -->
+      <text x="0" y="8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="900" text-anchor="middle" fill="#FFFFFF">
+        T
+      </text>
+    </g>
+
+    <!-- Product Title & Name -->
+    <text x="250" y="340" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="900" text-anchor="middle" fill="#BF360C">
+      Tata Sampann Besan
+    </text>
+
+    <!-- Subtitle / Variant Description -->
+    <text x="250" y="365" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" text-anchor="middle" fill="#64748B">
+      100% Pure Chana Dal Besan
+    </text>
+
+    <!-- Bottom Highlights Footer Bar -->
+    <g transform="translate(65, 388)">
+      <rect width="370" height="48" rx="14" fill="#FFFDE7" stroke="#FFF59D" stroke-opacity="0.3"/>
+      
+      <!-- Pack Size Badge -->
+      <text x="20" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="800" fill="#F57F17">
+        📦 500g Pouch
+      </text>
+
+      <!-- Verified Authenticity Pill -->
+      <text x="350" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" text-anchor="end" fill="#059669">
+        ✔ 100% GENUINE
+      </text>
+    </g>
+
+    <!-- Extra Text Banner if present -->
+    
+    <g transform="translate(250, 155)">
+      <rect x="-90" y="-12" width="180" height="24" rx="12" fill="#0D47A1" opacity="0.95"/>
+      <text x="0" y="4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="900" text-anchor="middle" fill="#FFFFFF" letter-spacing="0.5">
+        FINE GRAM FLOUR
+      </text>
+    </g>
+    
+  </g>
+</svg>

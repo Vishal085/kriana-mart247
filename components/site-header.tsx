@@ -416,7 +416,7 @@ export function SiteHeader() {
             )}
           </div>
 
-          {/* Mobile Hamburger Toggle */}
+          {/* Mobile Hamburger Toggle (Visible only on small mobile screens) */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-700 lg:hidden"
@@ -427,117 +427,199 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Slide-Over Drawer Menu (Opened by 3-Line Menu Button) */}
       {mobileMenuOpen && (
-        <div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
-          <form onSubmit={handleSearch} className="mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search products, mandis..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs"
-              />
+        <div className="fixed inset-0 z-50 flex">
+          {/* Backdrop Blur Overlay */}
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+          />
+
+          {/* Sliding Side Drawer Container */}
+          <div className="relative z-10 flex h-full w-80 max-w-[85vw] flex-col bg-white shadow-2xl animate-in slide-in-from-left duration-200">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 p-4">
+              <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                <BrandMark size="sm" />
+              </Link>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                aria-label="Close Menu"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-          </form>
 
-          <nav className="flex flex-col space-y-2 text-sm font-semibold text-slate-700">
-            <Link
-              href="/mandi-rates"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F]"
-            >
-              <TrendingUp className="h-4 w-4 text-[#39A9E8]" /> Today&apos;s Mandi Rates
-            </Link>
-            <Link
-              href="/mandis"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F]"
-            >
-              <Store className="h-4 w-4 text-[#39A9E8]" /> Mandi Directory
-            </Link>
-            <Link
-              href="/shop"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F]"
-            >
-              <ShoppingBag className="h-4 w-4 text-[#39A9E8]" /> Kirana Shop
-            </Link>
-            <Link
-              href="/cart"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F]"
-            >
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4 text-[#39A9E8]" /> My Cart
-              </div>
-              {itemCount > 0 && (
-                <span className="rounded-full bg-[#073B6F] px-2 py-0.5 text-xs text-white">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
-          </nav>
+            {/* Search Box */}
+            <div className="p-4 pb-2">
+              <form onSubmit={handleSearch}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search products, mandis..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                  />
+                </div>
+              </form>
+            </div>
 
-          <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2">
-            {user ? (
-              <>
-                {user.role === 'ADMIN' ? (
-                  <Link
-                    href="/dashboard/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-2.5 text-xs font-bold text-white"
-                  >
-                    <Shield className="h-4 w-4" /> Go to Admin Portal
-                  </Link>
+            {/* Navigation Links List */}
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1 text-xs font-bold text-slate-700">
+              <span className="block px-2 pt-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                Market Intelligence
+              </span>
+              <Link
+                href="/mandi-rates"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F] transition"
+              >
+                <div className="flex items-center gap-2.5">
+                  <TrendingUp className="h-4 w-4 text-[#39A9E8]" />
+                  <span>Today&apos;s Mandi Rates</span>
+                </div>
+                <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+              </Link>
+              <Link
+                href="/mandis"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F] transition"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Store className="h-4 w-4 text-[#39A9E8]" />
+                  <span>Mandi Directory</span>
+                </div>
+                <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+              </Link>
+              <Link
+                href="/shop"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F] transition"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ShoppingBag className="h-4 w-4 text-[#39A9E8]" />
+                  <span>Kirana Shop</span>
+                </div>
+                <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+              </Link>
+              <Link
+                href="/cart"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F] transition"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ShoppingCart className="h-4 w-4 text-[#39A9E8]" />
+                  <span>My Cart</span>
+                </div>
+                {itemCount > 0 ? (
+                  <span className="rounded-full bg-[#073B6F] px-2 py-0.5 text-[10px] font-black text-white">
+                    {itemCount}
+                  </span>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link
-                      href="/dashboard/customer/orders"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-center gap-1.5 rounded-xl bg-[#073B6F] py-2.5 text-xs font-bold text-white"
-                    >
-                      <Package className="h-4 w-4" /> My Orders
-                    </Link>
-                    <Link
-                      href="/profile"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-[#073B6F]"
-                    >
-                      <User className="h-4 w-4" /> My Profile
-                    </Link>
-                  </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                 )}
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    logout();
-                  }}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-red-200 py-2.5 text-xs font-bold text-red-600"
-                >
-                  <LogOut className="h-4 w-4" /> Logout
-                </button>
-              </>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  href="/login/customer"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center rounded-xl border border-slate-200 py-2 text-xs font-bold text-[#073B6F]"
-                >
-                  Customer Login
-                </Link>
-                <Link
-                  href="/login/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center rounded-xl bg-slate-800 py-2 text-xs font-bold text-white"
-                >
-                  Admin Portal
-                </Link>
-              </div>
-            )}
+              </Link>
+
+              <span className="block px-2 pt-4 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                Support & Contact
+              </span>
+              <a
+                href="https://wa.me/918510083082?text=Hello%20KiranaMart"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl p-2.5 hover:bg-emerald-50 text-emerald-700 transition"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-[#25D366] animate-ping" />
+                  <span>WhatsApp Live Support</span>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-600">Online</span>
+              </a>
+              <Link
+                href="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F] transition"
+              >
+                <span>Contact Us</span>
+                <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+              </Link>
+              <Link
+                href="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl p-2.5 hover:bg-[#EAF5FC] hover:text-[#073B6F] transition"
+              >
+                <span>About KiranaMart247</span>
+                <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+              </Link>
+            </div>
+
+            {/* Drawer Footer Account Section */}
+            <div className="border-t border-slate-100 p-4 bg-slate-50/70">
+              {user ? (
+                <div className="space-y-2">
+                  <div className="text-[11px] text-slate-500 font-medium">
+                    Logged in as <span className="font-bold text-slate-800">{user.fullName}</span>
+                  </div>
+                  {user.role === 'ADMIN' ? (
+                    <Link
+                      href="/dashboard/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-2.5 text-xs font-bold text-white shadow-sm"
+                    >
+                      <Shield className="h-4 w-4" /> Admin Console
+                    </Link>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link
+                        href="/dashboard/customer/orders"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center justify-center gap-1.5 rounded-xl bg-[#073B6F] py-2 text-xs font-bold text-white"
+                      >
+                        <Package className="h-3.5 w-3.5" /> Orders
+                      </Link>
+                      <Link
+                        href="/profile"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-bold text-[#073B6F]"
+                      >
+                        <User className="h-3.5 w-3.5" /> Profile
+                      </Link>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-white py-2 text-xs font-bold text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="h-3.5 w-3.5" /> Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    href="/login/customer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-2 text-xs font-bold text-[#073B6F]"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/login/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center rounded-xl bg-slate-800 py-2 text-xs font-bold text-white"
+                  >
+                    Admin
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -6,6 +6,7 @@ import { ShoppingCart, Heart, Plus, Minus } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { ProductImage } from '@/components/ProductImage';
 
 export interface ProductCardProps {
   id: string;
@@ -140,12 +141,12 @@ export function ProductCard({
 
         {/* Product Image */}
         <Link href={`/products/${slug}`} className="mt-2 block">
-          <div className="flex h-44 w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-100 transition-transform duration-300 group-hover:scale-105">
-            <img
-              src={imageUrl}
+          <div className="flex h-44 w-full items-center justify-center overflow-hidden rounded-2xl bg-white border border-slate-100 p-2 shadow-xs transition-transform duration-300 group-hover:scale-102">
+            <ProductImage
+              src={images[0]?.url || `/products/${id.toLowerCase()}.svg`}
               alt={name}
-              loading="lazy"
-              className="h-full w-full object-cover"
+              brandName={brand?.name || undefined}
+              className="h-full w-full object-contain"
             />
           </div>
         </Link>

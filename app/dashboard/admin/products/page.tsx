@@ -171,12 +171,20 @@ export default function AdminProductsPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-[#073B6F] px-5 py-2 text-xs font-bold text-white shadow hover:bg-[#0B5FA5]"
-        >
-          <Plus className="h-4 w-4" /> Add New Product
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/admin/products/images"
+            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-100 transition"
+          >
+            <span>🖼️ Image System Audit</span>
+          </Link>
+          <button
+            onClick={handleOpenCreate}
+            className="inline-flex items-center gap-2 rounded-full bg-[#073B6F] px-5 py-2 text-xs font-bold text-white shadow hover:bg-[#0B5FA5]"
+          >
+            <Plus className="h-4 w-4" /> Add New Product
+          </button>
+        </div>
       </div>
 
       {/* Search Input */}
