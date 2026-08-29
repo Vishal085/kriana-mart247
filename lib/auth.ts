@@ -10,6 +10,7 @@ export type SessionUser = {
   fullName: string;
   email?: string | null;
   mobile?: string | null;
+  avatarUrl?: string | null;
   role: Role;
   active: boolean;
 };
@@ -64,6 +65,7 @@ export async function getCurrentSessionUser(): Promise<SessionUser | null> {
       fullName: true,
       email: true,
       mobile: true,
+      avatarUrl: true,
       role: true,
       active: true,
     },

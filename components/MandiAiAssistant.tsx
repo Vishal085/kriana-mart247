@@ -17,7 +17,7 @@ export function MandiAiAssistant() {
     {
       id: '1',
       role: 'assistant',
-      content: "Namaste! I am **Vishal**, your KiranaMart247 AI assistant.\n\nAsk me about today's mandi wholesale rates, market trends, cheapest mandis, or grocery shopping!",
+      content: "Namaste! I am **Xyon**, your KiranaMart247 assistant.\n\nAsk me about today's mandi wholesale rates, market trends, cheapest mandis, or grocery shopping!",
       timestamp: new Date(),
     },
   ]);
@@ -121,7 +121,7 @@ export function MandiAiAssistant() {
               </div>
               <div>
                 <div className="flex items-center gap-1.5 font-bold text-white">
-                  Vishal AI
+                  Xyon
                   <span className="flex h-2 w-2 rounded-full bg-[#72B82A]" />
                 </div>
                 <div className="text-[11px] text-[#39A9E8] font-medium">
@@ -214,7 +214,7 @@ export function MandiAiAssistant() {
             >
               <input
                 type="text"
-                placeholder="Ask Vishal about mandi rates..."
+                placeholder="Ask Xyon about mandi rates..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 className="w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
@@ -235,8 +235,8 @@ export function MandiAiAssistant() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="group relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-white bg-[#073B6F] text-white shadow-2xl transition-all duration-300 hover:scale-110 hover:bg-[#0B5FA5] focus:outline-none"
-        aria-label="Open Vishal AI Assistant"
-        title="Ask Vishal AI - Today's Wholesale Rates"
+        aria-label="Open Xyon Assistant"
+        title="Ask Xyon - Today's Wholesale Rates"
       >
         <div className="relative flex items-center justify-center">
           {isOpen ? (
@@ -255,7 +255,7 @@ export function MandiAiAssistant() {
         {/* Hover Tooltip */}
         {!isOpen && (
           <span className="pointer-events-none absolute left-16 whitespace-nowrap rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-bold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
-            Ask Vishal AI 💬
+            Ask Xyon 💬
           </span>
         )}
       </button>

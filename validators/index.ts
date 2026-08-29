@@ -123,6 +123,7 @@ export const checkoutSchema = z.object({
   city: z.string().min(2, 'City is required'),
   pincode: z.string().regex(/^\d{6}$/, 'PIN Code must be 6 digits'),
   customerNotes: z.string().optional().nullable(),
+  whatsappOptIn: z.boolean().default(true).optional(),
 });
 
 export const priceAlertSchema = z.object({

@@ -6,6 +6,7 @@ import { CartProvider } from '@/context/CartContext';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { MandiAiAssistant } from '@/components/MandiAiAssistant';
+import { WhatsAppFloatingButton } from '@/components/WhatsAppFloatingButton';
 
 export const metadata: Metadata = {
   title: "KiranaMart247 | Today's Wholesale Rates",
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
     'Track wholesale mandi prices, compare market rates, and shop essential kirana products all in one place.',
   icons: {
     icon: '/brand/logo.png',
+    shortcut: '/brand/logo.png',
+    apple: '/brand/logo.png',
   },
 };
 
@@ -35,6 +38,7 @@ export default function RootLayout({
                 <SiteFooter />
               </div>
               <MandiAiAssistant />
+              <WhatsAppFloatingButton />
             </CartProvider>
           </MandiProvider>
         </AuthProvider>

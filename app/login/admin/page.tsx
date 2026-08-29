@@ -73,7 +73,7 @@ export default function AdminLoginPage() {
               <Mail className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
               <input
                 type="email"
-                placeholder="admin@kiranamart247.com"
+                placeholder="Enter your Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

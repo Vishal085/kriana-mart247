@@ -19,6 +19,7 @@ export default function CheckoutPage() {
     city: '',
     pincode: '',
     customerNotes: '',
+    whatsappOptIn: true,
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,6 +35,7 @@ export default function CheckoutPage() {
         deliveryAddress: user.customerProfile?.address || '',
         city: user.customerProfile?.city || '',
         pincode: user.customerProfile?.pinCode || '',
+        whatsappOptIn: true,
       }));
     }
   }, [user]);
@@ -205,6 +207,23 @@ export default function CheckoutPage() {
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
                 />
               </div>
+            </div>
+
+            {/* WhatsApp Communication Opt-in Consent */}
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3.5 flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="whatsappOptIn"
+                checked={formData.whatsappOptIn}
+                onChange={(e) => setFormData({ ...formData, whatsappOptIn: e.target.checked })}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 accent-emerald-600 focus:ring-emerald-500 cursor-pointer"
+              />
+              <label htmlFor="whatsappOptIn" className="text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                <span className="font-bold text-[#073B6F]">Send order tracking & updates on WhatsApp</span>
+                <p className="text-[11px] text-slate-500 font-normal mt-0.5">
+                  Receive instant order confirmation, packing, dispatch, and delivery tracking alerts directly on WhatsApp.
+                </p>
+              </label>
             </div>
           </div>
         </div>

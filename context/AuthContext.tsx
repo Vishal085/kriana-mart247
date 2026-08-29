@@ -8,6 +8,7 @@ export interface UserProfile {
   fullName: string;
   email?: string | null;
   mobile?: string | null;
+  avatarUrl?: string | null;
   role: 'CUSTOMER' | 'ADMIN';
   active: boolean;
   customerProfile?: {

@@ -67,6 +67,7 @@ export class OrderService {
           city: input.city,
           pincode: input.pincode,
           customerNotes: input.customerNotes || null,
+          whatsappOptIn: input.whatsappOptIn ?? true,
           items: {
             create: cart.items.map((item) => ({
               productId: item.productId,
@@ -115,27 +116,7 @@ export class OrderService {
 
     // Trigger WhatsApp notification (non-blocking)
     try {
-      await WhatsAppService.sendOrderNotification({
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        customerName: order.deliveryName,
-        phone: order.deliveryPhone,
-        items: order.items.map((i) => ({
-          name: i.productNameSnapshot,
-          quantity: i.quantity,
-          unit: i.unit,
-          subtotal: Number(i.subtotal),
-        })),
-        subtotal: Number(order.subtotal),
-        tax: Number(order.tax),
-        deliveryCharge: Number(order.deliveryCharge),
-        total: Number(order.total),
-        address: order.deliveryAddress,
-        city: order.city,
-        pincode: order.pincode,
-        orderDate: order.createdAt,
-        status: order.status,
-      });
+      await WhatsAppService.sendOrderStatusNotification(order.id, OrderStatus.PENDING);
     } catch (err) {
       console.error('WhatsApp dispatch error:', err);
     }
@@ -149,6 +130,7 @@ export class OrderService {
       include: {
         items: true,
         statusHistory: { orderBy: { createdAt: 'asc' } },
+        whatsappMessages: { orderBy: { createdAt: 'desc' }, take: 1 },
         whatsappLogs: { orderBy: { sentAt: 'desc' }, take: 1 },
       },
       orderBy: { createdAt: 'desc' },
@@ -161,6 +143,7 @@ export class OrderService {
       include: {
         items: true,
         statusHistory: { orderBy: { createdAt: 'asc' } },
+        whatsappMessages: { orderBy: { createdAt: 'desc' } },
         whatsappLogs: { orderBy: { sentAt: 'desc' } },
       },
     });
@@ -198,6 +181,7 @@ export class OrderService {
         include: {
           items: true,
           statusHistory: { orderBy: { createdAt: 'desc' }, take: 1 },
+          whatsappMessages: { orderBy: { createdAt: 'desc' }, take: 1 },
           whatsappLogs: { orderBy: { sentAt: 'desc' }, take: 1 },
           user: { select: { id: true, fullName: true, email: true, mobile: true } },
         },
@@ -223,6 +207,7 @@ export class OrderService {
       include: {
         items: true,
         statusHistory: { orderBy: { createdAt: 'asc' } },
+        whatsappMessages: { orderBy: { createdAt: 'desc' } },
         whatsappLogs: { orderBy: { sentAt: 'desc' } },
         user: {
           select: {
@@ -264,7 +249,7 @@ export class OrderService {
       return res;
     });
 
-    // Notify customer
+    // Notify customer via In-App notification
     try {
       await NotificationService.createNotification(
         order.userId,
@@ -274,6 +259,13 @@ export class OrderService {
       );
     } catch (e) {
       console.error('Notification error:', e);
+    }
+
+    // Trigger WhatsApp lifecycle template notification (non-blocking)
+    try {
+      await WhatsAppService.sendOrderStatusNotification(orderId, status, note);
+    } catch (err) {
+      console.error('WhatsApp lifecycle notification error:', err);
     }
 
     return updated;

@@ -31,7 +31,7 @@ export class AiService {
 
     if (apiKey) {
       try {
-        const systemPrompt = `You are "Vishal", the intelligent Kirana Mandi and Grocery assistant for KiranaMart247 (Official concept: "Today's Wholesale Rates").
+        const systemPrompt = `You are "Xyon", the intelligent Kirana Mandi and Grocery assistant for KiranaMart247 (Official concept: "Today's Wholesale Rates").
 You understand English, Hindi, and Hinglish fluently and respond naturally in the user's preferred language.
 
 CRITICAL RULES:
@@ -229,7 +229,7 @@ ${topRates
 
     // 6. Default helpful greeting & assistance
     return {
-      reply: `Namaste! I am **Vishal**, your KiranaMart247 AI Assistant.\n\nI can help you with:\n1. 📊 **Mandi Wholesale Rates** (e.g., *"What is today's Basmati Rice rate in Delhi?"*)\n2. 📈 **Market Trends** (e.g., *"Which commodities are rising today?"*)\n3. 🔍 **Mandi Comparison** (e.g., *"Which mandi has the lowest mustard oil price?"*)\n4. 🛒 **Kirana Shopping & Cart** (e.g., *"Show me dairy products"* or *"Check my cart"*)\n\nHow can I help you today?`,
+      reply: `Namaste! I am **Xyon**, your KiranaMart247 Assistant.\n\nI can help you with:\n1. 📊 **Mandi Wholesale Rates** (e.g., *"What is today's Basmati Rice rate in Delhi?"*)\n2. 📈 **Market Trends** (e.g., *"Which commodities are rising today?"*)\n3. 🔍 **Mandi Comparison** (e.g., *"Which mandi has the lowest mustard oil price?"*)\n4. 🛒 **Kirana Shopping & Cart** (e.g., *"Show me dairy products"* or *"Check my cart"*)\n\nHow can I help you today?`,
     };
   }
 }

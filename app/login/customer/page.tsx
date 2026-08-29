@@ -33,7 +33,7 @@ export default function CustomerLoginPage() {
       }
 
       await refreshUser();
-      router.push('/dashboard/customer');
+      router.push('/shop');
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Login failed');

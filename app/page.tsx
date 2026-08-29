@@ -393,13 +393,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. VISHAL AI ASSISTANT PROMO */}
+      {/* 6. XYON AI ASSISTANT PROMO */}
       <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
         <div className="rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-8 sm:p-12 text-white shadow-xl">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-[#39A9E8]">
-                <Bot className="h-4 w-4 text-[#72B82A]" /> Meet Vishal AI Assistant
+                <Bot className="h-4 w-4 text-[#72B82A]" /> Meet Xyon
               </div>
               <h2 className="mt-4 text-3xl font-black sm:text-4xl">
                 Instant Mandi Rate Intelligence at your Fingertips

@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Shield,
 } from 'lucide-react';
+import { AiRateUpdaterCard } from '@/components/admin/AiRateUpdaterCard';
 
 export default async function AdminDashboardPage() {
   let admin;
@@ -98,6 +99,11 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* AI Rate Auto-Updater & Daily 10:30 AM Schedule */}
+      <div className="mt-6">
+        <AiRateUpdaterCard />
       </div>
 
       {/* Admin Modules Navigation */}

@@ -44,9 +44,11 @@ model User {
   fullName        String
   mobile          String?
   email           String?         @unique
+  avatarUrl       String?
   passwordHash    String
   role            Role            @default(CUSTOMER)
   active          Boolean         @default(true)
+  whatsappOptIn   Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   customerProfile CustomerProfile?
@@ -58,6 +60,7 @@ model User {
   mandiWatchlist  MandiWatchlistItem[]
   alerts          PriceAlert[]
   notifications   Notification[]
+  whatsappMessages WhatsAppMessage[]
 
   @@index([email])
   @@index([mobile])
@@ -314,11 +317,13 @@ model Order {
   city                String
   pincode             String
   customerNotes       String?
+  whatsappOptIn       Boolean            @default(true)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   items               OrderItem[]
   statusHistory       OrderStatusHistory[]
   whatsappLogs        WhatsAppNotificationLog[]
+  whatsappMessages    WhatsAppMessage[]
 
   @@index([userId])
   @@index([status])
@@ -424,4 +429,48 @@ model WhatsAppNotificationLog {
   createdAt         DateTime @default(now())
 
   @@index([orderId])
+}
+
+enum WhatsAppMessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum WhatsAppMessageType {
+  TEMPLATE
+  TEXT
+  INTERACTIVE
+}
+
+model WhatsAppMessage {
+  id                String                 @id @default(cuid())
+  orderId           String?
+  order             Order?                 @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  userId            String?
+  user              User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  phoneNumber       String
+  messageType       WhatsAppMessageType    @default(TEMPLATE)
+  templateName      String?
+  templateLanguage  String                 @default("en")
+  metaMessageId     String?                @unique
+  status            WhatsAppMessageStatus  @default(PENDING)
+  errorCode         String?
+  errorMessage      String?
+  payload           Json?
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  failedAt          DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([phoneNumber])
+  @@index([metaMessageId])
+  @@index([status])
+  @@index([createdAt])
 }

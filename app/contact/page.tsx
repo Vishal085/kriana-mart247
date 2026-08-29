@@ -28,10 +28,18 @@ export default function ContactPage() {
           </div>
 
           <div className="flex items-start gap-3 text-xs text-slate-700">
-            <Phone className="h-5 w-5 text-[#39A9E8] flex-shrink-0" />
+            <Phone className="h-5 w-5 text-[#25D366] flex-shrink-0" />
             <div>
               <div className="font-bold">WhatsApp & Phone Support</div>
-              <div className="text-slate-500">+91 99999 99999</div>
+              <a
+                href="https://wa.me/918510083082?text=Hello%20KiranaMart%20Support"
+                target="_blank"
+                rel="noreferrer"
+                className="font-bold text-[#073B6F] hover:underline"
+              >
+                +91 85100 83082
+              </a>
+              <div className="text-[11px] text-slate-500">Available Mon-Sat: 7:00 AM - 9:00 PM IST</div>
             </div>
           </div>
 
