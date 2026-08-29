@@ -3,6 +3,7 @@ import { Direction } from '@prisma/client';
 import { computeRateMetrics } from '@/lib/rates';
 import { AlertService } from './alerts.service';
 import { WhatsAppService } from './whatsapp.service';
+import { WhatsAppClient } from '@/lib/whatsapp/client';
 
 export type AiRateUpdateResult = {
   success: boolean;
