@@ -9,7 +9,24 @@ datasource db {
 
 enum Role {
   CUSTOMER
+  SHOPKEEPER
   ADMIN
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_REVIEW
+  NEEDS_CHANGES
+  PUBLISHED
+  REJECTED
+}
+
+enum AiDescriptionStatus {
+  NOT_GENERATED
+  GENERATING
+  GENERATED
+  FAILED
+  ADMIN_EDITED
 }
 
 enum OrderStatus {
@@ -19,6 +36,14 @@ enum OrderStatus {
   DISPATCHED
   DELIVERED
   CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
 }
 
 enum Direction {
@@ -51,16 +76,18 @@ model User {
   whatsappOptIn   Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  customerProfile CustomerProfile?
-  adminProfile    AdminProfile?
-  sessions        UserSession[]
-  orders          Order[]
-  cart            Cart?
-  wishlistItems   WishlistItem[]
-  mandiWatchlist  MandiWatchlistItem[]
-  alerts          PriceAlert[]
-  notifications   Notification[]
-  whatsappMessages WhatsAppMessage[]
+  customerProfile   CustomerProfile?
+  adminProfile      AdminProfile?
+  shopkeeperProfile ShopkeeperProfile?
+  sessions          UserSession[]
+  orders            Order[]
+  cart              Cart?
+  wishlistItems     WishlistItem[]
+  mandiWatchlist    MandiWatchlistItem[]
+  alerts            PriceAlert[]
+  notifications     Notification[]
+  whatsappMessages  WhatsAppMessage[]
+  sellerProducts    Product[]           @relation("SellerProducts")
 
   @@index([email])
   @@index([mobile])
@@ -76,6 +103,24 @@ model CustomerProfile {
   pinCode   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ShopkeeperProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopName    String
+  shopAddress String
+  city        String
+  state       String?
+  pinCode     String?
+  gstNumber   String?
+  status      String   @default("APPROVED")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([city])
+  @@index([status])
 }
 
 model AdminProfile {
@@ -156,22 +201,51 @@ model Product {
   category         Category        @relation(fields: [categoryId], references: [id])
   subCategoryId    String?
   subCategory      SubCategory?    @relation(fields: [subCategoryId], references: [id])
-  unit             String
-  retailPrice      Decimal         @db.Decimal(10, 2)
-  minimumQuantity  Int             @default(1)
-  maximumQuantity  Int?
-  active           Boolean         @default(true)
-  barcode          String?
-  searchKeywords   String?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  images           ProductImage[]
-  rates            MandiRate[]
-  rateHistory      RateHistory[]
-  cartItems        CartItem[]
-  wishlistItems    WishlistItem[]
-  alerts           PriceAlert[]
-  orderItems       OrderItem[]
+  unit                 String
+  retailPrice          Decimal              @db.Decimal(10, 2)
+  minimumQuantity      Int                  @default(1)
+  maximumQuantity      Int?
+  active               Boolean              @default(true)
+  barcode              String?
+  searchKeywords       String?
+  
+  // Seller / Shopkeeper & Approval Fields
+  sellerId             String?
+  seller               User?                @relation("SellerProducts", fields: [sellerId], references: [id], onDelete: SetNull)
+  status               ProductStatus        @default(PUBLISHED)
+  aiDescriptionStatus  AiDescriptionStatus  @default(NOT_GENERATED)
+  shortDescription     String?
+  aiDescription        String?
+  finalDescription     String?
+  highlights           String[]             @default([])
+  productTags          String[]             @default([])
+  mrp                  Decimal?             @db.Decimal(10, 2)
+  wholesalePrice       Decimal?             @db.Decimal(10, 2)
+  stockQuantity        Int                  @default(100)
+  weight               String?
+  mandi                String?
+  location             String?
+  shopName             String?
+  shopAddress          String?
+  deliveryAvailability String?
+  gstPercent           Decimal?             @db.Decimal(5, 2)
+  expiryDate           String?
+  adminNotes           String?
+  rejectionReason      String?
+  approvedAt           DateTime?
+  approvedBy           String?
+  publishedVersionId   String?
+
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  images               ProductImage[]
+  rates                MandiRate[]
+  rateHistory          RateHistory[]
+  cartItems            CartItem[]
+  wishlistItems        WishlistItem[]
+  alerts               PriceAlert[]
+  orderItems           OrderItem[]
+  auditLogs            ProductAuditLog[]
 
   @@index([slug])
   @@index([name])
@@ -179,8 +253,28 @@ model Product {
   @@index([brandId])
   @@index([categoryId])
   @@index([subCategoryId])
+  @@index([sellerId])
+  @@index([status])
   @@index([active])
   @@index([name, active])
+  @@index([status, active])
+}
+
+model ProductAuditLog {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  actorId     String
+  actorRole   String
+  actorName   String?
+  action      String   // SUBMITTED, AI_GENERATED, EDITED_BY_ADMIN, EDITED_BY_SELLER, CHANGES_REQUESTED, APPROVED, REJECTED
+  changes     Json?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+  @@index([actorId])
+  @@index([action])
 }
 
 model ProductImage {
@@ -318,6 +412,12 @@ model Order {
   pincode             String
   customerNotes       String?
   whatsappOptIn       Boolean            @default(true)
+  paymentStatus       PaymentStatus      @default(PENDING)
+  paymentMethod       String?
+  razorpayOrderId     String?            @unique
+  razorpayPaymentId   String?            @unique
+  razorpaySignature   String?
+  paidAt              DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   items               OrderItem[]
@@ -327,6 +427,8 @@ model Order {
 
   @@index([userId])
   @@index([status])
+  @@index([paymentStatus])
+  @@index([razorpayOrderId])
   @@index([createdAt])
   @@index([orderNumber])
 }

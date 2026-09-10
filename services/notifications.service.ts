@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { NotificationType } from '@prisma/client';
+import { NotificationType, Role } from '@prisma/client';
 
 export class NotificationService {
   static async createNotification(
@@ -16,6 +16,28 @@ export class NotificationService {
         message,
       },
     });
+  }
+
+  static async notifyAdmins(type: NotificationType, title: string, message: string) {
+    try {
+      const admins = await prisma.user.findMany({
+        where: { role: Role.ADMIN, active: true },
+        select: { id: true },
+      });
+
+      if (admins.length === 0) return;
+
+      await prisma.notification.createMany({
+        data: admins.map((admin) => ({
+          userId: admin.id,
+          type,
+          title,
+          message,
+        })),
+      });
+    } catch (err) {
+      console.error('Error notifying admins:', err);
+    }
   }
 
   static async getUserNotifications(userId: string) {
@@ -40,3 +62,4 @@ export class NotificationService {
     });
   }
 }
+

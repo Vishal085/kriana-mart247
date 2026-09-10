@@ -99,6 +99,22 @@ export async function requireAdmin() {
   return user;
 }
 
+export async function requireShopkeeper() {
+  const user = await requireAuth();
+  if (user.role !== Role.SHOPKEEPER) {
+    throw new Error('Forbidden: Shopkeeper access required');
+  }
+  return user;
+}
+
+export async function requireShopkeeperOrAdmin() {
+  const user = await requireAuth();
+  if (user.role !== Role.SHOPKEEPER && user.role !== Role.ADMIN) {
+    throw new Error('Forbidden: Seller or Admin access required');
+  }
+  return user;
+}
+
 export async function clearSessionCookie() {
   const cookieStore = await cookies();
   cookieStore.set('km247_session', '', {

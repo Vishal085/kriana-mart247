@@ -9,10 +9,15 @@ export async function GET() {
     const orders = await OrderService.getCustomerOrders(user.id);
     return NextResponse.json({ orders });
   } catch (error: any) {
-    if (error.message.includes('Forbidden') || error.message.includes('Unauthorized')) {
+    const errorMsg =
+      error?.message ||
+      error?.error?.description ||
+      (typeof error === 'string' ? error : 'Failed to fetch orders');
+
+    if (errorMsg.includes('Forbidden') || errorMsg.includes('Unauthorized')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    return NextResponse.json({ error: error.message || 'Failed to fetch orders' }, { status: 500 });
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }
 
@@ -23,8 +28,10 @@ export async function POST(request: Request) {
     const parsed = checkoutSchema.safeParse(body);
 
     if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0];
+      const errorMessage = firstIssue?.message || 'Invalid checkout information';
       return NextResponse.json(
-        { error: 'Invalid checkout information', details: parsed.error.format() },
+        { error: errorMessage, details: parsed.error.format() },
         { status: 400 }
       );
     }
@@ -32,9 +39,14 @@ export async function POST(request: Request) {
     const order = await OrderService.createOrder(user.id, parsed.data);
     return NextResponse.json({ message: 'Order placed successfully', order }, { status: 201 });
   } catch (error: any) {
-    if (error.message.includes('Forbidden') || error.message.includes('Unauthorized')) {
+    const errorMsg =
+      error?.message ||
+      error?.error?.description ||
+      (typeof error === 'string' ? error : 'Checkout failed');
+
+    if (errorMsg.includes('Forbidden') || errorMsg.includes('Unauthorized')) {
       return NextResponse.json({ error: 'Please login to checkout' }, { status: 401 });
     }
-    return NextResponse.json({ error: error.message || 'Checkout failed' }, { status: 400 });
+    return NextResponse.json({ error: errorMsg }, { status: 400 });
   }
 }

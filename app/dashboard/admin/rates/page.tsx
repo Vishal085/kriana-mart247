@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Plus, Upload, Trash2, Edit3, TrendingUp, TrendingDown, Minus, Search, Check, Sparkles, Bot, Clock, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, Plus, Upload, Sparkles, Filter, Store, Calendar, ArrowUpDown, ChevronRight, CheckCircle2, Clock, Bot, Edit3, Trash2 } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
 
 export default function AdminRatesPage() {
@@ -37,6 +38,8 @@ export default function AdminRatesPage() {
   const [bulkJson, setBulkJson] = useState('');
   const [bulkResult, setBulkResult] = useState<any>(null);
 
+  const { toast } = useToast();
+
   const handleRunAiAutoUpdate = async () => {
     setAiUpdating(true);
     setAiResult(null);
@@ -45,9 +48,10 @@ export default function AdminRatesPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'AI update failed');
       setAiResult(data);
+      toast.success('AI Rate Auto-Update completed successfully!');
       await fetchRatesData();
     } catch (err: any) {
-      alert(err.message || 'AI Auto-Update error');
+      toast.error(err.message || 'AI Auto-Update error occurred');
     } finally {
       setAiUpdating(false);
     }
@@ -163,7 +167,7 @@ export default function AdminRatesPage() {
       setBulkResult(data.results || data);
       fetchRatesData();
     } catch (err: any) {
-      alert('Invalid JSON structure: ' + err.message);
+      toast.error('Invalid JSON structure: ' + err.message);
     } finally {
       setSubmitting(false);
     }

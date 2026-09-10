@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { requireCustomer } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { ChevronRight, CheckCircle2, Clock, Truck, Package, ShieldCheck, MapPin } from 'lucide-react';
+import { ChevronRight, CheckCircle2, Clock, Truck, Package, ShieldCheck, MapPin, CreditCard, AlertCircle } from 'lucide-react';
+import { CustomerOrderPaymentAction } from '@/components/CustomerOrderPaymentAction';
 
 export default async function CustomerOrderDetailPage({
   params,
@@ -52,12 +53,34 @@ export default async function CustomerOrderDetailPage({
           </div>
         </div>
 
-        <div>
-          <span className="rounded-full bg-[#073B6F] px-4 py-1.5 text-xs font-bold text-white shadow-sm">
-            Status: {order.status}
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`rounded-full px-3.5 py-1 text-xs font-bold ${
+              order.paymentStatus === 'PAID'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : order.paymentStatus === 'FAILED'
+                ? 'bg-red-50 text-red-700 border border-red-200'
+                : 'bg-amber-50 text-amber-700 border border-amber-200'
+            }`}
+          >
+            Payment: {order.paymentStatus}
+          </span>
+          <span className="rounded-full bg-[#073B6F] px-4 py-1 text-xs font-bold text-white shadow-sm">
+            Order: {order.status}
           </span>
         </div>
       </div>
+
+      {/* Payment Action if Pending/Failed */}
+      {order.paymentStatus !== 'PAID' && order.status !== 'CANCELLED' && (
+        <CustomerOrderPaymentAction
+          orderId={order.id}
+          orderNumber={order.orderNumber}
+          total={Number(order.total)}
+          paymentStatus={order.paymentStatus}
+        />
+      )}
+
 
       {/* Visual Timeline */}
       <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
@@ -185,6 +208,54 @@ export default async function CustomerOrderDetailPage({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Payment & Transaction Info */}
+          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-base font-black text-[#073B6F]">Payment Information</h2>
+
+            <div className="mt-4 space-y-2.5 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-medium">Gateway:</span>
+                <span className="font-bold text-[#073B6F]">Razorpay Secure</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-medium">Payment Status:</span>
+                <span
+                  className={`font-bold rounded-full px-2.5 py-0.5 text-[10px] ${
+                    order.paymentStatus === 'PAID'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : order.paymentStatus === 'FAILED'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}
+                >
+                  {order.paymentStatus}
+                </span>
+              </div>
+              {order.paymentMethod && (
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Payment Method:</span>
+                  <span className="font-semibold text-slate-800 uppercase">{order.paymentMethod}</span>
+                </div>
+              )}
+              {order.razorpayPaymentId && (
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Payment ID:</span>
+                  <span className="font-mono text-[11px] text-slate-700 truncate max-w-[170px]">
+                    {order.razorpayPaymentId}
+                  </span>
+                </div>
+              )}
+              {order.paidAt && (
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Paid At:</span>
+                  <span className="text-slate-700">
+                    {new Date(order.paidAt).toLocaleDateString()} {new Date(order.paidAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

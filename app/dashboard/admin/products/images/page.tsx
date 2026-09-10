@@ -171,8 +171,8 @@ export default async function AdminProductImagesPage({
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {products.map((p) => {
-                const img = p.images[0]?.url || `/products/${p.sku.toLowerCase()}.svg`;
-                const isVerified = img.startsWith('/products/');
+                const img = p.images[0]?.url || '/products/placeholder.svg';
+                const isVerified = Boolean(p.images[0]?.url);
 
                 return (
                   <tr key={p.id} className="hover:bg-slate-50/80 transition">

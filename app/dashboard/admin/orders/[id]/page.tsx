@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ChevronRight, CheckCircle2, Clock, Truck, ShieldCheck, RefreshCw, Send, AlertCircle } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 import { OrderStatus } from '@prisma/client';
 
 export default function AdminOrderDetailPage() {
@@ -17,6 +18,7 @@ export default function AdminOrderDetailPage() {
   const [updating, setUpdating] = useState(false);
   const [retryingWhatsApp, setRetryingWhatsApp] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const fetchOrder = async () => {
     try {
@@ -53,10 +55,11 @@ export default function AdminOrderDetailPage() {
       if (!res.ok) throw new Error(data.error || 'Status update failed');
 
       setMessage('Order status updated and customer notified.');
+      toast.success('Order status updated and customer notified.');
       setStatusNote('');
       fetchOrder();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message || 'Failed to update order status');
     } finally {
       setUpdating(false);
     }
@@ -69,10 +72,10 @@ export default function AdminOrderDetailPage() {
         method: 'POST',
       });
       const data = await res.json();
-      alert(`WhatsApp dispatch result: ${data.result?.status || 'Executed'}`);
+      toast.info(`WhatsApp dispatch result: ${data.result?.status || 'Executed'}`);
       fetchOrder();
     } catch (err: any) {
-      alert('Retry error: ' + err.message);
+      toast.error('WhatsApp dispatch error: ' + err.message);
     } finally {
       setRetryingWhatsApp(false);
     }
@@ -105,9 +108,20 @@ export default function AdminOrderDetailPage() {
           </div>
         </div>
 
-        <div>
-          <span className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-bold text-white shadow-sm">
-            Current: {order.status}
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`rounded-full px-3.5 py-1 text-xs font-bold ${
+              order.paymentStatus === 'PAID'
+                ? 'bg-emerald-100 text-emerald-800'
+                : order.paymentStatus === 'FAILED'
+                ? 'bg-red-100 text-red-800'
+                : 'bg-amber-100 text-amber-800'
+            }`}
+          >
+            Payment: {order.paymentStatus}
+          </span>
+          <span className="rounded-full bg-slate-900 px-4 py-1 text-xs font-bold text-white shadow-sm">
+            Status: {order.status}
           </span>
         </div>
       </div>
@@ -222,6 +236,58 @@ export default function AdminOrderDetailPage() {
                 {updating ? 'Updating...' : 'Commit Status Change'}
               </button>
             </form>
+          </div>
+
+          {/* Payment & Gateway Details */}
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm text-xs space-y-3">
+            <h2 className="text-lg font-black text-[#073B6F]">Payment Information</h2>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-slate-500">Payment Status:</span>
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                    order.paymentStatus === 'PAID'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : order.paymentStatus === 'FAILED'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}
+                >
+                  {order.paymentStatus}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-slate-500">Payment Method:</span>
+                <span className="font-bold text-slate-900 uppercase">
+                  {order.paymentMethod || 'Razorpay Gateway'}
+                </span>
+              </div>
+              {order.razorpayPaymentId && (
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-500">Razorpay Payment ID:</span>
+                  <span className="font-mono text-[11px] text-slate-900 font-bold">
+                    {order.razorpayPaymentId}
+                  </span>
+                </div>
+              )}
+              {order.razorpayOrderId && (
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-500">Razorpay Order ID:</span>
+                  <span className="font-mono text-[11px] text-slate-600">
+                    {order.razorpayOrderId}
+                  </span>
+                </div>
+              )}
+              {order.paidAt && (
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-500">Paid Timestamp:</span>
+                  <span className="text-slate-800">
+                    {new Date(order.paidAt).toLocaleDateString()} at{' '}
+                    {new Date(order.paidAt).toLocaleTimeString()}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Customer & Address Details */}

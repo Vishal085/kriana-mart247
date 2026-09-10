@@ -98,6 +98,32 @@ export function HistoricalPriceChart({
         </div>
       </div>
 
+      {/* KPI Stats Row */}
+      {formattedData.length > 0 && (
+        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="rounded-2xl border border-slate-100 bg-[#F8FAFC] p-3 text-center">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Current Rate</span>
+            <span className="text-base font-black text-[#073B6F]">
+              ₹{formattedData[formattedData.length - 1].rate.toFixed(2)}
+            </span>
+          </div>
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3 text-center">
+            <span className="text-[10px] uppercase font-bold text-emerald-700 block">Period Low</span>
+            <span className="text-base font-black text-emerald-700">₹{minPrice.toFixed(2)}</span>
+          </div>
+          <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-3 text-center">
+            <span className="text-[10px] uppercase font-bold text-rose-700 block">Period High</span>
+            <span className="text-base font-black text-rose-700">₹{maxPrice.toFixed(2)}</span>
+          </div>
+          <div className="rounded-2xl border border-slate-100 bg-[#F8FAFC] p-3 text-center">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Period Mean</span>
+            <span className="text-base font-black text-slate-800">
+              ₹{(formattedData.reduce((a, b) => a + b.rate, 0) / formattedData.length).toFixed(2)}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 h-72 w-full">
         {loading ? (
           <div className="flex h-full items-center justify-center text-sm text-slate-400">

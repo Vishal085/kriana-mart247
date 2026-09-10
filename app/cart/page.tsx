@@ -96,8 +96,15 @@ export default function CartPage() {
               <div className="flex items-center gap-4">
                 <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-[#F7FAFC] p-2">
                   <img
-                    src={item.product.image}
+                    src={item.product.image || '/products/placeholder.svg'}
                     alt={item.product.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      if (!target.src.endsWith('/products/placeholder.svg')) {
+                        target.src = '/products/placeholder.svg';
+                      }
+                    }}
                     className="max-h-16 max-w-full object-contain"
                   />
                 </div>

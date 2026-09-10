@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { MOCK_PRODUCTS } from '@/lib/mock-data';
 
 export interface CartItemProduct {
   id: string;
@@ -33,13 +34,21 @@ export interface CartData {
   subtotal: number;
   tax: number;
   deliveryCharge: number;
+  bulkSavings: number;
   grandTotal: number;
 }
+
+export const FREE_DELIVERY_THRESHOLD = 500;
+export const STANDARD_DELIVERY_FEE = 40;
 
 interface CartContextType {
   cart: CartData | null;
   loading: boolean;
   itemCount: number;
+  isDrawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  toggleDrawer: () => void;
   addItem: (productId: string, quantity?: number) => Promise<{ success: boolean; error?: string }>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
@@ -51,6 +60,10 @@ const CartContext = createContext<CartContextType>({
   cart: null,
   loading: false,
   itemCount: 0,
+  isDrawerOpen: false,
+  openDrawer: () => {},
+  closeDrawer: () => {},
+  toggleDrawer: () => {},
   addItem: async () => ({ success: false }),
   updateQuantity: async () => {},
   removeItem: async () => {},
@@ -58,28 +71,95 @@ const CartContext = createContext<CartContextType>({
   refreshCart: async () => {},
 });
 
+function calculateCartTotals(items: CartItemData[]): CartData {
+  let subtotal = 0;
+  let totalItems = 0;
+  let bulkSavings = 0;
+
+  for (const item of items) {
+    const rawTotal = item.unitPrice * item.quantity;
+    let discountRate = 0;
+    // Wholesale bulk tiers
+    if (item.quantity >= 20) {
+      discountRate = 0.10; // 10% off for bulk lot
+    } else if (item.quantity >= 5) {
+      discountRate = 0.06; // 6% off for medium lot
+    }
+
+    const itemSavings = rawTotal * discountRate;
+    bulkSavings += itemSavings;
+    subtotal += (rawTotal - itemSavings);
+    totalItems += item.quantity;
+  }
+
+  const deliveryCharge = subtotal >= FREE_DELIVERY_THRESHOLD || items.length === 0 ? 0 : STANDARD_DELIVERY_FEE;
+  const tax = Math.round(subtotal * 0.05 * 100) / 100; // 5% GST
+  const grandTotal = Math.max(0, subtotal + deliveryCharge + tax);
+
+  return {
+    id: 'active-cart',
+    items,
+    totalItems,
+    subtotal: Math.round(subtotal * 100) / 100,
+    tax,
+    deliveryCharge,
+    bulkSavings: Math.round(bulkSavings * 100) / 100,
+    grandTotal: Math.round(grandTotal * 100) / 100,
+  };
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [cart, setCart] = useState<CartData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const openDrawer = () => setIsDrawerOpen(true);
+  const closeDrawer = () => setIsDrawerOpen(false);
+  const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
+
+  // Load guest cart from localStorage on initial load
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('km_guest_cart');
+      if (saved) {
+        const parsedItems: CartItemData[] = JSON.parse(saved);
+        if (Array.isArray(parsedItems) && parsedItems.length > 0) {
+          setCart(calculateCartTotals(parsedItems));
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Save guest cart whenever cart changes
+  const saveGuestCart = (items: CartItemData[]) => {
+    const totals = calculateCartTotals(items);
+    setCart(totals);
+    try {
+      localStorage.setItem('km_guest_cart', JSON.stringify(items));
+    } catch {
+      // ignore
+    }
+  };
 
   const refreshCart = async () => {
-    if (!user || user.role !== 'CUSTOMER') {
-      setCart(null);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await fetch('/api/cart');
-      if (res.ok) {
-        const data = await res.json();
-        setCart(data.cart || null);
+    if (user && user.role === 'CUSTOMER') {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/cart');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.cart?.items) {
+            setCart(calculateCartTotals(data.cart.items));
+          }
+        }
+      } catch (err) {
+        console.warn('API cart load failed, keeping local cart:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to load cart:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -88,72 +168,116 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const addItem = async (productId: string, quantity = 1): Promise<{ success: boolean; error?: string }> => {
-    if (!user) {
-      return { success: false, error: 'Please login as customer to add products to your cart' };
-    }
-    if (user.role !== 'CUSTOMER') {
-      return { success: false, error: 'Admin accounts cannot place customer orders' };
-    }
+    // 1. If logged in customer and server is reachable, try server API
+    if (user && user.role === 'CUSTOMER') {
+      try {
+        const res = await fetch('/api/cart/items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, quantity }),
+        });
 
-    try {
-      const res = await fetch('/api/cart/items', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        return { success: false, error: data.error || 'Failed to add item' };
+        if (res.ok) {
+          const data = await res.json();
+          if (data.cart?.items) {
+            setCart(calculateCartTotals(data.cart.items));
+            openDrawer();
+            return { success: true };
+          }
+        }
+      } catch (e) {
+        console.warn('Server cart add failed, using optimistic cart:', e);
       }
-
-      setCart(data.cart);
-      return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Network error' };
     }
+
+    // 2. Local / Guest optimistic cart
+    const prod = MOCK_PRODUCTS.find((p) => p.id === productId);
+    if (!prod) {
+      return { success: false, error: 'Product not found' };
+    }
+
+    const currentItems = cart?.items ? [...cart.items] : [];
+    const existingIndex = currentItems.findIndex((i) => i.productId === productId);
+
+    if (existingIndex > -1) {
+      const existing = currentItems[existingIndex];
+      const newQty = existing.quantity + quantity;
+      currentItems[existingIndex] = {
+        ...existing,
+        quantity: newQty,
+        subtotal: existing.unitPrice * newQty,
+      };
+    } else {
+      currentItems.push({
+        id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        productId,
+        quantity,
+        unitPrice: Number(prod.retailPrice),
+        subtotal: Number(prod.retailPrice) * quantity,
+        product: {
+          id: prod.id,
+          name: prod.name,
+          slug: prod.slug,
+          unit: prod.unit,
+          retailPrice: Number(prod.retailPrice),
+          minimumQuantity: prod.minimumQuantity,
+          maximumQuantity: prod.maximumQuantity,
+          brand: prod.brand.name,
+          category: prod.category.name,
+          image: prod.images[0]?.url || '/products/placeholder.svg',
+          active: prod.active,
+        },
+      });
+    }
+
+    saveGuestCart(currentItems);
+    openDrawer();
+    return { success: true };
   };
 
   const updateQuantity = async (itemId: string, quantity: number) => {
-    try {
-      const res = await fetch(`/api/cart/items/${itemId}`, {
+    if (user && user.role === 'CUSTOMER') {
+      fetch(`/api/cart/items/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity }),
-      });
+      }).catch(() => {});
+    }
 
-      if (res.ok) {
-        const data = await res.json();
-        setCart(data.cart);
+    const currentItems = cart?.items ? [...cart.items] : [];
+    const index = currentItems.findIndex((i) => i.id === itemId);
+    if (index > -1) {
+      if (quantity <= 0) {
+        currentItems.splice(index, 1);
+      } else {
+        currentItems[index] = {
+          ...currentItems[index],
+          quantity,
+          subtotal: currentItems[index].unitPrice * quantity,
+        };
       }
-    } catch (err) {
-      console.error('Failed to update item quantity:', err);
+      saveGuestCart(currentItems);
     }
   };
 
   const removeItem = async (itemId: string) => {
-    try {
-      const res = await fetch(`/api/cart/items/${itemId}`, {
-        method: 'DELETE',
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setCart(data.cart);
-      }
-    } catch (err) {
-      console.error('Failed to remove item:', err);
+    if (user && user.role === 'CUSTOMER') {
+      fetch(`/api/cart/items/${itemId}`, { method: 'DELETE' }).catch(() => {});
     }
+
+    const currentItems = cart?.items ? cart.items.filter((i) => i.id !== itemId) : [];
+    saveGuestCart(currentItems);
   };
 
   const clearCart = async () => {
+    if (user && user.role === 'CUSTOMER') {
+      fetch('/api/cart', { method: 'DELETE' }).catch(() => {});
+    }
+    setCart(null);
     try {
-      const res = await fetch('/api/cart', { method: 'DELETE' });
-      if (res.ok) {
-        setCart(null);
-      }
-    } catch (err) {
-      console.error('Failed to clear cart:', err);
+      localStorage.removeItem('km_guest_cart');
+    } catch {
+      // ignore
     }
   };
 
@@ -163,6 +287,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         cart,
         loading,
         itemCount: cart?.totalItems ?? 0,
+        isDrawerOpen,
+        openDrawer,
+        closeDrawer,
+        toggleDrawer,
         addItem,
         updateQuantity,
         removeItem,

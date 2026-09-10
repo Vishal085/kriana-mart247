@@ -75,7 +75,7 @@ export const mandiSchema = z.object({
   city: z.string().min(2, 'City is required'),
   state: z.string().min(2, 'State is required'),
   address: z.string().optional().nullable(),
-  pincode: z.string().optional().nullable(),
+  pincode: z.string().regex(/^\d{6}$/, 'PIN Code must be 6 digits').optional().nullable().or(z.literal('')),
   description: z.string().optional().nullable(),
   active: z.boolean().default(true),
   displayOrder: z.number().int().default(0),
@@ -119,10 +119,10 @@ export const cartItemUpdateSchema = z.object({
 export const checkoutSchema = z.object({
   deliveryName: z.string().min(2, 'Name is required'),
   deliveryPhone: z.string().regex(/^[6-9]\d{9}$/, 'Valid 10-digit Indian mobile number is required'),
-  deliveryAddress: z.string().min(5, 'Delivery address is required'),
+  deliveryAddress: z.string().min(3, 'Delivery address must be at least 3 characters'),
   city: z.string().min(2, 'City is required'),
   pincode: z.string().regex(/^\d{6}$/, 'PIN Code must be 6 digits'),
-  customerNotes: z.string().optional().nullable(),
+  customerNotes: z.string().optional().nullable().or(z.literal('')),
   whatsappOptIn: z.boolean().default(true).optional(),
 });
 
@@ -145,3 +145,24 @@ export const orderStatusUpdateSchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'PROCESSING', 'DISPATCHED', 'DELIVERED', 'CANCELLED']),
   note: z.string().optional().nullable(),
 });
+
+export const paymentVerifySchema = z.object({
+  orderId: z.string().min(1, 'Order ID is required'),
+  razorpayOrderId: z.string().min(1, 'Razorpay Order ID is required'),
+  razorpayPaymentId: z.string().min(1, 'Razorpay Payment ID is required'),
+  razorpaySignature: z.string().min(1, 'Razorpay Signature is required'),
+  paymentMethod: z.string().optional().nullable(),
+});
+
+export const createPaymentOrderSchema = z.object({
+  orderId: z.string().min(1, 'Order ID is required'),
+});
+
+export const paymentFailureSchema = z.object({
+  orderId: z.string().min(1, 'Order ID is required'),
+  razorpayOrderId: z.string().optional().nullable(),
+  errorCode: z.string().optional().nullable(),
+  errorDescription: z.string().optional().nullable(),
+  errorReason: z.string().optional().nullable(),
+});
+

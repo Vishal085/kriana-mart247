@@ -3,7 +3,10 @@
 import React, { useState } from 'react';
 import { Sparkles, Bot, Clock, CheckCircle2, MessageSquare } from 'lucide-react';
 
+import { useToast } from '@/components/ui/Toast';
+
 export function AiRateUpdaterCard({ onUpdated }: { onUpdated?: () => void }) {
+  const { toast } = useToast();
   const [aiUpdating, setAiUpdating] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
@@ -15,9 +18,10 @@ export function AiRateUpdaterCard({ onUpdated }: { onUpdated?: () => void }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'AI update failed');
       setAiResult(data);
+      toast.success('AI Rate Auto-Update completed successfully!');
       if (onUpdated) onUpdated();
     } catch (err: any) {
-      alert(err.message || 'AI Auto-Update error');
+      toast.error(err.message || 'AI Auto-Update failed. Please check server logs.');
     } finally {
       setAiUpdating(false);
     }

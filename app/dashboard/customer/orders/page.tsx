@@ -51,7 +51,18 @@ export default async function CustomerOrdersPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                    order.paymentStatus === 'PAID'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : order.paymentStatus === 'FAILED'
+                      ? 'bg-red-50 text-red-700 border border-red-200'
+                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                  }`}
+                >
+                  Pay: {order.paymentStatus}
+                </span>
                 <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-[#0B5FA5]">
                   {order.status}
                 </span>

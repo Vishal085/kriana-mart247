@@ -12,9 +12,13 @@ import {
   RefreshCw,
   Store,
   ChevronRight,
+  Bell,
+  Scale,
 } from 'lucide-react';
 import { useMandi } from '@/context/MandiContext';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
+import { PriceAlertModal } from '@/components/mandis/PriceAlertModal';
+import { MandiRateRowSkeleton } from '@/components/ui/Skeleton';
 
 export default function MandiRatesPage() {
   const { mandis, selectedMandi, selectMandiById } = useMandi();
@@ -27,6 +31,14 @@ export default function MandiRatesPage() {
   });
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [alertItem, setAlertItem] = useState<{
+    commodityName: string;
+    mandiName: string;
+    currentPrice: number;
+    unit: string;
+    productId?: string;
+    mandiId?: string;
+  } | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -272,6 +284,15 @@ export default function MandiRatesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
+              {loading && rates.length === 0 && (
+                <>
+                  <MandiRateRowSkeleton />
+                  <MandiRateRowSkeleton />
+                  <MandiRateRowSkeleton />
+                  <MandiRateRowSkeleton />
+                  <MandiRateRowSkeleton />
+                </>
+              )}
               {rates.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50/80 transition">
                   <td className="px-4 py-3.5 font-bold text-[#073B6F]">
@@ -316,12 +337,31 @@ export default function MandiRatesPage() {
                     />
                   </td>
                   <td className="px-4 py-3.5 text-right">
-                    <Link
-                      href={`/products/${row.product.slug}`}
-                      className="inline-flex items-center rounded-lg bg-[#EAF5FC] px-2.5 py-1 text-[11px] font-bold text-[#0B5FA5] hover:bg-[#073B6F] hover:text-white transition"
-                    >
-                      View Spread →
-                    </Link>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() =>
+                          setAlertItem({
+                            commodityName: row.product.name,
+                            mandiName: row.mandi.name,
+                            currentPrice: Number(row.currentRate),
+                            unit: row.unit,
+                            productId: row.productId,
+                            mandiId: row.mandiId,
+                          })
+                        }
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition"
+                        title="Set Mandi Price Alert"
+                        aria-label="Set Mandi Price Alert"
+                      >
+                        <Bell className="h-4 w-4" />
+                      </button>
+                      <Link
+                        href={`/products/${row.product.slug}`}
+                        className="inline-flex items-center rounded-lg bg-[#EAF5FC] px-2.5 py-1 text-[11px] font-bold text-[#0B5FA5] hover:bg-[#073B6F] hover:text-white transition"
+                      >
+                        Spread →
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -336,6 +376,37 @@ export default function MandiRatesPage() {
           </table>
         </div>
       </div>
+
+      {/* Compare Mandis Floating CTA Banner */}
+      <div className="mt-8 rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+        <div>
+          <h3 className="text-lg font-black font-heading">Looking for the lowest rate in Delhi?</h3>
+          <p className="text-xs text-slate-200 mt-0.5">
+            Compare wholesale rates across all 6 APMC terminal mandis side-by-side with interactive spread charts.
+          </p>
+        </div>
+        <Link
+          href="/compare"
+          className="shrink-0 inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-xs font-black text-[#073B6F] hover:bg-[#EAF5FC] shadow-md transition"
+        >
+          <Scale className="h-4 w-4 text-[#0B5FA5]" />
+          <span>Open Price Comparison Tool →</span>
+        </Link>
+      </div>
+
+      {/* Price Alert Modal */}
+      {alertItem && (
+        <PriceAlertModal
+          isOpen={true}
+          onClose={() => setAlertItem(null)}
+          commodityName={alertItem.commodityName}
+          mandiName={alertItem.mandiName}
+          currentPrice={alertItem.currentPrice}
+          unit={alertItem.unit}
+          productId={alertItem.productId}
+          mandiId={alertItem.mandiId}
+        />
+      )}
     </main>
   );
 }

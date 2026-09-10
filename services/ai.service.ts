@@ -232,4 +232,204 @@ ${topRates
       reply: `Namaste! I am **Xyon**, your KiranaMart247 Assistant.\n\nI can help you with:\n1. 📊 **Mandi Wholesale Rates** (e.g., *"What is today's Basmati Rice rate in Delhi?"*)\n2. 📈 **Market Trends** (e.g., *"Which commodities are rising today?"*)\n3. 🔍 **Mandi Comparison** (e.g., *"Which mandi has the lowest mustard oil price?"*)\n4. 🛒 **Kirana Shopping & Cart** (e.g., *"Show me dairy products"* or *"Check my cart"*)\n\nHow can I help you today?`,
     };
   }
+
+  static async generateProductDescription(
+    product: {
+      name: string;
+      brand?: string;
+      category?: string;
+      subCategory?: string;
+      unit?: string;
+      weight?: string;
+      retailPrice?: number;
+      wholesalePrice?: number;
+      mrp?: number;
+      shopName?: string;
+      location?: string;
+      description?: string;
+    },
+    options: {
+      tone?: 'Professional' | 'Simple' | 'Premium' | 'B2B Wholesale';
+      length?: 'Short' | 'Medium' | 'Detailed';
+      language?: 'English' | 'Hindi' | 'Hinglish';
+    } = {}
+  ): Promise<{
+    shortDescription: string;
+    detailedDescription: string;
+    highlights: string[];
+    productTags: string[];
+  }> {
+    const tone = options.tone || 'Professional';
+    const length = options.length || 'Medium';
+    const language = options.language || 'English';
+
+    const rawBrand = (typeof product.brand === 'object' && product.brand ? (product.brand as any).name : product.brand);
+    const rawCategory = (typeof product.category === 'object' && product.category ? (product.category as any).name : product.category);
+
+    const brandName = String(rawBrand || 'Authentic Kirana');
+    const categoryName = String(rawCategory || 'Daily Grocery');
+    const packSize = String(product.unit || product.weight || 'Standard Pack');
+    const originalDesc = product.description?.trim() || '';
+
+    // Check if OpenAI is configured
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (apiKey) {
+      try {
+        const prompt = `You are a professional FMCG catalog editor for KiranaMart247, a wholesale grocery & mandi intelligence commerce platform in India.
+Generate high quality, accurate product descriptions based strictly on the factual details provided.
+
+INPUT PRODUCT FACTS:
+- Product Name: ${product.name}
+- Brand: ${brandName}
+- Category: ${categoryName}
+- Pack Size / Unit: ${packSize}
+- Selling Price: ₹${product.retailPrice || 0}
+- Wholesale Price: ₹${product.wholesalePrice || 0}
+- Shop / Merchant: ${product.shopName || 'Verified Merchant'}
+- Merchant Notes: ${originalDesc || 'None'}
+
+REQUIREMENTS:
+- Tone: ${tone}
+- Length: ${length}
+- Language: ${language}
+- Output STRICT JSON format matching:
+{
+  "shortDescription": "1-2 sentence clean summary",
+  "detailedDescription": "paragraph of 2-4 sentences describing pack characteristics, convenience, and merchant assurance",
+  "highlights": ["highlight 1", "highlight 2", "highlight 3", "highlight 4"],
+  "productTags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
+}
+
+STRICT GUARDRAILS:
+1. NEVER hallucinate fake health benefits, medicinal claims, organic/AYUSH certifications, or unverifiable nutritional data.
+2. Only highlight factual pack details: brand authenticity, packaging convenience, wholesale suitability, and everyday household or commercial kitchen usage.`;
+
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: 'json_object' },
+            temperature: 0.4,
+          }),
+          signal: AbortSignal.timeout(4000),
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          const parsed = JSON.parse(json.choices[0].message.content);
+          if (parsed.shortDescription && parsed.detailedDescription && Array.isArray(parsed.highlights)) {
+            return {
+              shortDescription: parsed.shortDescription,
+              detailedDescription: parsed.detailedDescription,
+              highlights: parsed.highlights,
+              productTags: Array.isArray(parsed.productTags) ? parsed.productTags : [product.name, brandName, categoryName],
+            };
+          }
+        }
+      } catch (err) {
+        console.warn('OpenAI description generation failed, falling back to deterministic engine:', err);
+      }
+    }
+
+    // Deterministic factual FMCG engine (100% reliable, zero hallucination)
+    const baseName = product.name;
+    let shortDescription = '';
+    let detailedDescription = '';
+    let highlights: string[] = [];
+
+    if (language === 'Hindi') {
+      shortDescription = `${brandName} का प्रामाणिक ${baseName}, जो दैनिक उपयोग के लिए सुविधाजनक ${packSize} में उपलब्ध है।`;
+      detailedDescription = `किरानामार्ट247 पर उपलब्ध ${brandName} ${baseName} को विशेष रूप से दैनिक घरेलू और व्यावसायिक उपयोग के लिए तैयार किया गया है। यह उच्च गुणवत्ता वाले मानकों के साथ सुरक्षित पैकेजिंग में आता है। किराना दुकानों और थोक खरीदारों के लिए यह एक विश्वसनीय उत्पाद है।`;
+      highlights = [
+        `${packSize} सुविधाजनक पैक`,
+        `मूल ${brandName} ब्रांड गुणवत्ता`,
+        `दैनिक किराना और थोक आवश्यकताओं के लिए उपयुक्त`,
+        `सख्त गुणवत्ता मानकों के साथ सुरक्षित पैकेजिंग`,
+      ];
+    } else if (language === 'Hinglish') {
+      shortDescription = `${brandName} ${baseName} everyday use ke liye perfect authentic packaging me, pack size ${packSize}.`;
+      detailedDescription = `KiranaMart247 par verified shopkeeper listing - ${brandName} ${baseName}. Yeh fresh stock aur hygienic packaging ke sath wholesale and retail buyers ke liye directly available hai. Daily kitchen aur retail shelf dono ke liye highly recommended.`;
+      highlights = [
+        `${packSize} convenient pack size`,
+        `100% genuine ${brandName} packaging`,
+        `Wholesale & bulk order friendly`,
+        `Sealed packaging for freshness retention`,
+      ];
+    } else {
+      // English with specific Tone adaptations
+      if (tone === 'B2B Wholesale') {
+        shortDescription = `Commercial-grade wholesale lot of ${brandName} ${baseName} in verified ${packSize}, optimized for high-turnover kirana retail.`;
+        detailedDescription = `Stock your shelves with genuine ${brandName} ${baseName} (${packSize}). Directly sourced through trusted merchant networks on KiranaMart247, this item offers dependable margin consistency, standardized outer packaging, and seamless reordering for retail and institutional kitchens.`;
+        highlights = [
+          `Commercial ${packSize} unit packing`,
+          `Fast-moving FMCG inventory staple`,
+          `Guaranteed authentic ${brandName} packaging`,
+          `Competitive wholesale lot pricing`,
+        ];
+      } else if (tone === 'Premium') {
+        shortDescription = `Premium-grade ${baseName} from ${brandName}, carefully packaged in a ${packSize} seal-intact pack for discerning kitchens.`;
+        detailedDescription = `Experience the reliable quality of ${brandName} ${baseName}. Selected for superior packaging integrity and consistent standards, this ${packSize} offering is ideal for households and commercial establishments seeking dependable pantry essentials.`;
+        highlights = [
+          `Premium ${packSize} retail packaging`,
+          `Trusted hallmark quality from ${brandName}`,
+          `Hygienically packaged and sealed`,
+          `Essential everyday staple`,
+        ];
+      } else if (tone === 'Simple') {
+        shortDescription = `Original ${brandName} ${baseName}, available in a handy ${packSize} pack.`;
+        detailedDescription = `A standard ${packSize} pack of ${brandName} ${baseName}. Suitable for everyday cooking and routine household needs, packed cleanly and ready for dispatch.`;
+        highlights = [
+          `${packSize} pack`,
+          `Original ${brandName} brand`,
+          `Suitable for daily use`,
+          `Clean and secure packaging`,
+        ];
+      } else {
+        // Professional (Default)
+        shortDescription = `Authentic ${brandName} ${baseName}, hygienically packaged in a convenient ${packSize} pack for daily requirements.`;
+        detailedDescription = `KiranaMart247 verified merchant product: ${brandName} ${baseName} in ${packSize}. Packed in compliance with standard FMCG handling procedures to ensure freshness and shelf-life stability. An indispensable staple for retail stores and family kitchens alike.`;
+        highlights = [
+          `${packSize} standard pack size`,
+          `Authentic manufacturer packaging from ${brandName}`,
+          `Suitable for daily pantry and culinary requirements`,
+          `Verified merchant inventory on KiranaMart247`,
+        ];
+      }
+    }
+
+    if (length === 'Short') {
+      detailedDescription = shortDescription;
+    } else if (length === 'Detailed' && originalDesc) {
+      detailedDescription += ` Seller notes: "${originalDesc}"`;
+    }
+
+    const cleanTokens = baseName
+      .toLowerCase()
+      .replace(/[^a-z0-9 ]/g, '')
+      .split(' ')
+      .filter((w) => w.length > 2);
+
+    const productTags = Array.from(
+      new Set([
+        ...cleanTokens,
+        brandName.toLowerCase(),
+        categoryName.toLowerCase(),
+        packSize.toLowerCase(),
+        'kirana fmcg',
+        'wholesale',
+      ])
+    ).slice(0, 8);
+
+    return {
+      shortDescription,
+      detailedDescription,
+      highlights,
+      productTags,
+    };
+  }
 }

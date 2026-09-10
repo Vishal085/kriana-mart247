@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Plus, Trash2, Store, MapPin } from 'lucide-react';
+import { Store, Plus, Edit2, Trash2, MapPin, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 export default function AdminMandisPage() {
   const [mandis, setMandis] = useState<any[]>([]);
@@ -39,8 +40,16 @@ export default function AdminMandisPage() {
     fetchMandis();
   }, []);
 
+  const { toast } = useToast();
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanPin = formData.pincode ? formData.pincode.replace(/\D/g, '').trim() : '';
+    if (cleanPin && !/^\d{6}$/.test(cleanPin)) {
+      toast.warning('PIN Code must be exactly 6 digits (e.g. 110006)');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch('/api/admin/mandis', {
@@ -48,6 +57,7 @@ export default function AdminMandisPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          pincode: cleanPin || null,
           slug: formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
           active: true,
         }),
@@ -174,14 +184,28 @@ export default function AdminMandisPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700">Market Address / Locality</label>
-                <input
-                  type="text"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-700">Market Address / Locality</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">PIN Code (6 digits)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 110006"
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                    value={formData.pincode}
+                    onChange={(e) => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
+                  />
+                </div>
               </div>
 
               <div className="mt-6 flex justify-end gap-2">

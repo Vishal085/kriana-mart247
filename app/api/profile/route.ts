@@ -52,6 +52,26 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
     }
 
+    if (mobile !== undefined && mobile !== null && String(mobile).trim() !== '') {
+      const cleanMobile = String(mobile).trim();
+      if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
+        return NextResponse.json(
+          { error: 'Please enter a valid 10-digit Indian mobile number (starting with 6-9)' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (pinCode !== undefined && pinCode !== null && String(pinCode).trim() !== '') {
+      const cleanPin = String(pinCode).trim();
+      if (!/^\d{6}$/.test(cleanPin)) {
+        return NextResponse.json(
+          { error: 'PIN Code must be exactly 6 digits (e.g. 110006)' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Handle password update if requested
     let passwordHashUpdate: string | undefined = undefined;
     if (newPassword) {

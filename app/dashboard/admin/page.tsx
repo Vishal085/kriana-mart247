@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   ArrowRight,
   Shield,
+  ShieldCheck,
 } from 'lucide-react';
 import { AiRateUpdaterCard } from '@/components/admin/AiRateUpdaterCard';
 
@@ -37,7 +38,9 @@ export default async function AdminDashboardPage() {
     ordersTotal,
     ordersPending,
     ordersDelivered,
+    ordersPaid,
     recentOrders,
+    pendingApprovalsCount,
   ] = await Promise.all([
     prisma.user.count({ where: { role: Role.CUSTOMER } }),
     prisma.product.count(),
@@ -53,11 +56,13 @@ export default async function AdminDashboardPage() {
     prisma.order.count(),
     prisma.order.count({ where: { status: 'PENDING' } }),
     prisma.order.count({ where: { status: 'DELIVERED' } }),
+    prisma.order.count({ where: { paymentStatus: 'PAID' } }),
     prisma.order.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
       include: { user: { select: { fullName: true, mobile: true } } },
     }),
+    prisma.product.count({ where: { status: 'PENDING_REVIEW' } }),
   ]);
 
   const rising = rateDirections.find((r) => r.direction === Direction.RISING)?._count.direction ?? 0;
@@ -84,7 +89,19 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/admin/approvals"
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-600 transition"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              Product Approvals
+              {pendingApprovalsCount > 0 && (
+                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-amber-600">
+                  {pendingApprovalsCount}
+                </span>
+              )}
+            </Link>
             <Link
               href="/dashboard/admin/rates"
               className="rounded-full bg-[#073B6F] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#0B5FA5]"
@@ -107,7 +124,18 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Admin Modules Navigation */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7 text-xs font-bold text-slate-700">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8 text-xs font-bold text-slate-700">
+        <Link
+          href="/dashboard/admin/approvals"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50/60 p-3 hover:border-amber-400 hover:text-amber-900 transition relative"
+        >
+          <ShieldCheck className="h-4 w-4 text-amber-600" /> Approvals
+          {pendingApprovalsCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-black text-white">
+              {pendingApprovalsCount}
+            </span>
+          )}
+        </Link>
         <Link
           href="/dashboard/admin/rates"
           className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F]"
@@ -153,7 +181,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Metrics Grid */}
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="text-[11px] font-bold uppercase text-slate-400">Total Customers</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{customersCount}</div>
@@ -167,16 +195,20 @@ export default async function AdminDashboardPage() {
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{mandisCount}</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-slate-400">Total Rates Tracked</div>
+          <div className="text-[11px] font-bold uppercase text-slate-400">Rates Tracked</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{ratesCount}</div>
+        </div>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 shadow-sm">
+          <div className="text-[11px] font-bold uppercase text-emerald-800">Paid Orders</div>
+          <div className="mt-1 text-2xl font-black text-emerald-600">{ordersPaid}</div>
         </div>
         <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 shadow-sm">
           <div className="text-[11px] font-bold uppercase text-amber-700">Pending Orders</div>
           <div className="mt-1 text-2xl font-black text-amber-600">{ordersPending}</div>
         </div>
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-emerald-700">Delivered Orders</div>
-          <div className="mt-1 text-2xl font-black text-emerald-600">{ordersDelivered}</div>
+        <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 shadow-sm">
+          <div className="text-[11px] font-bold uppercase text-[#073B6F]">Delivered Orders</div>
+          <div className="mt-1 text-2xl font-black text-[#073B6F]">{ordersDelivered}</div>
         </div>
       </div>
 
@@ -219,6 +251,7 @@ export default async function AdminDashboardPage() {
                 <th className="px-4 py-3">Customer</th>
                 <th className="px-4 py-3">Phone</th>
                 <th className="px-4 py-3">Total (₹)</th>
+                <th className="px-4 py-3">Payment</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Placed At</th>
                 <th className="px-4 py-3 text-right">Action</th>
@@ -231,6 +264,19 @@ export default async function AdminDashboardPage() {
                   <td className="px-4 py-3 font-bold text-slate-800">{ord.deliveryName}</td>
                   <td className="px-4 py-3 text-slate-600">{ord.deliveryPhone}</td>
                   <td className="px-4 py-3 font-black text-slate-900">₹{Number(ord.total).toFixed(2)}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        ord.paymentStatus === 'PAID'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : ord.paymentStatus === 'FAILED'
+                          ? 'bg-red-50 text-red-700 border border-red-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}
+                    >
+                      {ord.paymentStatus}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-[10px] font-bold text-[#0B5FA5]">
                       {ord.status}
@@ -251,8 +297,8 @@ export default async function AdminDashboardPage() {
               ))}
               {recentOrders.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
-                    No customer orders received yet.
+                  <td colSpan={8} className="p-8 text-center text-slate-400">
+                    No customer orders placed yet.
                   </td>
                 </tr>
               )}

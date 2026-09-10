@@ -2,13 +2,13 @@ import { z } from 'zod';
 
 export const customerRegisterSchema = z.object({
   fullName: z.string().min(2),
-  mobile: z.string().min(10),
+  mobile: z.string().regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number'),
   email: z.string().email().optional().or(z.literal('')),
   password: z.string().min(6),
   confirmPassword: z.string().min(6),
-  address: z.string().min(5).optional().or(z.literal('')),
+  address: z.string().min(3).optional().or(z.literal('')),
   city: z.string().min(2).optional().or(z.literal('')),
-  pinCode: z.string().min(4).optional().or(z.literal('')),
+  pinCode: z.string().regex(/^\d{6}$/, 'PIN Code must be 6 digits').optional().or(z.literal('')),
 });
 
 export const loginSchema = z.object({
@@ -31,10 +31,10 @@ export const cartItemSchema = z.object({
 });
 
 export const checkoutSchema = z.object({
-  deliveryName: z.string().min(2),
-  deliveryPhone: z.string().min(10),
-  deliveryAddress: z.string().min(5),
-  city: z.string().min(2),
-  pincode: z.string().min(4),
+  deliveryName: z.string().min(2, 'Name is required'),
+  deliveryPhone: z.string().regex(/^[6-9]\d{9}$/, 'Valid 10-digit Indian mobile number is required'),
+  deliveryAddress: z.string().min(3, 'Address is required'),
+  city: z.string().min(2, 'City is required'),
+  pincode: z.string().regex(/^\d{6}$/, 'PIN Code must be 6 digits'),
   customerNotes: z.string().optional().or(z.literal('')),
 });

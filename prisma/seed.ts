@@ -1,3 +1,4 @@
+
 import { PrismaClient, Role, Direction } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import fs from 'fs';
@@ -1509,9 +1510,9 @@ async function seed() {
         images: {
           create: [
             {
-              url: fs.existsSync(path.join(process.cwd(), 'public', 'products', `${item.sku.toLowerCase()}.jpg`))
-                ? `/products/${item.sku.toLowerCase()}.jpg`
-                : `/products/${item.sku.toLowerCase()}.svg`,
+              url:  fs.existsSync(path.join(process.cwd(), 'public', 'products', `${item.sku.toLowerCase()}.svg`))
+                  ? `/products/${item.sku.toLowerCase()}.svg`
+                  : '/products/placeholder.svg',
               altText: `${item.brand} ${item.name} (${item.unit})`,
               sortOrder: 0,
               active: true,

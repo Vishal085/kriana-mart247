@@ -1,0 +1,245 @@
+{
+  "products": [
+    {
+      "id": "seller-prod-1788512648522-snz5",
+      "sku": "KM-SEL-644460",
+      "name": "Bansal Pure Mustard Oil 1L Pouch (Review Test)",
+      "slug": "bansal-pure-mustard-oil-1l-pouch-review-test-2-snz5",
+      "description": "Cold-pressed traditional mustard oil directly pressed and packaged for wholesale supply.",
+      "brandId": null,
+      "brand": {
+        "name": "Fortune"
+      },
+      "categoryId": "cat-1",
+      "category": {
+        "id": "cat-1",
+        "name": "Milk & Dairy",
+        "slug": "milk-dairy",
+        "description": "Fresh milk pouches, butter, paneer, curd, fresh cream, and cheese",
+        "active": true,
+        "displayOrder": 1,
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "updatedAt": "2026-01-01T00:00:00.000Z"
+      },
+      "subCategoryId": null,
+      "subCategoryName": null,
+      "unit": "1L Pouch",
+      "retailPrice": 145,
+      "minimumQuantity": 12,
+      "maximumQuantity": null,
+      "active": true,
+      "searchKeywords": "",
+      "images": [
+        {
+          "id": "img-2",
+          "url": "/images/products/fortune_kachi_ghani_1l.svg",
+          "name": "Oil.svg",
+          "isPrimary": true
+        }
+      ],
+      "sellerId": "seller-demo-1",
+      "seller": {
+        "id": "seller-demo-1",
+        "fullName": "Ramesh Gupta (Gupta Kirana Store)",
+        "email": "shopkeeper@kiranamart247.com"
+      },
+      "status": "PUBLISHED",
+      "aiDescriptionStatus": "GENERATED",
+      "shortDescription": "Authentic Fortune Bansal Pure Mustard Oil 1L Pouch (Review Test), hygienically packaged in a convenient 1L Pouch pack for daily requirements.",
+      "aiDescription": "KiranaMart247 verified merchant product: Fortune Bansal Pure Mustard Oil 1L Pouch (Review Test) in 1L Pouch. Packed in compliance with standard FMCG handling procedures to ensure freshness and shelf-life stability. An indispensable staple for retail stores and family kitchens alike.",
+      "finalDescription": "KiranaMart247 verified merchant product: Fortune Bansal Pure Mustard Oil 1L Pouch (Review Test) in 1L Pouch. Packed in compliance with standard FMCG handling procedures to ensure freshness and shelf-life stability. An indispensable staple for retail stores and family kitchens alike.",
+      "highlights": [
+        "1L Pouch standard pack size",
+        "Authentic manufacturer packaging from Fortune",
+        "Suitable for daily pantry and culinary requirements",
+        "Verified merchant inventory on KiranaMart247"
+      ],
+      "productTags": [
+        "bansal",
+        "pure",
+        "mustard",
+        "oil",
+        "pouch",
+        "review",
+        "test",
+        "fortune"
+      ],
+      "mrp": 170,
+      "wholesalePrice": 132,
+      "stockQuantity": 120,
+      "weight": null,
+      "mandi": null,
+      "location": null,
+      "shopName": "Ramesh Gupta (Gupta Kirana Store)",
+      "shopAddress": "Azadpur Mandi Commercial Hub",
+      "deliveryAvailability": "Immediate Dispatch",
+      "gstPercent": null,
+      "expiryDate": null,
+      "adminNotes": "Verified packaging images and prices. Approved for live marketplace storefront.",
+      "rejectionReason": null,
+      "approvedAt": "2026-09-04T09:05:11.658Z",
+      "approvedBy": "admin-demo-1",
+      "publishedVersionId": null,
+      "createdAt": "2026-09-04T09:04:08.522Z",
+      "updatedAt": "2026-09-04T09:05:15.720Z"
+    },
+    {
+      "id": "seller-prod-1788512636317-wwvc",
+      "sku": "KM-SEL-632275",
+      "name": "Test Basmati Rice 5kg Crate (Seller Draft)",
+      "slug": "test-basmati-rice-5kg-crate-seller-draft-7-wwvc",
+      "description": "Fresh direct mandi delivery bag of premium basmati.",
+      "brandId": null,
+      "brand": {
+        "name": "India Gate"
+      },
+      "categoryId": "cat-1",
+      "category": {
+        "id": "cat-1",
+        "name": "Milk & Dairy",
+        "slug": "milk-dairy",
+        "description": "Fresh milk pouches, butter, paneer, curd, fresh cream, and cheese",
+        "active": true,
+        "displayOrder": 1,
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "updatedAt": "2026-01-01T00:00:00.000Z"
+      },
+      "subCategoryId": null,
+      "subCategoryName": null,
+      "unit": "5kg Bag",
+      "retailPrice": 450,
+      "minimumQuantity": 2,
+      "maximumQuantity": null,
+      "active": true,
+      "searchKeywords": "",
+      "images": [
+        {
+          "id": "img-1",
+          "url": "/images/products/india_gate_classic_5kg.svg",
+          "name": "Pack.svg",
+          "isPrimary": true
+        }
+      ],
+      "sellerId": "seller-demo-1",
+      "seller": {
+        "id": "seller-demo-1",
+        "fullName": "Ramesh Gupta (Gupta Kirana Store)",
+        "email": "shopkeeper@kiranamart247.com"
+      },
+      "status": "DRAFT",
+      "aiDescriptionStatus": "NOT_GENERATED",
+      "shortDescription": null,
+      "aiDescription": null,
+      "finalDescription": "Fresh direct mandi delivery bag of premium basmati.",
+      "highlights": [],
+      "productTags": [],
+      "mrp": 520,
+      "wholesalePrice": 410,
+      "stockQuantity": 40,
+      "weight": null,
+      "mandi": null,
+      "location": null,
+      "shopName": "Ramesh Gupta (Gupta Kirana Store)",
+      "shopAddress": "Azadpur Mandi Commercial Hub",
+      "deliveryAvailability": "Immediate Dispatch",
+      "gstPercent": null,
+      "expiryDate": null,
+      "adminNotes": null,
+      "rejectionReason": null,
+      "approvedAt": null,
+      "approvedBy": null,
+      "publishedVersionId": null,
+      "createdAt": "2026-09-04T09:03:56.318Z",
+      "updatedAt": "2026-09-04T09:03:56.318Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "audit-1788512719802-9qzr",
+      "productId": "seller-prod-1788512648522-snz5",
+      "actorId": "admin-demo-1",
+      "actorRole": "ADMIN",
+      "actorName": "Super Admin",
+      "action": "APPROVE",
+      "notes": "Verified packaging images and prices. Approved for live marketplace storefront.",
+      "createdAt": "2026-09-04T09:05:19.802Z"
+    },
+    {
+      "id": "audit-1788512702825-1qqq",
+      "productId": "seller-prod-1788512648522-snz5",
+      "actorId": "admin-demo-1",
+      "actorRole": "ADMIN",
+      "actorName": "Super Admin",
+      "action": "AI_REGENERATED",
+      "notes": "Regenerated description (Tone: commercial, Lang: english, Length: medium)",
+      "createdAt": "2026-09-04T09:05:02.825Z"
+    },
+    {
+      "id": "audit-1788512660720-e0l8",
+      "productId": "seller-prod-1788512648522-snz5",
+      "actorId": "system-ai",
+      "actorRole": "AI_ASSISTANT",
+      "actorName": "Xyon AI Engine",
+      "action": "AI_GENERATED",
+      "notes": "Generated initial factual description, highlights, and tags",
+      "createdAt": "2026-09-04T09:04:20.720Z"
+    },
+    {
+      "id": "audit-1788512652592-ej0g",
+      "productId": "seller-prod-1788512648522-snz5",
+      "actorId": "seller-demo-1",
+      "actorRole": "SHOPKEEPER",
+      "actorName": "Ramesh Gupta (Gupta Kirana Store)",
+      "action": "SUBMITTED",
+      "notes": "Submitted for Admin review",
+      "createdAt": "2026-09-04T09:04:12.592Z"
+    },
+    {
+      "id": "audit-1788512640382-v9m4",
+      "productId": "seller-prod-1788512636317-wwvc",
+      "actorId": "seller-demo-1",
+      "actorRole": "SHOPKEEPER",
+      "actorName": "Ramesh Gupta (Gupta Kirana Store)",
+      "action": "SAVED_DRAFT",
+      "notes": "Saved as initial draft",
+      "createdAt": "2026-09-04T09:04:00.382Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "seller-demo-1",
+      "fullName": "Ramesh Gupta (Gupta Kirana Store)",
+      "email": "shopkeeper@kiranamart247.com",
+      "mobile": "9876543210",
+      "passwordHash": "$2b$10$V0rols.Px0V10tRQH87S3OKUGcuaIVQYK70evDuLHEGklUMcPi23q",
+      "role": "SHOPKEEPER",
+      "active": true,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "shopkeeperProfile": {
+        "id": "prof-demo-1",
+        "userId": "seller-demo-1",
+        "shopName": "Gupta Kirana & General Store",
+        "shopAddress": "Shop 14, Main Market, Azadpur",
+        "city": "Delhi",
+        "state": "Delhi",
+        "pinCode": "110033",
+        "gstNumber": "07AAAAA0000A1Z5",
+        "status": "APPROVED",
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "updatedAt": "2026-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "id": "admin-demo-1",
+      "fullName": "Super Admin",
+      "email": "admin@kiranamart247.com",
+      "mobile": "9999999999",
+      "passwordHash": "$2b$10$8tSWqxXd3SlEQ5yRmSbttOrG7Y.BOPz96RxNg9qqfq100diGLBy8K",
+      "role": "ADMIN",
+      "active": true,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

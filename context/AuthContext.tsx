@@ -9,12 +9,21 @@ export interface UserProfile {
   email?: string | null;
   mobile?: string | null;
   avatarUrl?: string | null;
-  role: 'CUSTOMER' | 'ADMIN';
+  role: 'CUSTOMER' | 'SHOPKEEPER' | 'ADMIN';
   active: boolean;
   customerProfile?: {
     address?: string | null;
     city?: string | null;
     pinCode?: string | null;
+  } | null;
+  shopkeeperProfile?: {
+    shopName: string;
+    shopAddress: string;
+    city: string;
+    state?: string | null;
+    pinCode?: string | null;
+    gstNumber?: string | null;
+    status: string;
   } | null;
 }
 

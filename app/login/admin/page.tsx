@@ -107,6 +107,26 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
+        {/* Demo Credentials Helper */}
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-slate-700">Demo Admin Account:</span>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@kiranamart247.com');
+                setPassword('admin123');
+              }}
+              className="text-[11px] font-bold text-[#073B6F] hover:underline"
+            >
+              Fill Credentials
+            </button>
+          </div>
+          <p className="mt-1 text-[11px] text-slate-500">
+            Email: <code className="text-slate-700 font-semibold">admin@kiranamart247.com</code> | Pass: <code className="text-slate-700 font-semibold">admin123</code>
+          </p>
+        </div>
+
         <div className="mt-6 pt-6 text-center text-xs text-slate-500 border-t border-slate-100">
           Not an administrator?{' '}
           <Link

@@ -18,6 +18,7 @@ export async function GET() {
       ordersTotal,
       ordersPending,
       ordersDelivered,
+      ordersPaid,
       recentOrders,
     ] = await Promise.all([
       prisma.user.count({ where: { role: Role.CUSTOMER } }),
@@ -34,6 +35,7 @@ export async function GET() {
       prisma.order.count(),
       prisma.order.count({ where: { status: 'PENDING' } }),
       prisma.order.count({ where: { status: 'DELIVERED' } }),
+      prisma.order.count({ where: { paymentStatus: 'PAID' } }),
       prisma.order.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
@@ -58,6 +60,7 @@ export async function GET() {
           total: ordersTotal,
           pending: ordersPending,
           delivered: ordersDelivered,
+          paid: ordersPaid,
         },
       },
       recentOrders,

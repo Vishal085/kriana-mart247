@@ -13,10 +13,12 @@ import {
   Bot,
   Layers,
   Search,
+  Scale,
 } from 'lucide-react';
 import { MandiSelector } from '@/components/mandis/MandiSelector';
 import { ProductCard } from '@/components/ProductCard';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
+import { MyWholesaleBasket } from '@/components/wholesale/MyWholesaleBasket';
 
 export const revalidate = 60; // Refresh cache every minute
 
@@ -114,6 +116,13 @@ export default async function HomePage() {
                 >
                   <ShoppingBag className="h-4 w-4 text-[#39A9E8]" />
                   Shop Kirana Products
+                </Link>
+                <Link
+                  href="/compare"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#0B5FA5]/30 bg-[#EAF5FC] px-6 py-3.5 text-sm font-bold text-[#073B6F] shadow-xs transition hover:bg-[#073B6F] hover:text-white"
+                >
+                  <Scale className="h-4 w-4 text-[#0B5FA5]" />
+                  Compare Mandis
                 </Link>
               </div>
 
@@ -269,6 +278,11 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* 2.5 WHOLESALE RESTOCK BASKET */}
+      <section className="mx-auto max-w-7xl px-4 py-6 lg:px-6">
+        <MyWholesaleBasket />
       </section>
 
       {/* 3. POPULAR CATEGORIES */}

@@ -73,7 +73,18 @@ export default async function ProductDetailPage({
                   key={img.id}
                   className="flex h-16 w-16 items-center justify-center rounded-xl border border-slate-200 bg-[#F7FAFC] p-2"
                 >
-                  <img src={img.url} alt={img.altText || product.name} className="max-h-full object-contain" />
+                  <img
+                    src={img.url}
+                    alt={img.altText || product.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      if (!target.src.endsWith('/products/placeholder.svg')) {
+                        target.src = '/products/placeholder.svg';
+                      }
+                    }}
+                    className="max-h-full object-contain"
+                  />
                 </div>
               ))}
             </div>

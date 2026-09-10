@@ -6,17 +6,36 @@ import { Search, Filter, ChevronRight, Layers } from 'lucide-react';
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoryId?: string; brandId?: string; search?: string; page?: string }>;
+  searchParams: Promise<{
+    categoryId?: string;
+    brandId?: string;
+    search?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    page?: string;
+  }>;
 }) {
-  const { categoryId, brandId, search, page } = await searchParams;
+  const { categoryId, brandId, search, minPrice, maxPrice, page } = await searchParams;
   const currentPage = parseInt(page || '1', 10);
   const limit = 20;
   const skip = (currentPage - 1) * limit;
 
-  const where = {
+  const minP = minPrice ? parseFloat(minPrice) : undefined;
+  const maxP = maxPrice ? parseFloat(maxPrice) : undefined;
+
+  const priceFilter =
+    minP !== undefined || maxP !== undefined
+      ? {
+          ...(minP !== undefined ? { gte: minP } : {}),
+          ...(maxP !== undefined ? { lte: maxP } : {}),
+        }
+      : undefined;
+
+  const where: any = {
     active: true,
     ...(categoryId ? { categoryId } : {}),
     ...(brandId ? { brandId } : {}),
+    ...(priceFilter ? { retailPrice: priceFilter } : {}),
     ...(search
       ? {
           OR: [
@@ -46,6 +65,31 @@ export default async function ShopPage({
   ]);
 
   const totalPages = Math.ceil(total / limit);
+  const hasActiveFilters = Boolean(categoryId || brandId || search || minPrice || maxPrice);
+
+  const pricePresets = [
+    { label: 'All Prices', min: undefined, max: undefined },
+    { label: 'Under ₹20', min: undefined, max: '20' },
+    { label: '₹20 – ₹100', min: '20', max: '100' },
+    { label: '₹100 – ₹300', min: '100', max: '300' },
+    { label: 'Above ₹300', min: '300', max: undefined },
+  ];
+
+  const buildUrl = (updates: { [key: string]: string | undefined }) => {
+    const params = new URLSearchParams();
+    if (categoryId) params.set('categoryId', categoryId);
+    if (brandId) params.set('brandId', brandId);
+    if (search) params.set('search', search);
+    if (minPrice) params.set('minPrice', minPrice);
+    if (maxPrice) params.set('maxPrice', maxPrice);
+
+    for (const [key, val] of Object.entries(updates)) {
+      if (val === undefined) params.delete(key);
+      else params.set(key, val);
+    }
+    const qs = params.toString();
+    return qs ? `/shop?${qs}` : '/shop';
+  };
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
@@ -56,35 +100,97 @@ export default async function ShopPage({
         <span className="text-[#073B6F]">Kirana Shop</span>
       </div>
 
-      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Header & In-Page Search */}
+      <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-black text-[#073B6F]">Kirana Store Catalog</h1>
           <p className="mt-1 text-xs text-slate-500">
             Wholesale staples, dairy, beverages, and packaged grocery essentials delivered to your doorstep.
           </p>
         </div>
-        <div className="text-xs font-bold text-slate-500">
-          Showing {products.length} of {total} products
+
+        {/* Search Input Bar */}
+        <form method="GET" action="/shop" className="flex items-center gap-2">
+          {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
+          {brandId && <input type="hidden" name="brandId" value={brandId} />}
+          {minPrice && <input type="hidden" name="minPrice" value={minPrice} />}
+          {maxPrice && <input type="hidden" name="maxPrice" value={maxPrice} />}
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              name="search"
+              defaultValue={search || ''}
+              placeholder="Search products in catalog..."
+              className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs text-slate-800 placeholder-slate-400 shadow-xs outline-none focus:border-[#39A9E8]"
+            />
+          </div>
+          <button
+            type="submit"
+            className="rounded-full bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5] transition shrink-0"
+          >
+            Search
+          </button>
+        </form>
+      </div>
+
+      {/* Filter Status & Active Clear Button */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-slate-700">
+            Showing {products.length} of {total} products
+          </span>
+          {hasActiveFilters && (
+            <Link
+              href="/shop"
+              className="rounded-lg bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-rose-600 hover:bg-rose-100 transition"
+            >
+              Clear All Filters ✕
+            </Link>
+          )}
+        </div>
+
+        {/* Price Presets */}
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">Price:</span>
+          {pricePresets.map((preset) => {
+            const isSelected =
+              (preset.min === undefined && preset.max === undefined && !minPrice && !maxPrice) ||
+              (preset.min === minPrice && preset.max === maxPrice);
+            return (
+              <Link
+                key={preset.label}
+                href={buildUrl({ minPrice: preset.min, maxPrice: preset.max, page: undefined })}
+                className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                  isSelected
+                    ? 'bg-[#073B6F] text-white font-bold'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:border-[#39A9E8]'
+                }`}
+              >
+                {preset.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
       {/* Horizontal Category Carousel */}
-      <div className="mt-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         <Link
-          href="/shop"
-          className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-sm ${
+          href={buildUrl({ categoryId: undefined, page: undefined })}
+          className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-xs ${
             !categoryId
               ? 'bg-[#073B6F] text-white'
               : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]'
           }`}
         >
-          All Items
+          All Categories
         </Link>
         {categories.map((c) => (
           <Link
             key={c.id}
-            href={`/shop?categoryId=${c.id}`}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-sm ${
+            href={buildUrl({ categoryId: c.id, page: undefined })}
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-xs ${
               categoryId === c.id
                 ? 'bg-[#073B6F] text-white'
                 : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]'
@@ -96,10 +202,10 @@ export default async function ShopPage({
       </div>
 
       {/* Brand Filters Bar */}
-      <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2">
+      <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-2">
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex-shrink-0">Brands:</span>
         <Link
-          href={`/shop${categoryId ? `?categoryId=${categoryId}` : ''}`}
+          href={buildUrl({ brandId: undefined, page: undefined })}
           className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
             !brandId ? 'bg-[#EAF5FC] text-[#073B6F] font-bold' : 'text-slate-500 hover:text-slate-800'
           }`}
@@ -109,7 +215,7 @@ export default async function ShopPage({
         {brands.map((b) => (
           <Link
             key={b.id}
-            href={`/shop?${categoryId ? `categoryId=${categoryId}&` : ''}brandId=${b.id}`}
+            href={buildUrl({ brandId: b.id, page: undefined })}
             className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
               brandId === b.id ? 'bg-[#EAF5FC] text-[#073B6F] font-bold' : 'text-slate-500 hover:text-slate-800'
             }`}

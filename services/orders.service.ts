@@ -1,9 +1,10 @@
 import { prisma } from '@/lib/prisma';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, PaymentStatus } from '@prisma/client';
 import { z } from 'zod';
 import { checkoutSchema } from '@/validators';
 import { WhatsAppService } from './whatsapp.service';
 import { NotificationService } from './notifications.service';
+import { PaymentService } from './payment.service';
 
 export class OrderService {
   static async createOrder(userId: string, input: z.infer<typeof checkoutSchema>) {
@@ -50,13 +51,14 @@ export class OrderService {
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
     const orderNumber = `KIR-${dateStr}-${randomSuffix}`;
 
-    // Execute atomic transaction
+    // Execute atomic transaction to create order
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
           userId,
           status: OrderStatus.PENDING,
+          paymentStatus: PaymentStatus.PENDING,
           subtotal,
           tax,
           deliveryCharge,
@@ -83,7 +85,7 @@ export class OrderService {
             create: [
               {
                 status: OrderStatus.PENDING,
-                note: 'Order placed by customer',
+                note: 'Order initiated by customer awaiting payment',
               },
             ],
           },
@@ -102,26 +104,13 @@ export class OrderService {
       return newOrder;
     });
 
-    // Create in-app notification
-    try {
-      await NotificationService.createNotification(
-        userId,
-        'ORDER',
-        'Order Placed Successfully',
-        `Your order #${order.orderNumber} for ₹${Number(order.total).toFixed(2)} has been received and is pending confirmation.`
-      );
-    } catch (e) {
-      console.error('Notification error:', e);
-    }
+    // Create Razorpay Order securely from server
+    const razorpayOrder = await PaymentService.createRazorpayOrder(order.id, userId);
 
-    // Trigger WhatsApp notification (non-blocking)
-    try {
-      await WhatsAppService.sendOrderStatusNotification(order.id, OrderStatus.PENDING);
-    } catch (err) {
-      console.error('WhatsApp dispatch error:', err);
-    }
-
-    return order;
+    return {
+      ...order,
+      razorpayOrder,
+    };
   }
 
   static async getCustomerOrders(userId: string) {
@@ -151,11 +140,13 @@ export class OrderService {
 
   static async getAllOrdersAdmin({
     status,
+    paymentStatus,
     search,
     page = 1,
     limit = 20,
   }: {
     status?: OrderStatus;
+    paymentStatus?: PaymentStatus;
     search?: string;
     page?: number;
     limit?: number;
@@ -163,17 +154,21 @@ export class OrderService {
     const skip = (page - 1) * limit;
     const where = {
       ...(status ? { status } : {}),
+      ...(paymentStatus ? { paymentStatus } : {}),
       ...(search
         ? {
-            OR: [
-              { orderNumber: { contains: search, mode: 'insensitive' as const } },
-              { deliveryName: { contains: search, mode: 'insensitive' as const } },
-              { deliveryPhone: { contains: search, mode: 'insensitive' as const } },
-              { city: { contains: search, mode: 'insensitive' as const } },
-            ],
-          }
+          OR: [
+            { orderNumber: { contains: search, mode: 'insensitive' as const } },
+            { deliveryName: { contains: search, mode: 'insensitive' as const } },
+            { deliveryPhone: { contains: search, mode: 'insensitive' as const } },
+            { city: { contains: search, mode: 'insensitive' as const } },
+            { razorpayPaymentId: { contains: search, mode: 'insensitive' as const } },
+            { razorpayOrderId: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
         : {}),
     };
+
 
     const [items, total] = await Promise.all([
       prisma.order.findMany({

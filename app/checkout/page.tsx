@@ -5,7 +5,40 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldCheck, ArrowRight, User, Phone, MapPin, Building, Hash, FileText, AlertCircle } from 'lucide-react';
+import {
+  ShieldCheck,
+  ArrowRight,
+  User,
+  Phone,
+  MapPin,
+  Building,
+  Hash,
+  FileText,
+  AlertCircle,
+  CheckCircle2,
+  Lock,
+  RefreshCw,
+  CreditCard,
+  ExternalLink,
+} from 'lucide-react';
+import { openRazorpayCheckout } from '@/lib/razorpay-client';
+
+type CheckoutPaymentState =
+  | 'idle'
+  | 'creating_order'
+  | 'awaiting_payment'
+  | 'verifying'
+  | 'success'
+  | 'failed';
+
+interface SuccessDetails {
+  orderId: string;
+  orderNumber: string;
+  paymentId: string;
+  paymentMethod?: string;
+  amount: number;
+  status: string;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -22,8 +55,10 @@ export default function CheckoutPage() {
     whatsappOptIn: true,
   });
 
-  const [loading, setLoading] = useState(false);
+  const [paymentState, setPaymentState] = useState<CheckoutPaymentState>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [lastPendingOrderId, setLastPendingOrderId] = useState<string | null>(null);
+  const [successDetails, setSuccessDetails] = useState<SuccessDetails | null>(null);
 
   // Auto-populate from customer profile if available
   useEffect(() => {
@@ -55,6 +90,88 @@ export default function CheckoutPage() {
     );
   }
 
+  // If payment succeeded, show rich payment confirmation view
+  if (paymentState === 'success' && successDetails) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-12">
+        {/* Completed Stepper */}
+        <div className="mb-6 rounded-2xl bg-white border border-emerald-100 p-4 shadow-xs">
+          <div className="flex items-center justify-between max-w-xl mx-auto">
+            {['1. Cart', '2. Delivery', '3. Payment', '4. Confirmation'].map((step, idx, arr) => (
+              <React.Fragment key={step}>
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white text-xs font-bold">
+                    <CheckCircle2 className="h-4 w-4" />
+                  </div>
+                  <span className="text-[11px] font-bold text-emerald-700">{step}</span>
+                </div>
+                {idx < arr.length - 1 && <div className="h-0.5 flex-1 bg-emerald-500 -mt-4" />}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-emerald-200 bg-white p-6 sm:p-10 shadow-lg text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+            <CheckCircle2 className="h-10 w-10" />
+          </div>
+
+          <span className="mt-4 inline-block rounded-full bg-emerald-50 px-3.5 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200">
+            Verified Secure Transaction
+          </span>
+
+          <h1 className="mt-3 text-2xl sm:text-3xl font-black text-[#073B6F]">
+            Payment Successful!
+          </h1>
+          <p className="mt-1 text-xs text-slate-500">
+            Thank you, {formData.deliveryName || user.fullName}! Your order has been placed and confirmed.
+          </p>
+
+          <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-5 text-left text-xs space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-medium">Order Number:</span>
+              <span className="font-mono font-bold text-[#073B6F]">#{successDetails.orderNumber}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-medium">Payment ID (Razorpay):</span>
+              <span className="font-mono font-bold text-slate-800 truncate max-w-[200px]">
+                {successDetails.paymentId}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-medium">Amount Paid:</span>
+              <span className="text-base font-black text-[#073B6F]">
+                ₹{successDetails.amount.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-medium">Order Status:</span>
+              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                {successDetails.status}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href={`/dashboard/customer/orders/${successDetails.orderId}`}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-[#073B6F] px-6 py-3 text-xs font-bold text-white hover:bg-[#0B5FA5] transition"
+            >
+              Track Order & View Receipt
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/shop"
+              className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+            >
+              Continue Shopping
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   if (!cart || cart.items.length === 0) {
     return (
       <main className="mx-auto max-w-4xl px-4 py-16 text-center">
@@ -70,49 +187,306 @@ export default function CheckoutPage() {
     );
   }
 
-  const handlePlaceOrder = async (e: React.FormEvent) => {
+  const triggerRazorpayPayment = async (orderId: string, razorpayOrder: any) => {
+    setPaymentState('awaiting_payment');
+
+    try {
+      await openRazorpayCheckout({
+        key: razorpayOrder.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_51KIRANAMART24',
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency || 'INR',
+        name: 'KiranaMart247',
+        description: `Order #${razorpayOrder.orderNumber}`,
+        image: '/icon.png',
+        order_id: razorpayOrder.razorpayOrderId,
+        prefill: {
+          name: razorpayOrder.customerName || formData.deliveryName,
+          contact: razorpayOrder.customerPhone || formData.deliveryPhone,
+          email: razorpayOrder.customerEmail || user?.email || '',
+        },
+        theme: {
+          color: '#073B6F',
+        },
+        handler: async (response) => {
+          setPaymentState('verifying');
+          try {
+            // Verify payment on server
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId: orderId,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              }),
+            });
+
+            let verifyData: any = {};
+            try {
+              const text = await verifyRes.text();
+              verifyData = text ? JSON.parse(text) : {};
+            } catch {
+              verifyData = { error: 'Payment verification service error' };
+            }
+
+            if (!verifyRes.ok) {
+              throw new Error(verifyData.error || 'Payment signature verification failed');
+            }
+
+            await refreshCart();
+            setSuccessDetails({
+              orderId: orderId,
+              orderNumber: razorpayOrder.orderNumber,
+              paymentId: response.razorpay_payment_id,
+              amount: Number(verifyData.order?.total || cart.grandTotal),
+              status: verifyData.order?.status || 'CONFIRMED',
+            });
+            setPaymentState('success');
+          } catch (verifyErr: any) {
+            setError(verifyErr.message || 'Payment verification failed on the server.');
+            setPaymentState('failed');
+          }
+        },
+        modal: {
+          ondismiss: async () => {
+            setPaymentState('failed');
+            setError('Payment cancelled. Your order details are saved — click "Retry Payment" to complete your checkout.');
+            try {
+              await fetch('/api/payment/failure', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  orderId,
+                  razorpayOrderId: razorpayOrder.razorpayOrderId,
+                  errorDescription: 'User closed payment window before completion',
+                }),
+              });
+            } catch {}
+          },
+        },
+      });
+    } catch (checkoutErr: any) {
+      console.error('Checkout error:', checkoutErr);
+      setError(checkoutErr.message || 'Unable to open Razorpay payment gateway.');
+      setPaymentState('failed');
+    }
+  };
+
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return; // Prevent double submissions
+    if (paymentState === 'creating_order' || paymentState === 'verifying') return;
 
     setError(null);
-    setLoading(true);
+
+    const cleanPhone = formData.deliveryPhone.replace(/\D/g, '').trim();
+    const cleanPin = formData.pincode.replace(/\D/g, '').trim();
+
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      setError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9');
+      return;
+    }
+
+    if (!/^\d{6}$/.test(cleanPin)) {
+      setError('PIN Code must be exactly 6 digits (e.g. 110006)');
+      return;
+    }
+
+    // If retrying payment on an already created pending order
+    if (lastPendingOrderId && paymentState === 'failed') {
+      setPaymentState('creating_order');
+      try {
+        const retryRes = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: lastPendingOrderId }),
+        });
+
+        let retryData: any = {};
+        try {
+          const text = await retryRes.text();
+          retryData = text ? JSON.parse(text) : {};
+        } catch {
+          retryData = { error: 'Payment service connection error' };
+        }
+
+        if (!retryRes.ok) throw new Error(retryData.error || 'Failed to reinitialize payment');
+
+        await triggerRazorpayPayment(lastPendingOrderId, retryData.paymentOrder);
+        return;
+      } catch (err: any) {
+        setError(err.message || 'Payment retry failed');
+        setPaymentState('failed');
+        return;
+      }
+    }
+
+    setPaymentState('creating_order');
 
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          deliveryPhone: cleanPhone,
+          pincode: cleanPin,
+        }),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to place order');
+      let data: any = {};
+      try {
+        const text = await res.text();
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { error: 'Order service connection error' };
       }
 
-      await refreshCart();
-      router.push(`/dashboard/customer/orders/${data.order.id}`);
-      router.refresh();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to initiate order');
+      }
+
+      const createdOrder = data.order;
+      setLastPendingOrderId(createdOrder.id);
+
+      if (createdOrder.razorpayOrder) {
+        await triggerRazorpayPayment(createdOrder.id, createdOrder.razorpayOrder);
+      } else {
+        // Fallback: fetch/create payment order directly
+        const pRes = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: createdOrder.id }),
+        });
+
+        let pData: any = {};
+        try {
+          const pText = await pRes.text();
+          pData = pText ? JSON.parse(pText) : {};
+        } catch {
+          pData = { error: 'Payment initialization error' };
+        }
+
+        if (!pRes.ok) throw new Error(pData.error || 'Failed to initialize payment gateway');
+        await triggerRazorpayPayment(createdOrder.id, pData.paymentOrder);
+      }
     } catch (err: any) {
       setError(err.message || 'Checkout failed');
-      setLoading(false);
+      setPaymentState('failed');
     }
   };
 
+  const isProcessing =
+    paymentState === 'creating_order' ||
+    paymentState === 'awaiting_payment' ||
+    paymentState === 'verifying';
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
-      <h1 className="text-3xl font-black text-[#073B6F]">Secure Checkout</h1>
-      <p className="mt-1 text-xs text-slate-500">
-        Verify your delivery address and confirm your kirana order.
-      </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-[#073B6F]">Secure Checkout</h1>
+          <p className="mt-1 text-xs text-slate-500">
+            Verify your delivery address and pay securely via Razorpay.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3.5 py-1.5 text-xs font-bold text-[#073B6F] border border-blue-200">
+          <Lock className="h-3.5 w-3.5 text-[#39A9E8]" />
+          <span>256-Bit SSL Encrypted</span>
+        </div>
+      </div>
+
+      {/* 4-Step Checkout Progress Stepper */}
+      <div className="mt-8 mb-8 rounded-2xl bg-white border border-slate-200 p-4 shadow-xs">
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
+          {/* Step 1: Cart */}
+          <div className="flex flex-col items-center gap-1 flex-1 text-center">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs">
+              <CheckCircle2 className="h-4 w-4" />
+            </div>
+            <span className="text-[11px] font-bold text-slate-700">1. Cart</span>
+          </div>
+          <div className="h-0.5 flex-1 bg-emerald-500 -mt-4" />
+
+          {/* Step 2: Delivery */}
+          <div className="flex flex-col items-center gap-1 flex-1 text-center">
+            <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold shadow-xs ${
+              paymentState === 'idle' || paymentState === 'failed'
+                ? 'bg-[#073B6F] text-white ring-4 ring-[#EAF5FC]'
+                : 'bg-emerald-600 text-white'
+            }`}>
+              {paymentState === 'idle' || paymentState === 'failed' ? '2' : <CheckCircle2 className="h-4 w-4" />}
+            </div>
+            <span className="text-[11px] font-bold text-[#073B6F]">2. Delivery</span>
+          </div>
+          <div className={`h-0.5 flex-1 -mt-4 ${
+            paymentState !== 'idle' && paymentState !== 'failed' ? 'bg-emerald-500' : 'bg-slate-200'
+          }`} />
+
+          {/* Step 3: Payment */}
+          <div className="flex flex-col items-center gap-1 flex-1 text-center">
+            <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold shadow-xs ${
+              isProcessing
+                ? 'bg-[#073B6F] text-white ring-4 ring-[#EAF5FC] animate-pulse'
+                : paymentState === 'success'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-slate-100 text-slate-400 border border-slate-200'
+            }`}>
+              {paymentState === 'success' ? <CheckCircle2 className="h-4 w-4" /> : '3'}
+            </div>
+            <span className={`text-[11px] font-bold ${isProcessing ? 'text-[#073B6F]' : 'text-slate-400'}`}>
+              3. Payment
+            </span>
+          </div>
+          <div className={`h-0.5 flex-1 -mt-4 ${
+            paymentState === 'success' ? 'bg-emerald-500' : 'bg-slate-200'
+          }`} />
+
+          {/* Step 4: Confirmation */}
+          <div className="flex flex-col items-center gap-1 flex-1 text-center">
+            <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold shadow-xs ${
+              paymentState === 'success'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-slate-100 text-slate-400 border border-slate-200'
+            }`}>
+              4
+            </div>
+            <span className={`text-[11px] font-bold ${paymentState === 'success' ? 'text-emerald-700' : 'text-slate-400'}`}>
+              4. Confirmation
+            </span>
+          </div>
+        </div>
+      </div>
 
       {error && (
-        <div className="mt-6 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-600">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <span>{error}</span>
+        <div className="mt-6 flex items-start gap-2.5 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-600">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span>{error}</span>
+            {lastPendingOrderId && paymentState === 'failed' && (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={handleCheckoutSubmit}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-red-700"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" /> Retry Payment Now
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      <form onSubmit={handlePlaceOrder} className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+      {paymentState === 'verifying' && (
+        <div className="mt-6 flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs font-bold text-[#073B6F]">
+          <RefreshCw className="h-5 w-5 animate-spin text-[#0B5FA5]" />
+          <span>Verifying payment with bank and Razorpay servers. Please do not refresh...</span>
+        </div>
+      )}
+
+      <form onSubmit={handleCheckoutSubmit} className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         {/* Delivery Information */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
           <h2 className="text-lg font-black text-[#073B6F]">1. Delivery Information</h2>
@@ -126,9 +500,10 @@ export default function CheckoutPage() {
                   <input
                     type="text"
                     required
+                    disabled={isProcessing}
                     value={formData.deliveryName}
                     onChange={(e) => setFormData({ ...formData, deliveryName: e.target.value })}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -140,10 +515,12 @@ export default function CheckoutPage() {
                   <input
                     type="tel"
                     required
+                    disabled={isProcessing}
                     pattern="[6-9][0-9]{9}"
+                    maxLength={10}
                     value={formData.deliveryPhone}
-                    onChange={(e) => setFormData({ ...formData, deliveryPhone: e.target.value })}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                    onChange={(e) => setFormData({ ...formData, deliveryPhone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -156,10 +533,11 @@ export default function CheckoutPage() {
                 <input
                   type="text"
                   required
+                  disabled={isProcessing}
                   placeholder="Street / Locality / Landmark"
                   value={formData.deliveryAddress}
                   onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white disabled:opacity-60"
                 />
               </div>
             </div>
@@ -172,9 +550,10 @@ export default function CheckoutPage() {
                   <input
                     type="text"
                     required
+                    disabled={isProcessing}
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -186,10 +565,12 @@ export default function CheckoutPage() {
                   <input
                     type="text"
                     required
+                    disabled={isProcessing}
                     pattern="[0-9]{6}"
+                    maxLength={6}
                     value={formData.pincode}
-                    onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                    onChange={(e) => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -201,10 +582,11 @@ export default function CheckoutPage() {
                 <FileText className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <textarea
                   rows={2}
+                  disabled={isProcessing}
                   placeholder="Optional delivery instructions or landmark..."
                   value={formData.customerNotes}
                   onChange={(e) => setFormData({ ...formData, customerNotes: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white disabled:opacity-60"
                 />
               </div>
             </div>
@@ -214,6 +596,7 @@ export default function CheckoutPage() {
               <input
                 type="checkbox"
                 id="whatsappOptIn"
+                disabled={isProcessing}
                 checked={formData.whatsappOptIn}
                 onChange={(e) => setFormData({ ...formData, whatsappOptIn: e.target.checked })}
                 className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 accent-emerald-600 focus:ring-emerald-500 cursor-pointer"
@@ -228,10 +611,10 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Order Review & Submit */}
+        {/* Order Review & Payment Submit */}
         <div>
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-black text-[#073B6F]">2. Order Review</h2>
+            <h2 className="text-lg font-black text-[#073B6F]">2. Order & Payment Review</h2>
 
             {/* Items List */}
             <div className="mt-4 divide-y divide-slate-100 max-h-56 overflow-y-auto pr-1">
@@ -270,17 +653,53 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* Payment Gateway Badges */}
+            <div className="mt-5 rounded-2xl bg-[#EAF5FC] p-3 text-xs">
+              <div className="flex items-center gap-2 font-bold text-[#073B6F]">
+                <CreditCard className="h-4 w-4 text-[#0B5FA5]" />
+                <span>Razorpay Gateway (UPI, Cards, NetBanking)</span>
+              </div>
+              <p className="mt-1 text-[11px] text-slate-500">
+                Supports Google Pay, PhonePe, Paytm, Debit/Credit Cards & all major Indian banks.
+              </p>
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#073B6F] py-3.5 text-xs font-bold text-white shadow-lg transition hover:bg-[#0B5FA5] disabled:opacity-50"
+              disabled={isProcessing}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#073B6F] py-4 text-sm font-bold text-white shadow-lg transition hover:bg-[#0B5FA5] disabled:opacity-50 active:scale-98"
             >
-              {loading ? 'Processing Order...' : 'Confirm & Place Order'}
-              <ArrowRight className="h-4 w-4" />
+              {paymentState === 'creating_order' ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Preparing Order...</span>
+                </>
+              ) : paymentState === 'awaiting_payment' ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Waiting for Payment...</span>
+                </>
+              ) : paymentState === 'verifying' ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Verifying Payment...</span>
+                </>
+              ) : paymentState === 'failed' ? (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Retry Payment ₹{cart.grandTotal.toFixed(2)}</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" />
+                  <span>Pay Securely ₹{cart.grandTotal.toFixed(2)}</span>
+                </>
+              )}
             </button>
 
             <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] font-medium text-slate-400">
-              <ShieldCheck className="h-4 w-4 text-[#72B82A]" /> Transactional Prisma Database Guarantee
+              <ShieldCheck className="h-4 w-4 text-[#72B82A]" />
+              <span>Razorpay Verified Merchant • 100% Buyer Protection</span>
             </div>
           </div>
         </div>

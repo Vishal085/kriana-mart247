@@ -129,6 +129,16 @@ export default function ProfilePage() {
       }
     }
 
+    if (mobile.trim() && !/^[6-9]\d{9}$/.test(mobile.trim())) {
+      setErrorMessage('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9');
+      return;
+    }
+
+    if (user?.role === 'CUSTOMER' && pinCode.trim() && !/^\d{6}$/.test(pinCode.trim())) {
+      setErrorMessage('PIN Code must be exactly 6 digits (e.g. 110006)');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -340,8 +350,10 @@ export default function ProfilePage() {
                 <input
                   type="tel"
                   placeholder="e.g. 9876543210"
+                  pattern="[6-9][0-9]{9}"
+                  maxLength={10}
                   value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-xs font-medium text-slate-800 outline-none focus:border-[#073B6F] focus:bg-white"
                 />
               </div>
@@ -402,8 +414,10 @@ export default function ProfilePage() {
                   <input
                     type="text"
                     placeholder="e.g. 110006"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
                     value={pinCode}
-                    onChange={(e) => setPinCode(e.target.value)}
+                    onChange={(e) => setPinCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs font-medium text-slate-800 outline-none focus:border-[#073B6F] focus:bg-white"
                   />
                 </div>

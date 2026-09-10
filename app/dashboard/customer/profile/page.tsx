@@ -35,13 +35,31 @@ export default function CustomerProfilePage() {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+
+    const cleanMobile = formData.mobile.replace(/\D/g, '').trim();
+    const cleanPin = formData.pinCode.replace(/\D/g, '').trim();
+
+    if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
+      setError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9');
+      return;
+    }
+
+    if (!/^\d{6}$/.test(cleanPin)) {
+      setError('PIN Code must be exactly 6 digits (e.g. 110006)');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch('/api/customer/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          mobile: cleanMobile,
+          pinCode: cleanPin,
+        }),
       });
 
       const data = await res.json();
@@ -108,8 +126,9 @@ export default function CustomerProfilePage() {
                 type="tel"
                 required
                 pattern="[6-9][0-9]{9}"
+                maxLength={10}
                 value={formData.mobile}
-                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
               />
             </div>
@@ -153,8 +172,9 @@ export default function CustomerProfilePage() {
                 type="text"
                 required
                 pattern="[0-9]{6}"
+                maxLength={6}
                 value={formData.pinCode}
-                onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, pinCode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
               />
             </div>
