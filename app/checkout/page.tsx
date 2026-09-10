@@ -43,7 +43,7 @@ interface SuccessDetails {
 export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { cart, refreshCart } = useCart();
+  const { cart, refreshCart, clearCart } = useCart();
 
   const [formData, setFormData] = useState({
     deliveryName: '',
@@ -55,6 +55,7 @@ export default function CheckoutPage() {
     whatsappOptIn: true,
   });
 
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'ONLINE'>('COD');
   const [paymentState, setPaymentState] = useState<CheckoutPaymentState>('idle');
   const [error, setError] = useState<string | null>(null);
   const [lastPendingOrderId, setLastPendingOrderId] = useState<string | null>(null);
@@ -67,24 +68,24 @@ export default function CheckoutPage() {
         ...prev,
         deliveryName: user.fullName || '',
         deliveryPhone: user.mobile || '',
-        deliveryAddress: user.customerProfile?.address || '',
-        city: user.customerProfile?.city || '',
-        pincode: user.customerProfile?.pinCode || '',
+        deliveryAddress: (user as any).customerProfile?.address || '',
+        city: (user as any).customerProfile?.city || '',
+        pincode: (user as any).customerProfile?.pinCode || '',
         whatsappOptIn: true,
       }));
     }
   }, [user]);
 
-  if (!user) {
+  if ((!cart || cart.items.length === 0) && paymentState !== 'success') {
     return (
       <main className="mx-auto max-w-4xl px-4 py-16 text-center">
-        <h1 className="text-2xl font-black text-[#073B6F]">Please Log In to Checkout</h1>
-        <p className="mt-2 text-xs text-slate-500">Sign in to complete your grocery order.</p>
+        <h1 className="text-2xl font-black text-[#073B6F]">Your Cart is Empty</h1>
+        <p className="mt-2 text-xs text-slate-500">Please add essential kirana products before checking out.</p>
         <Link
-          href="/login/customer"
-          className="mt-6 inline-block rounded-full bg-[#073B6F] px-8 py-3 text-xs font-bold text-white"
+          href="/shop"
+          className="mt-6 inline-block rounded-full bg-[#073B6F] px-8 py-3 text-xs font-bold text-white shadow hover:bg-[#0B5FA5]"
         >
-          Customer Login
+          Explore Kirana Shop
         </Link>
       </main>
     );
@@ -323,6 +324,11 @@ export default function CheckoutPage() {
 
     setPaymentState('creating_order');
 
+    const itemsPayload = cart?.items.map((i) => ({
+      productId: i.productId,
+      quantity: i.quantity,
+    })) || [];
+
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -331,6 +337,8 @@ export default function CheckoutPage() {
           ...formData,
           deliveryPhone: cleanPhone,
           pincode: cleanPin,
+          paymentMethod,
+          items: itemsPayload,
         }),
       });
 
@@ -348,6 +356,21 @@ export default function CheckoutPage() {
 
       const createdOrder = data.order;
       setLastPendingOrderId(createdOrder.id);
+
+      // If Cash on Delivery, instant order success!
+      if (paymentMethod === 'COD') {
+        await refreshCart();
+        setSuccessDetails({
+          orderId: createdOrder.id,
+          orderNumber: createdOrder.orderNumber,
+          paymentId: 'COD-PAY-ON-DELIVERY',
+          paymentMethod: 'Cash / Pay on Delivery (Cash or UPI to Delivery Partner)',
+          amount: Number(createdOrder.total),
+          status: 'CONFIRMED',
+        });
+        setPaymentState('success');
+        return;
+      }
 
       if (createdOrder.razorpayOrder) {
         await triggerRazorpayPayment(createdOrder.id, createdOrder.razorpayOrder);
@@ -634,17 +657,21 @@ export default function CheckoutPage() {
             {/* Price Calculations */}
             <div className="mt-4 pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-600">
               <div className="flex justify-between">
-                <span>Subtotal</span>
+                <span>Items Subtotal</span>
                 <span className="font-bold text-slate-800">₹{cart.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span>GST Tax (5%)</span>
-                <span className="font-bold text-slate-800">₹{cart.tax.toFixed(2)}</span>
+                <span>Taxes & GST</span>
+                <span className="font-bold text-emerald-700">Included in prices</span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery Fee</span>
                 <span className="font-bold text-slate-800">
-                  {cart.deliveryCharge === 0 ? 'FREE' : `₹${cart.deliveryCharge.toFixed(2)}`}
+                  {cart.deliveryCharge === 0 ? (
+                    <span className="text-emerald-600">FREE</span>
+                  ) : (
+                    `₹${cart.deliveryCharge.toFixed(2)}`
+                  )}
                 </span>
               </div>
               <div className="pt-3 border-t border-slate-100 flex items-baseline justify-between text-base font-black text-[#073B6F]">
@@ -653,15 +680,66 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Payment Gateway Badges */}
-            <div className="mt-5 rounded-2xl bg-[#EAF5FC] p-3 text-xs">
-              <div className="flex items-center gap-2 font-bold text-[#073B6F]">
-                <CreditCard className="h-4 w-4 text-[#0B5FA5]" />
-                <span>Razorpay Gateway (UPI, Cards, NetBanking)</span>
-              </div>
-              <p className="mt-1 text-[11px] text-slate-500">
-                Supports Google Pay, PhonePe, Paytm, Debit/Credit Cards & all major Indian banks.
-              </p>
+            {/* Payment Method Selector */}
+            <div className="mt-5 space-y-2.5">
+              <div className="text-xs font-bold text-slate-800">Select Payment Method *</div>
+
+              {/* Option 1: Cash / Pay on Delivery */}
+              <label
+                onClick={() => setPaymentMethod('COD')}
+                className={`flex items-start gap-3 rounded-2xl border p-3.5 cursor-pointer transition ${
+                  paymentMethod === 'COD'
+                    ? 'border-[#073B6F] bg-[#EAF5FC]/60 shadow-xs'
+                    : 'border-slate-200 bg-white hover:bg-slate-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="COD"
+                  checked={paymentMethod === 'COD'}
+                  onChange={() => setPaymentMethod('COD')}
+                  className="mt-0.5 h-4 w-4 text-[#073B6F] accent-[#073B6F]"
+                />
+                <div>
+                  <div className="text-xs font-bold text-[#073B6F] flex items-center gap-1.5">
+                    <span>💵 Cash / Pay on Delivery (COD)</span>
+                    <span className="rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-black px-1.5 py-0.2">
+                      Popular
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-slate-500">
+                    Pay securely via Cash or UPI directly to our delivery executive when your groceries arrive.
+                  </p>
+                </div>
+              </label>
+
+              {/* Option 2: Online Payment via Razorpay */}
+              <label
+                onClick={() => setPaymentMethod('ONLINE')}
+                className={`flex items-start gap-3 rounded-2xl border p-3.5 cursor-pointer transition ${
+                  paymentMethod === 'ONLINE'
+                    ? 'border-[#073B6F] bg-[#EAF5FC]/60 shadow-xs'
+                    : 'border-slate-200 bg-white hover:bg-slate-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="ONLINE"
+                  checked={paymentMethod === 'ONLINE'}
+                  onChange={() => setPaymentMethod('ONLINE')}
+                  className="mt-0.5 h-4 w-4 text-[#073B6F] accent-[#073B6F]"
+                />
+                <div>
+                  <div className="text-xs font-bold text-[#073B6F] flex items-center gap-1.5">
+                    <span>💳 Online Payment (Razorpay)</span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-slate-500">
+                    Pay now instantly with UPI (Google Pay, PhonePe, Paytm), Debit/Credit Cards & NetBanking.
+                  </p>
+                </div>
+              </label>
             </div>
 
             <button
@@ -672,7 +750,7 @@ export default function CheckoutPage() {
               {paymentState === 'creating_order' ? (
                 <>
                   <RefreshCw className="h-4 w-4 animate-spin" />
-                  <span>Preparing Order...</span>
+                  <span>Placing Your Order...</span>
                 </>
               ) : paymentState === 'awaiting_payment' ? (
                 <>
@@ -684,10 +762,10 @@ export default function CheckoutPage() {
                   <RefreshCw className="h-4 w-4 animate-spin" />
                   <span>Verifying Payment...</span>
                 </>
-              ) : paymentState === 'failed' ? (
+              ) : paymentMethod === 'COD' ? (
                 <>
-                  <RefreshCw className="h-4 w-4" />
-                  <span>Retry Payment ₹{cart.grandTotal.toFixed(2)}</span>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Confirm Order (Pay ₹{cart.grandTotal.toFixed(2)} on Delivery)</span>
                 </>
               ) : (
                 <>
@@ -699,7 +777,7 @@ export default function CheckoutPage() {
 
             <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] font-medium text-slate-400">
               <ShieldCheck className="h-4 w-4 text-[#72B82A]" />
-              <span>Razorpay Verified Merchant • 100% Buyer Protection</span>
+              <span>100% Genuine Sealed Grocery Packaging • Safe Delivery</span>
             </div>
           </div>
         </div>

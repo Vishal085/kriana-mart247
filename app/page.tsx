@@ -83,52 +83,96 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-[#F7FAFC] text-slate-800">
       {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#EAF5FC]/50 to-transparent py-12 lg:py-20">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#EAF5FC]/60 via-[#F7FAFC] to-[#F7FAFC] py-10 lg:py-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-6">
-          <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div>
               {/* Brand Tagline Badge */}
               <div className="inline-flex items-center gap-2 rounded-full border border-[#39A9E8]/40 bg-[#EAF5FC] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">
                 <Sparkles className="h-3.5 w-3.5 text-[#39A9E8]" />
-                Today&apos;s Wholesale Rates & Kirana Mandi
+                ⚡ Fast Kirana Delivery • Today&apos;s Mandi Rates
               </div>
 
-              <h1 className="mt-5 text-3xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
-                Daily Kirana Mandi Rates.{' '}
-                <span className="block text-[#0B5FA5]">Better Buying Decisions.</span>
+              <h1 className="mt-4 text-3xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
+                Aapki Apni Online Kirana Dukan.{' '}
+                <span className="block text-[#0B5FA5]">Daily Grocery at Mandi Rates.</span>
               </h1>
 
-              <p className="mt-4 sm:mt-6 max-w-xl text-sm sm:text-lg text-slate-600 leading-relaxed">
-                Track wholesale mandi prices, compare market rates, and shop essential kirana products — all in one unified platform.
+              <p className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base text-slate-600 leading-relaxed">
+                Order milk, atta, cooking oil, pulses, spices, and ₹5/₹10 pocket packs with same-day home delivery or track live wholesale market trends.
               </p>
 
-              {/* Action Buttons */}
-              <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-4">
-                <Link
-                  href="/mandi-rates"
-                  className="inline-flex justify-center items-center gap-2 rounded-full bg-[#073B6F] px-6 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg transition hover:bg-[#0B5FA5] w-full sm:w-auto"
-                >
-                  View Today&apos;s Mandi Rates <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="/shop"
-                  className="inline-flex justify-center items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-6 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-[#073B6F] shadow-sm transition hover:border-[#39A9E8] w-full sm:w-auto"
-                >
-                  <ShoppingBag className="h-4 w-4 text-[#39A9E8]" />
-                  Shop Kirana Products
-                </Link>
-                <Link
-                  href="/compare"
-                  className="inline-flex justify-center items-center gap-2 rounded-full border border-[#0B5FA5]/30 bg-[#EAF5FC] px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-[#073B6F] shadow-xs transition hover:bg-[#073B6F] hover:text-white w-full sm:w-auto"
-                >
-                  <Scale className="h-4 w-4 text-[#0B5FA5]" />
-                  Compare Mandis
-                </Link>
+              {/* Instant Kirana Grocery Search Bar */}
+              <div className="mt-6 max-w-xl">
+                <form action="/shop" method="GET" className="relative flex items-center shadow-md rounded-2xl bg-white border border-slate-200 p-1.5 focus-within:border-[#39A9E8] transition">
+                  <Search className="h-5 w-5 text-slate-400 ml-3 shrink-0" />
+                  <input
+                    type="text"
+                    name="search"
+                    placeholder="Search 'Atta', 'Fortune Oil', 'Parle-G ₹5', 'Sugar'..."
+                    className="w-full bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-[#073B6F] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#0B5FA5] transition shrink-0"
+                  >
+                    Search Grocery
+                  </button>
+                </form>
               </div>
 
-              {/* Mandi Selector in Hero */}
-              <div className="mt-8 max-w-md">
-                <MandiSelector variant="hero" />
+              {/* Quick Grocery Category Shortcuts */}
+              <div className="mt-4 flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="font-bold text-slate-400 text-[11px] uppercase mr-1">Popular:</span>
+                {[
+                  { name: '🥛 Milk & Dairy', href: '/shop?categoryId=cat-1' },
+                  { name: '🌾 Atta & Dal', href: '/shop?categoryId=cat-11' },
+                  { name: '🛢️ Cooking Oil', href: '/shop?categoryId=cat-6' },
+                  { name: '🍪 ₹5/₹10 Biscuits', href: '/shop?categoryId=cat-9' },
+                  { name: '🧂 Spices & Masala', href: '/shop?categoryId=cat-16' },
+                ].map((pill) => (
+                  <Link
+                    key={pill.name}
+                    href={pill.href}
+                    className="rounded-full bg-white border border-slate-200/80 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-[#39A9E8] hover:text-[#073B6F] shadow-2xs transition"
+                  >
+                    {pill.name}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Trust Reassurance Chips */}
+              <div className="mt-6 flex flex-wrap gap-4 text-xs font-semibold text-slate-600 border-t border-slate-200/60 pt-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-emerald-600 font-black">🚚</span>
+                  <span>Free Delivery on orders above ₹500</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[#0B5FA5] font-black">💵</span>
+                  <span>Cash on Delivery & UPI</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-amber-600 font-black">✔</span>
+                  <span>100% Genuine Sealed Brands</span>
+                </div>
+              </div>
+
+              {/* Quick Action Links */}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/shop"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#073B6F] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md transition hover:bg-[#0B5FA5]"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  Explore Full Grocery Shop
+                </Link>
+                <Link
+                  href="/mandi-rates"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs sm:text-sm font-bold text-[#073B6F] shadow-xs transition hover:border-[#39A9E8]"
+                >
+                  <TrendingUp className="h-4 w-4 text-[#0B5FA5]" />
+                  Today&apos;s Mandi Rates
+                </Link>
               </div>
             </div>
 
@@ -399,6 +443,9 @@ export default async function HomePage() {
               category={p.category}
               unit={p.unit}
               retailPrice={Number(p.retailPrice)}
+              mrp={p.mrp ? Number(p.mrp) : null}
+              stockQuantity={p.stockQuantity ?? 100}
+              weight={p.weight}
               minimumQuantity={p.minimumQuantity}
               maximumQuantity={p.maximumQuantity}
               images={p.images}

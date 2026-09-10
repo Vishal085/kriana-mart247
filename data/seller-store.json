@@ -10,14 +10,14 @@
       "brand": {
         "name": "Fortune"
       },
-      "categoryId": "cat-1",
+      "categoryId": "cat-6",
       "category": {
-        "id": "cat-1",
-        "name": "Milk & Dairy",
-        "slug": "milk-dairy",
-        "description": "Fresh milk pouches, butter, paneer, curd, fresh cream, and cheese",
+        "id": "cat-6",
+        "name": "Cooking Oil",
+        "slug": "cooking-oil",
+        "description": "Kachi Ghani Mustard oil, groundnut oil, and traditional cooking oils",
         "active": true,
-        "displayOrder": 1,
+        "displayOrder": 6,
         "createdAt": "2026-01-01T00:00:00.000Z",
         "updatedAt": "2026-01-01T00:00:00.000Z"
       },
@@ -93,14 +93,14 @@
       "brand": {
         "name": "India Gate"
       },
-      "categoryId": "cat-1",
+      "categoryId": "cat-5",
       "category": {
-        "id": "cat-1",
-        "name": "Milk & Dairy",
-        "slug": "milk-dairy",
-        "description": "Fresh milk pouches, butter, paneer, curd, fresh cream, and cheese",
+        "id": "cat-5",
+        "name": "Rice",
+        "slug": "rice",
+        "description": "Premium Basmati, Kolam, Sona Masoori, and everyday rice",
         "active": true,
-        "displayOrder": 1,
+        "displayOrder": 5,
         "createdAt": "2026-01-01T00:00:00.000Z",
         "updatedAt": "2026-01-01T00:00:00.000Z"
       },
@@ -240,6 +240,24 @@
       "active": true,
       "createdAt": "2026-01-01T00:00:00.000Z",
       "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "customer-demo-1",
+      "fullName": "Vishal Gupta (Customer)",
+      "email": "customer@kiranamart247.com",
+      "mobile": "9876543210",
+      "passwordHash": "$2b$10$RTDC81ygiJC8vcbDIPnnbuylz3Q1hHjJfg/QOMlDx20MfngxEU2gW",
+      "role": "CUSTOMER",
+      "active": true,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "customerProfile": {
+        "id": "cust-prof-1",
+        "userId": "customer-demo-1",
+        "address": "Shop 42, Naya Bazar Wholesale Market",
+        "city": "Delhi",
+        "pinCode": "110006"
+      }
     }
   ]
 }

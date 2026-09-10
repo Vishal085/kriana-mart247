@@ -56,6 +56,9 @@ export const productSchema = z.object({
   subCategoryId: z.string().optional().nullable(),
   unit: z.string().min(1, 'Unit is required'),
   retailPrice: z.number().positive('Retail price must be greater than 0'),
+  mrp: z.number().positive().optional().nullable(),
+  stockQuantity: z.number().int().min(0).optional().nullable(),
+  weight: z.string().optional().nullable(),
   minimumQuantity: z.number().int().min(1).default(1),
   maximumQuantity: z.number().int().positive().optional().nullable(),
   barcode: z.string().optional().nullable(),
@@ -124,6 +127,11 @@ export const checkoutSchema = z.object({
   pincode: z.string().regex(/^\d{6}$/, 'PIN Code must be 6 digits'),
   customerNotes: z.string().optional().nullable().or(z.literal('')),
   whatsappOptIn: z.boolean().default(true).optional(),
+  paymentMethod: z.enum(['COD', 'ONLINE']).default('COD').optional(),
+  items: z.array(z.object({
+    productId: z.string(),
+    quantity: z.number().int().min(1),
+  })).optional(),
 });
 
 export const priceAlertSchema = z.object({

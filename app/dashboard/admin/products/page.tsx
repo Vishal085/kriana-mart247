@@ -24,6 +24,10 @@ export default function AdminProductsPage() {
     subCategoryId: '',
     unit: 'KG',
     retailPrice: '',
+    mrp: '',
+    stockQuantity: '100',
+    weight: '',
+    imageUrl: '',
     minimumQuantity: 1,
     maximumQuantity: '',
     active: true,
@@ -75,6 +79,10 @@ export default function AdminProductsPage() {
       subCategoryId: '',
       unit: 'KG',
       retailPrice: '',
+      mrp: '',
+      stockQuantity: '100',
+      weight: '',
+      imageUrl: '',
       minimumQuantity: 1,
       maximumQuantity: '',
       active: true,
@@ -95,6 +103,10 @@ export default function AdminProductsPage() {
       subCategoryId: p.subCategoryId || '',
       unit: p.unit,
       retailPrice: p.retailPrice.toString(),
+      mrp: p.mrp ? p.mrp.toString() : '',
+      stockQuantity: p.stockQuantity !== undefined ? p.stockQuantity.toString() : '100',
+      weight: p.weight || '',
+      imageUrl: p.images?.[0]?.url || '',
       minimumQuantity: p.minimumQuantity || 1,
       maximumQuantity: p.maximumQuantity ? p.maximumQuantity.toString() : '',
       active: p.active,
@@ -119,6 +131,12 @@ export default function AdminProductsPage() {
         subCategoryId: formData.subCategoryId || null,
         unit: formData.unit,
         retailPrice: parseFloat(formData.retailPrice),
+        mrp: formData.mrp ? parseFloat(formData.mrp) : null,
+        stockQuantity: formData.stockQuantity ? parseInt(formData.stockQuantity, 10) : 100,
+        weight: formData.weight || null,
+        images: formData.imageUrl
+          ? [{ url: formData.imageUrl, altText: formData.name, sortOrder: 0, active: true }]
+          : undefined,
         minimumQuantity: Number(formData.minimumQuantity) || 1,
         maximumQuantity: formData.maximumQuantity ? Number(formData.maximumQuantity) : null,
         active: formData.active,
@@ -347,30 +365,67 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700">Unit (e.g. KG, Litre, Pack) *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.unit}
-                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700">Retail Price (₹) *</label>
+                  <label className="block font-bold text-slate-700">Selling Price (₹) *</label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={formData.retailPrice}
                     onChange={(e) => setFormData({ ...formData, retailPrice: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 font-bold"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 font-bold text-slate-900"
+                    placeholder="e.g. 28"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700">Min Quantity</label>
+                  <label className="block font-bold text-slate-700">Real MRP (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.mrp}
+                    onChange={(e) => setFormData({ ...formData, mrp: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-slate-700"
+                    placeholder="e.g. 30"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700">Unit *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.unit}
+                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
+                    placeholder="e.g. 1 Pack, KG"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700">Pack Weight / Size</label>
+                  <input
+                    type="text"
+                    value={formData.weight}
+                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
+                    placeholder="e.g. 50g, 1kg, 5L"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700">Stock Quantity</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={formData.stockQuantity}
+                    onChange={(e) => setFormData({ ...formData, stockQuantity: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
+                    placeholder="100"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700">Min Order Qty</label>
                   <input
                     type="number"
                     required
@@ -379,6 +434,38 @@ export default function AdminProductsPage() {
                     onChange={(e) => setFormData({ ...formData, minimumQuantity: parseInt(e.target.value, 10) || 1 })}
                     className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
                   />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700">Max Order Qty</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.maximumQuantity}
+                    onChange={(e) => setFormData({ ...formData, maximumQuantity: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
+                    placeholder="Optional"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700">Product Image URL</label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-2 font-mono text-[11px]"
+                    placeholder="e.g. /products/parle-g.jpg or https://..."
+                  />
+                  {formData.imageUrl && (
+                    <img
+                      src={formData.imageUrl}
+                      alt="Preview"
+                      className="h-9 w-9 rounded-lg border border-slate-200 object-contain bg-white p-0.5"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -389,6 +476,7 @@ export default function AdminProductsPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2"
+                  placeholder="Fresh and genuine kirana product sourced directly..."
                 />
               </div>
 

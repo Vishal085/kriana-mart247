@@ -12,34 +12,6 @@ export default function CartPage() {
   const { user } = useAuth();
   const router = useRouter();
 
-  if (!user) {
-    return (
-      <main className="mx-auto max-w-7xl px-4 py-16 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-[#EAF5FC] text-[#073B6F]">
-          <ShoppingCart className="h-8 w-8" />
-        </div>
-        <h1 className="mt-4 text-2xl font-black text-[#073B6F]">Please Log In to View Your Cart</h1>
-        <p className="mt-2 text-xs text-slate-500">
-          Sign in to your customer account to manage your shopping cart and place orders.
-        </p>
-        <div className="mt-6 flex justify-center gap-3">
-          <Link
-            href="/login/customer"
-            className="rounded-full bg-[#073B6F] px-6 py-2.5 text-xs font-bold text-white hover:bg-[#0B5FA5]"
-          >
-            Customer Login
-          </Link>
-          <Link
-            href="/shop"
-            className="rounded-full border border-slate-200 bg-white px-6 py-2.5 text-xs font-bold text-[#073B6F]"
-          >
-            Browse Products
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
   if (loading) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-16 text-center text-xs text-slate-400">
@@ -173,14 +145,14 @@ export default function CartPage() {
                 <span className="font-bold text-slate-800">₹{cart.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Estimated GST Tax (5%)</span>
-                <span className="font-bold text-slate-800">₹{cart.tax.toFixed(2)}</span>
+                <span>Taxes & GST</span>
+                <span className="font-bold text-emerald-700">Included in prices</span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery Charge</span>
                 <span className="font-bold text-slate-800">
                   {cart.deliveryCharge === 0 ? (
-                    <span className="text-emerald-600">FREE (Orders &gt; ₹1000)</span>
+                    <span className="text-emerald-600">FREE (Orders &gt; ₹500)</span>
                   ) : (
                     `₹${cart.deliveryCharge.toFixed(2)}`
                   )}

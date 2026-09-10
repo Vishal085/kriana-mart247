@@ -8,8 +8,39 @@ import { PaymentService } from './payment.service';
 
 export class OrderService {
   static async createOrder(userId: string, input: z.infer<typeof checkoutSchema>) {
+    let targetUserId = userId;
+
+    // If guest user, find or create customer record linked to mobile number
+    if (!targetUserId) {
+      const cleanPhone = (input.deliveryPhone || '').replace(/\D/g, '').trim();
+      let existingUser = await prisma.user.findFirst({
+        where: { mobile: cleanPhone },
+      });
+
+      if (!existingUser) {
+        existingUser = await prisma.user.create({
+          data: {
+            fullName: input.deliveryName,
+            mobile: cleanPhone,
+            passwordHash: '$2b$10$V0rols.Px0V10tRQH87S3OKUGcuaIVQYK70evDuLHEGklUMcPi23q',
+            role: 'CUSTOMER',
+            whatsappOptIn: input.whatsappOptIn ?? true,
+          },
+        });
+      }
+      targetUserId = existingUser.id;
+    }
+
+    interface OrderLineItem {
+      productId: string;
+      product: any;
+      quantity: number;
+    }
+    let orderItemsToCreate: OrderLineItem[] = [];
+
+    // 1. Check database cart first
     const cart = await prisma.cart.findUnique({
-      where: { userId },
+      where: { userId: targetUserId },
       include: {
         items: {
           include: {
@@ -21,19 +52,45 @@ export class OrderService {
       },
     });
 
-    if (!cart || cart.items.length === 0) {
-      throw new Error('Your cart is empty');
+    if (cart && cart.items.length > 0) {
+      orderItemsToCreate = cart.items.map((i: any) => ({
+        productId: i.productId,
+        product: i.product,
+        quantity: i.quantity,
+      }));
+    } else if (input.items && input.items.length > 0) {
+      // 2. Guest cart items passed directly from frontend localStorage
+      const productIds = input.items.map((i) => i.productId);
+      const products = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        include: { brand: true },
+      });
+
+      for (const it of input.items) {
+        const prod = products.find((p: any) => p.id === it.productId);
+        if (prod) {
+          orderItemsToCreate.push({
+            productId: it.productId,
+            product: prod,
+            quantity: it.quantity,
+          });
+        }
+      }
+    }
+
+    if (orderItemsToCreate.length === 0) {
+      throw new Error('Your cart is empty. Please add items before checking out.');
     }
 
     // Verify product availability and calculate server totals
     let subtotal = 0;
-    for (const item of cart.items) {
+    for (const item of orderItemsToCreate) {
       if (!item.product.active) {
         throw new Error(`Product "${item.product.name}" is currently unavailable.`);
       }
 
-      if (item.quantity < item.product.minimumQuantity) {
-        throw new Error(`Minimum quantity for "${item.product.name}" is ${item.product.minimumQuantity}`);
+      if (item.quantity < (item.product.minimumQuantity || 1)) {
+        throw new Error(`Minimum quantity for "${item.product.name}" is ${item.product.minimumQuantity || 1}`);
       }
 
       if (item.product.maximumQuantity && item.quantity > item.product.maximumQuantity) {
@@ -43,9 +100,11 @@ export class OrderService {
       subtotal += Number(item.product.retailPrice) * item.quantity;
     }
 
-    const tax = subtotal * 0.05;
-    const deliveryCharge = subtotal >= 1000 ? 0 : 40;
+    // FMCG & Kirana prices are strictly inclusive of all taxes
+    const tax = 0;
+    const deliveryCharge = subtotal >= 500 ? 0 : 40;
     const total = subtotal + tax + deliveryCharge;
+    const isCOD = (input.paymentMethod || 'COD') === 'COD';
 
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const randomSuffix = Math.floor(100000 + Math.random() * 900000);
@@ -56,9 +115,10 @@ export class OrderService {
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
-          userId,
-          status: OrderStatus.PENDING,
+          userId: targetUserId,
+          status: isCOD ? OrderStatus.CONFIRMED : OrderStatus.PENDING,
           paymentStatus: PaymentStatus.PENDING,
+          paymentMethod: isCOD ? 'COD' : 'ONLINE',
           subtotal,
           tax,
           deliveryCharge,
@@ -71,7 +131,7 @@ export class OrderService {
           customerNotes: input.customerNotes || null,
           whatsappOptIn: input.whatsappOptIn ?? true,
           items: {
-            create: cart.items.map((item) => ({
+            create: orderItemsToCreate.map((item) => ({
               productId: item.productId,
               productNameSnapshot: item.product.name,
               brandSnapshot: item.product.brand?.name || 'Generic',
@@ -84,8 +144,10 @@ export class OrderService {
           statusHistory: {
             create: [
               {
-                status: OrderStatus.PENDING,
-                note: 'Order initiated by customer awaiting payment',
+                status: isCOD ? OrderStatus.CONFIRMED : OrderStatus.PENDING,
+                note: isCOD
+                  ? 'Order placed with Cash on Delivery (Pay on Delivery)'
+                  : 'Order initiated awaiting online payment',
               },
             ],
           },
@@ -96,16 +158,31 @@ export class OrderService {
         },
       });
 
-      // Clear customer's cart
-      await tx.cartItem.deleteMany({
-        where: { cartId: cart.id },
-      });
+      // Clear customer's cart if exists
+      if (cart) {
+        await tx.cartItem.deleteMany({
+          where: { cartId: cart.id },
+        });
+      }
 
       return newOrder;
     });
 
-    // Create Razorpay Order securely from server
-    const razorpayOrder = await PaymentService.createRazorpayOrder(order.id, userId);
+    // If COD, send immediate WhatsApp notification and return without Razorpay order
+    if (isCOD) {
+      if (input.whatsappOptIn) {
+        WhatsAppService.sendOrderStatusNotification(order.id, OrderStatus.CONFIRMED).catch((e) =>
+          console.warn('WhatsApp COD notification trigger notice:', e?.message || e)
+        );
+      }
+      return {
+        ...order,
+        razorpayOrder: null,
+      };
+    }
+
+    // Create Razorpay Order securely from server for ONLINE payments
+    const razorpayOrder = await PaymentService.createRazorpayOrder(order.id, targetUserId);
 
     return {
       ...order,

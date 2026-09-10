@@ -93,8 +93,8 @@ function calculateCartTotals(items: CartItemData[]): CartData {
   }
 
   const deliveryCharge = subtotal >= FREE_DELIVERY_THRESHOLD || items.length === 0 ? 0 : STANDARD_DELIVERY_FEE;
-  const tax = Math.round(subtotal * 0.05 * 100) / 100; // 5% GST
-  const grandTotal = Math.max(0, subtotal + deliveryCharge + tax);
+  const tax = 0; // Packaged groceries & kirana prices are inclusive of all taxes
+  const grandTotal = Math.max(0, subtotal + deliveryCharge);
 
   return {
     id: 'active-cart',

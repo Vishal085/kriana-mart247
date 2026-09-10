@@ -26,13 +26,67 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "KiranaMart.com | Today's Wholesale Rates & Mandi Intelligence",
+  metadataBase: new URL('https://kiranamart.com'),
+  title: {
+    default: "KiranaMart | Online Kirana & Grocery Store • Daily Mandi Rates",
+    template: "%s | KiranaMart",
+  },
   description:
-    'Track Delhi wholesale mandi prices across APMC markets, compare commodity rates, and order grocery staples with bulk wholesale pricing.',
+    'Order fresh milk, cooking oil, atta, pulses, spices, and ₹5/₹10 grocery packs online with fast same-day delivery. Track live Delhi APMC mandi wholesale rates.',
+  keywords: [
+    'KiranaMart',
+    'online grocery store',
+    'kirana delivery',
+    'wholesale mandi rates',
+    'atta',
+    'mustard oil',
+    'parle g',
+    'amul milk',
+    'sugar',
+    'delhi mandi bhav',
+  ],
+  authors: [{ name: 'KiranaMart' }],
+  creator: 'KiranaMart',
+  publisher: 'KiranaMart',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: 'https://kiranamart.com',
+    siteName: 'KiranaMart',
+    title: 'KiranaMart | Online Kirana & Grocery Store • Daily Mandi Rates',
+    description:
+      'Buy groceries, FMCG staples, and track live mandi wholesale rates. Fast home delivery and Cash on Delivery available.',
+    images: [
+      {
+        url: '/icon.png',
+        width: 512,
+        height: 512,
+        alt: 'KiranaMart Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'KiranaMart | Online Kirana & Grocery Store',
+    description:
+      'Order groceries online with fast delivery. Track live wholesale mandi prices across APMC markets.',
+    images: ['/icon.png'],
+  },
   icons: {
-    icon: '/brand/logo.png',
-    shortcut: '/brand/logo.png',
-    apple: '/brand/logo.png',
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/icon.png',
   },
 };
 

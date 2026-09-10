@@ -15,6 +15,9 @@ export interface ProductCardProps {
   category?: { name: string } | null;
   unit: string;
   retailPrice: number | string;
+  mrp?: number | string | null;
+  stockQuantity?: number;
+  weight?: string | null;
   minimumQuantity?: number;
   maximumQuantity?: number | null;
   images?: Array<{ url: string; altText?: string | null }>;
@@ -28,6 +31,9 @@ export function ProductCard({
   category,
   unit,
   retailPrice,
+  mrp: propMrp,
+  stockQuantity = 100,
+  weight,
   minimumQuantity = 1,
   maximumQuantity,
   images = [],
@@ -40,10 +46,13 @@ export function ProductCard({
   const [wishlisted, setWishlisted] = useState(false);
 
   const price = Number(retailPrice);
-  // Realistic MRP with discount
-  const mrp = Math.round(price * 1.18);
-  const discountPercent = Math.round(((mrp - price) / mrp) * 100);
-  const wholesaleBulkPrice = Math.round(price * 0.94); // Tier 2 (5+ units)
+  const numericMrp = propMrp ? Number(propMrp) : null;
+  const hasAuthenticDiscount = numericMrp !== null && numericMrp > price;
+  const discountPercent = hasAuthenticDiscount
+    ? Math.round(((numericMrp - price) / numericMrp) * 100)
+    : 0;
+
+  const isOutOfStock = stockQuantity <= 0;
 
   // Check if item is in cart
   const cartItem = cart?.items.find((item) => item.productId === id);
@@ -51,19 +60,23 @@ export function ProductCard({
 
   // Dynamic Badge criteria
   const isSmallPack = price <= 10;
-  const isWholesaleDeal = discountPercent >= 15;
-  const isEssential = category?.name?.includes('Oil') || category?.name?.includes('Atta') || category?.name?.includes('Rice');
+  const isSpecialOffer = discountPercent >= 10;
+  const isEssential = category?.name?.includes('Oil') || category?.name?.includes('Atta') || category?.name?.includes('Rice') || category?.name?.includes('Dairy');
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isOutOfStock) {
+      toast.warning(`${name} is currently out of stock.`);
+      return;
+    }
 
     setAdding(true);
     const res = await addItem(id, minimumQuantity);
     setAdding(false);
 
     if (res.success) {
-      toast.success(`${name} added to your wholesale basket!`);
+      toast.success(`${name} added to cart!`);
     } else if (res.error) {
       toast.error(res.error);
     }
@@ -143,17 +156,21 @@ export function ProductCard({
         {/* Badges & Wishlist Header */}
         <div className="flex items-start justify-between gap-1 mb-2">
           <div className="flex flex-wrap gap-1">
-            {isSmallPack ? (
-              <span className="rounded-md bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-black text-amber-800 uppercase tracking-tight">
-                Pocket Pack
+            {isOutOfStock ? (
+              <span className="rounded-md bg-rose-50 border border-rose-200/60 px-2 py-0.5 text-[10px] font-black text-rose-700 uppercase tracking-tight">
+                Out of Stock
               </span>
-            ) : isWholesaleDeal ? (
+            ) : isSmallPack ? (
+              <span className="rounded-md bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-black text-amber-800 uppercase tracking-tight">
+                Chhota Pack
+              </span>
+            ) : isSpecialOffer ? (
               <span className="rounded-md bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-black text-emerald-800 uppercase tracking-tight flex items-center gap-0.5">
-                <Sparkles className="h-2.5 w-2.5 text-emerald-600" /> Wholesale Deal
+                <Sparkles className="h-2.5 w-2.5 text-emerald-600" /> Special Offer
               </span>
             ) : isEssential ? (
               <span className="rounded-md bg-sky-50 border border-sky-200/60 px-2 py-0.5 text-[10px] font-black text-sky-800 uppercase tracking-tight flex items-center gap-0.5">
-                <Zap className="h-2.5 w-2.5 text-sky-600" /> Fast Dispatch
+                <Zap className="h-2.5 w-2.5 text-sky-600" /> Fast Delivery
               </span>
             ) : null}
           </div>
@@ -200,7 +217,7 @@ export function ProductCard({
             {brandDisplayName}
           </span>
           <span className="rounded-md bg-slate-100 px-1.5 py-0.5 font-medium text-slate-600 shrink-0">
-            {unit}
+            {weight || unit}
           </span>
         </div>
 
@@ -220,21 +237,28 @@ export function ProductCard({
               <span className="text-xs sm:text-sm font-black text-slate-900">
                 ₹{price.toFixed(2)}
               </span>
-              {mrp > price && (
+              {hasAuthenticDiscount && (
                 <span className="text-[10px] sm:text-[11px] text-slate-400 line-through">
-                  ₹{mrp.toFixed(2)}
+                  ₹{numericMrp!.toFixed(2)}
                 </span>
               )}
             </div>
-            {/* Wholesale Tier Notice */}
-            <div className="text-[9px] sm:text-[10px] text-emerald-700 font-bold tracking-tight truncate">
-              ₹{wholesaleBulkPrice.toFixed(2)} in 5+ bulk lot
+            <div className="text-[9px] sm:text-[10px] text-slate-500 font-medium tracking-tight truncate">
+              {isOutOfStock ? (
+                <span className="text-rose-600 font-bold">Currently Unavailable</span>
+              ) : (
+                <span className="text-emerald-700 font-bold">✅ In Stock</span>
+              )}
             </div>
           </div>
 
           {/* Stepper / Add Button */}
           <div className="shrink-0">
-            {currentQuantity === 0 ? (
+            {isOutOfStock ? (
+              <span className="inline-block rounded-xl bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-400">
+                Out of Stock
+              </span>
+            ) : currentQuantity === 0 ? (
               <button
                 onClick={handleAddToCart}
                 disabled={adding}

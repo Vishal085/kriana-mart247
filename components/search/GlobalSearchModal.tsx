@@ -59,38 +59,47 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   if (!isOpen) return null;
 
   const cleanQ = query.trim().toLowerCase();
+  const sanitizedQuery = cleanQ.replace(/[₹$,]/g, '').trim();
+  const tokens = sanitizedQuery.split(/\s+/).filter((t) => t.length > 0);
 
-  // Matched results
+  // Matched results with tokenization & keyword matching
   const matchingCommodityRates = cleanQ
-    ? MOCK_MANDI_RATES.filter(
-        (r) =>
-          r.product.name.toLowerCase().includes(cleanQ) ||
-          r.product.category.name.toLowerCase().includes(cleanQ) ||
-          r.mandi.name.toLowerCase().includes(cleanQ)
-      ).slice(0, 3)
+    ? MOCK_MANDI_RATES.filter((r) => {
+        const prodName = (r.product?.name || '').toLowerCase();
+        const catName = (r.product?.category?.name || '').toLowerCase();
+        const mandiName = (r.mandi?.name || '').toLowerCase();
+        const full = `${prodName} ${catName} ${mandiName}`;
+        return full.includes(cleanQ) || (tokens.length > 0 && tokens.every((t) => full.includes(t)));
+      }).slice(0, 3)
     : [];
 
   const matchingProducts = cleanQ
-    ? MOCK_PRODUCTS.filter(
-        (p) =>
-          p.name.toLowerCase().includes(cleanQ) ||
-          p.brand.name.toLowerCase().includes(cleanQ) ||
-          p.category.name.toLowerCase().includes(cleanQ) ||
-          p.sku.toLowerCase().includes(cleanQ)
-      ).slice(0, 4)
+    ? MOCK_PRODUCTS.filter((p) => {
+        const name = (p.name || '').toLowerCase();
+        const brand = (p.brand?.name || '').toLowerCase();
+        const cat = (p.category?.name || '').toLowerCase();
+        const kw = (p.searchKeywords || '').toLowerCase();
+        const sku = (p.sku || '').toLowerCase();
+        const unit = (p.unit || '').toLowerCase();
+        const full = `${name} ${brand} ${cat} ${kw} ${sku} ${unit}`;
+        return full.includes(cleanQ) || (tokens.length > 0 && tokens.every((t) => full.includes(t)));
+      }).slice(0, 5)
     : [];
 
   const matchingCategories = cleanQ
-    ? MOCK_CATEGORIES.filter((c) => c.name.toLowerCase().includes(cleanQ)).slice(0, 3)
+    ? MOCK_CATEGORIES.filter((c) => {
+        const name = (c.name || '').toLowerCase();
+        return name.includes(cleanQ) || (tokens.length > 0 && tokens.every((t) => name.includes(t)));
+      }).slice(0, 3)
     : [];
 
   const matchingMandis = cleanQ
-    ? MOCK_MANDIS.filter(
-        (m) =>
-          m.name.toLowerCase().includes(cleanQ) ||
-          m.city.toLowerCase().includes(cleanQ) ||
-          m.address.toLowerCase().includes(cleanQ)
-      ).slice(0, 3)
+    ? MOCK_MANDIS.filter((m) => {
+        const name = (m.name || '').toLowerCase();
+        const city = (m.city || '').toLowerCase();
+        const full = `${name} ${city}`;
+        return full.includes(cleanQ) || (tokens.length > 0 && tokens.every((t) => full.includes(t)));
+      }).slice(0, 3)
     : [];
 
   const hasResults =

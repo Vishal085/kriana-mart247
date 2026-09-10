@@ -147,6 +147,25 @@ function ensureDataFile(): StoreData {
             createdAt: '2026-01-01T00:00:00.000Z',
             updatedAt: '2026-01-01T00:00:00.000Z',
           },
+          // Pre-seeded demo customer for testing
+          {
+            id: 'customer-demo-1',
+            fullName: 'Vishal Gupta (Customer)',
+            email: 'customer@kiranamart247.com',
+            mobile: '9876543210',
+            passwordHash: '$2b$10$RTDC81ygiJC8vcbDIPnnbuylz3Q1hHjJfg/QOMlDx20MfngxEU2gW', // bcrypt for 'Test@123'
+            role: 'CUSTOMER',
+            active: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+            customerProfile: {
+              id: 'cust-prof-1',
+              userId: 'customer-demo-1',
+              address: 'Shop 42, Naya Bazar Wholesale Market',
+              city: 'Delhi',
+              pinCode: '110006',
+            },
+          },
         ],
       };
       fs.writeFileSync(DATA_FILE, JSON.stringify(initial, null, 2), 'utf8');

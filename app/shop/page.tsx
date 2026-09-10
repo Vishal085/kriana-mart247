@@ -237,6 +237,9 @@ export default async function ShopPage({
             category={product.category}
             unit={product.unit}
             retailPrice={Number(product.retailPrice)}
+            mrp={product.mrp ? Number(product.mrp) : null}
+            stockQuantity={product.stockQuantity ?? 100}
+            weight={product.weight}
             minimumQuantity={product.minimumQuantity}
             maximumQuantity={product.maximumQuantity}
             images={product.images}

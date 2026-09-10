@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
@@ -5,6 +6,52 @@ import { ChevronRight, ShoppingCart, Heart, ShieldCheck, ArrowRight, TrendingUp,
 import { HistoricalPriceChart } from '@/components/HistoricalPriceChart';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
 import { ProductImage } from '@/components/ProductImage';
+import { ProductDetailActions } from '@/components/ProductDetailActions';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await prisma.product.findUnique({
+    where: { slug, active: true },
+    include: { brand: true, category: true, images: true },
+  });
+
+  if (!product) {
+    return { title: 'Product Not Found | KiranaMart' };
+  }
+
+  const brandName = product.brand?.name || 'KiranaMart';
+  const price = Number(product.retailPrice).toFixed(2);
+  const imageUrl = product.images[0]?.url || 'https://kiranamart.com/brand/logo.png';
+
+  return {
+    title: `${product.name} (${product.unit}) - ₹${price} | KiranaMart`,
+    description:
+      product.description ||
+      `Buy ${product.name} (${product.unit}) online at best price ₹${price} on KiranaMart. Genuine quality FMCG groceries delivered to your door.`,
+    alternates: {
+      canonical: `https://kiranamart.com/products/${product.slug}`,
+    },
+    openGraph: {
+      title: `${product.name} - ₹${price} | KiranaMart`,
+      description: `Shop authentic ${product.name} from ${brandName}. Fresh kirana stock, same day delivery.`,
+      url: `https://kiranamart.com/products/${product.slug}`,
+      siteName: 'KiranaMart',
+      images: [
+        {
+          url: imageUrl,
+          width: 500,
+          height: 500,
+          alt: product.name,
+        },
+      ],
+      type: 'website',
+    },
+  };
+}
 
 export default async function ProductDetailPage({
   params,
@@ -39,8 +86,41 @@ export default async function ProductDetailPage({
   const priceSpread = lowestRate && highestRate ? Number(highestRate.currentRate) - Number(lowestRate.currentRate) : 0;
   const mainImage = product.images[0]?.url || '/brand/logo.svg';
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: [mainImage.startsWith('http') ? mainImage : `https://kiranamart.com${mainImage}`],
+    description: product.description || `${product.name} available at KiranaMart`,
+    sku: product.sku,
+    brand: {
+      '@type': 'Brand',
+      name: product.brand?.name || 'KiranaMart',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `https://kiranamart.com/products/${product.slug}`,
+      priceCurrency: 'INR',
+      price: Number(product.retailPrice).toFixed(2),
+      availability: (product.stockQuantity ?? 100) > 0
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: {
+        '@type': 'Organization',
+        name: 'KiranaMart',
+      },
+    },
+  };
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
+      {/* Schema.org Product Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
         <Link href="/" className="hover:text-[#0B5FA5]">Home</Link>
@@ -106,26 +186,18 @@ export default async function ProductDetailPage({
               SKU: <span className="font-mono text-slate-700 font-bold">{product.sku}</span> • Category: <span className="text-[#0B5FA5] font-semibold">{product.category.name}</span>
             </div>
 
-            {/* Clear distinction between Retail Price & Wholesale Rate */}
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Retail Shop Price
-                  </div>
-                  <div className="mt-1 text-3xl font-black text-[#073B6F]">
-                    ₹{Number(product.retailPrice).toFixed(2)}
-                    <span className="text-sm font-semibold text-slate-500"> / {product.unit}</span>
-                  </div>
-                </div>
-                <div className="text-right text-xs text-slate-500">
-                  Min. Order: <span className="font-bold text-slate-800">{product.minimumQuantity} {product.unit}</span>
-                  {product.maximumQuantity && (
-                    <div>Max: {product.maximumQuantity} {product.unit}</div>
-                  )}
-                </div>
-              </div>
-            </div>
+            {/* Interactive Buy & Add to Cart Action Panel */}
+            <ProductDetailActions
+              productId={product.id}
+              productName={product.name}
+              unit={product.unit}
+              retailPrice={Number(product.retailPrice)}
+              mrp={product.mrp ? Number(product.mrp) : null}
+              stockQuantity={product.stockQuantity ?? 100}
+              minimumQuantity={product.minimumQuantity}
+              maximumQuantity={product.maximumQuantity}
+              productUrl={`/products/${product.slug}`}
+            />
 
             {product.description && (
               <p className="mt-6 text-xs text-slate-600 leading-relaxed">
