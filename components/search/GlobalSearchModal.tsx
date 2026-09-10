@@ -301,7 +301,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
         {/* Footer info bar */}
         <div className="border-t border-slate-100 bg-[#F8FAFC] px-4 py-2.5 sm:px-6 flex items-center justify-between text-[11px] text-slate-500">
           <div>Press <kbd className="font-semibold text-slate-700">Enter</kbd> to search catalog</div>
-          <div className="hidden sm:block">Powered by KiranaMart247 Mandi Intelligence</div>
+          <div className="hidden sm:block">Powered by KiranaMart.com Mandi Intelligence</div>
         </div>
       </div>
     </div>

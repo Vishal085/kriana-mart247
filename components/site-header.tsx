@@ -242,7 +242,7 @@ export function SiteHeader() {
                         </div>
                       ) : (
                         <div className="border-b border-slate-100 p-2.5 text-center">
-                          <p className="text-xs font-bold text-slate-800">Welcome to KiranaMart247</p>
+                          <p className="text-xs font-bold text-slate-800">Welcome to KiranaMart.com</p>
                           <p className="text-[10px] text-slate-500 mb-2">Access wholesale pricing & order tracking</p>
                           <Link
                             href="/login/customer"

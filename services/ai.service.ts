@@ -31,7 +31,7 @@ export class AiService {
 
     if (apiKey) {
       try {
-        const systemPrompt = `You are "Xyon", the intelligent Kirana Mandi and Grocery assistant for KiranaMart247 (Official concept: "Today's Wholesale Rates").
+        const systemPrompt = `You are "Xyon", the intelligent Kirana Mandi and Grocery assistant for KiranaMart.com (Official concept: "Today's Wholesale Rates").
 You understand English, Hindi, and Hinglish fluently and respond naturally in the user's preferred language.
 
 CRITICAL RULES:
@@ -223,13 +223,13 @@ ${topRates
         : '';
 
       return {
-        reply: `**${matchedMandi.name}** (${matchedMandi.city}) is active on KiranaMart247.${rateSummary}\n\nVisit [${matchedMandi.name} Directory Page](/mandis/${matchedMandi.id}) for complete details.`,
+        reply: `**${matchedMandi.name}** (${matchedMandi.city}) is active on KiranaMart.com.${rateSummary}\n\nVisit [${matchedMandi.name} Directory Page](/mandis/${matchedMandi.id}) for complete details.`,
       };
     }
 
     // 6. Default helpful greeting & assistance
     return {
-      reply: `Namaste! I am **Xyon**, your KiranaMart247 Assistant.\n\nI can help you with:\n1. 📊 **Mandi Wholesale Rates** (e.g., *"What is today's Basmati Rice rate in Delhi?"*)\n2. 📈 **Market Trends** (e.g., *"Which commodities are rising today?"*)\n3. 🔍 **Mandi Comparison** (e.g., *"Which mandi has the lowest mustard oil price?"*)\n4. 🛒 **Kirana Shopping & Cart** (e.g., *"Show me dairy products"* or *"Check my cart"*)\n\nHow can I help you today?`,
+      reply: `Namaste! I am **Xyon**, your KiranaMart.com Assistant.\n\nI can help you with:\n1. 📊 **Mandi Wholesale Rates** (e.g., *"What is today's Basmati Rice rate in Delhi?"*)\n2. 📈 **Market Trends** (e.g., *"Which commodities are rising today?"*)\n3. 🔍 **Mandi Comparison** (e.g., *"Which mandi has the lowest mustard oil price?"*)\n4. 🛒 **Kirana Shopping & Cart** (e.g., *"Show me dairy products"* or *"Check my cart"*)\n\nHow can I help you today?`,
     };
   }
 
@@ -275,7 +275,7 @@ ${topRates
     const apiKey = process.env.OPENAI_API_KEY;
     if (apiKey) {
       try {
-        const prompt = `You are a professional FMCG catalog editor for KiranaMart247, a wholesale grocery & mandi intelligence commerce platform in India.
+        const prompt = `You are a professional FMCG catalog editor for KiranaMart.com, a wholesale grocery & mandi intelligence commerce platform in India.
 Generate high quality, accurate product descriptions based strictly on the factual details provided.
 
 INPUT PRODUCT FACTS:
@@ -353,7 +353,7 @@ STRICT GUARDRAILS:
       ];
     } else if (language === 'Hinglish') {
       shortDescription = `${brandName} ${baseName} everyday use ke liye perfect authentic packaging me, pack size ${packSize}.`;
-      detailedDescription = `KiranaMart247 par verified shopkeeper listing - ${brandName} ${baseName}. Yeh fresh stock aur hygienic packaging ke sath wholesale and retail buyers ke liye directly available hai. Daily kitchen aur retail shelf dono ke liye highly recommended.`;
+      detailedDescription = `KiranaMart.com par verified shopkeeper listing - ${brandName} ${baseName}. Yeh fresh stock aur hygienic packaging ke sath wholesale and retail buyers ke liye directly available hai. Daily kitchen aur retail shelf dono ke liye highly recommended.`;
       highlights = [
         `${packSize} convenient pack size`,
         `100% genuine ${brandName} packaging`,
@@ -364,7 +364,7 @@ STRICT GUARDRAILS:
       // English with specific Tone adaptations
       if (tone === 'B2B Wholesale') {
         shortDescription = `Commercial-grade wholesale lot of ${brandName} ${baseName} in verified ${packSize}, optimized for high-turnover kirana retail.`;
-        detailedDescription = `Stock your shelves with genuine ${brandName} ${baseName} (${packSize}). Directly sourced through trusted merchant networks on KiranaMart247, this item offers dependable margin consistency, standardized outer packaging, and seamless reordering for retail and institutional kitchens.`;
+        detailedDescription = `Stock your shelves with genuine ${brandName} ${baseName} (${packSize}). Directly sourced through trusted merchant networks on KiranaMart.com, this item offers dependable margin consistency, standardized outer packaging, and seamless reordering for retail and institutional kitchens.`;
         highlights = [
           `Commercial ${packSize} unit packing`,
           `Fast-moving FMCG inventory staple`,
@@ -392,12 +392,12 @@ STRICT GUARDRAILS:
       } else {
         // Professional (Default)
         shortDescription = `Authentic ${brandName} ${baseName}, hygienically packaged in a convenient ${packSize} pack for daily requirements.`;
-        detailedDescription = `KiranaMart247 verified merchant product: ${brandName} ${baseName} in ${packSize}. Packed in compliance with standard FMCG handling procedures to ensure freshness and shelf-life stability. An indispensable staple for retail stores and family kitchens alike.`;
+        detailedDescription = `KiranaMart.com verified merchant product: ${brandName} ${baseName} in ${packSize}. Packed in compliance with standard FMCG handling procedures to ensure freshness and shelf-life stability. An indispensable staple for retail stores and family kitchens alike.`;
         highlights = [
           `${packSize} standard pack size`,
           `Authentic manufacturer packaging from ${brandName}`,
           `Suitable for daily pantry and culinary requirements`,
-          `Verified merchant inventory on KiranaMart247`,
+          `Verified merchant inventory on KiranaMart.com`,
         ];
       }
     }

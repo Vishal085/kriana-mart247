@@ -42,10 +42,10 @@ export function CustomerOrderPaymentAction({ orderId, orderNumber, total, paymen
 
       // 2. Open Razorpay Modal
       await openRazorpayCheckout({
-        key: pOrder.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_51KIRANAMART24',
+        key: pOrder.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: pOrder.amount,
         currency: pOrder.currency || 'INR',
-        name: 'KiranaMart247',
+        name: 'KiranaMart.com',
         description: `Order #${pOrder.orderNumber}`,
         image: '/icon.png',
         order_id: pOrder.razorpayOrderId,

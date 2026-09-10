@@ -26,7 +26,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "KiranaMart247 | Today's Wholesale Rates & Mandi Intelligence",
+  title: "KiranaMart.com | Today's Wholesale Rates & Mandi Intelligence",
   description:
     'Track Delhi wholesale mandi prices across APMC markets, compare commodity rates, and order grocery staples with bulk wholesale pricing.',
   icons: {

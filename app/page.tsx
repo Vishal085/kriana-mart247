@@ -443,7 +443,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-6">
         <div className="text-center max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">Seamless Workflow</span>
-          <h2 className="mt-2 text-3xl font-black text-[#073B6F]">How KiranaMart247 Works</h2>
+          <h2 className="mt-2 text-3xl font-black text-[#073B6F]">How KiranaMart.com Works</h2>
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-3">

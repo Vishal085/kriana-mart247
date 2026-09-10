@@ -192,10 +192,10 @@ export default function CheckoutPage() {
 
     try {
       await openRazorpayCheckout({
-        key: razorpayOrder.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_51KIRANAMART24',
+        key: razorpayOrder.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency || 'INR',
-        name: 'KiranaMart247',
+        name: 'KiranaMart.com',
         description: `Order #${razorpayOrder.orderNumber}`,
         image: '/icon.png',
         order_id: razorpayOrder.razorpayOrderId,

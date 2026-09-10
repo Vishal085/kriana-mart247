@@ -18,7 +18,7 @@ export function SiteFooter() {
           <div className="flex flex-col justify-start space-y-4">
             <BrandMark size="md" />
             <p className="text-xs leading-relaxed text-slate-500">
-              KiranaMart247 is India&apos;s leading platform providing daily Kirana Mandi wholesale rate intelligence, market trends, and reliable online grocery ordering.
+              KiranaMart.com is India&apos;s leading platform providing daily Kirana Mandi wholesale rate intelligence, market trends, and reliable online grocery ordering.
             </p>
             <div className="flex items-center gap-2.5 pt-1">
               {/* WhatsApp */}
@@ -138,7 +138,7 @@ export function SiteFooter() {
             <ul className="space-y-2.5 text-xs font-medium text-slate-600">
               <li>
                 <Link href="/about" className="transition hover:text-[#0B5FA5]">
-                  About KiranaMart247
+                  About KiranaMart.com
                 </Link>
               </li>
               <li>
@@ -173,10 +173,10 @@ export function SiteFooter() {
         {/* Bottom Horizontal Divider & Centered Copyright */}
         <div className="mt-12 border-t border-slate-200 pt-6 text-center text-[11px] text-slate-400">
           <p className="max-w-3xl mx-auto leading-relaxed">
-            Mandi rates displayed on KiranaMart247 are recorded from authorized market intelligence reports and mandi auction entries for informational reference.
+            Mandi rates displayed on KiranaMart.com are recorded from authorized market intelligence reports and mandi auction entries for informational reference.
           </p>
           <p className="mt-2 font-medium text-slate-500">
-            © {new Date().getFullYear()} KiranaMart247. All rights reserved. Built with precision for Indian Kirana Mandis.
+            © {new Date().getFullYear()} KiranaMart.com. All rights reserved. Built with precision for Indian Kirana Mandis.
           </p>
         </div>
       </div>

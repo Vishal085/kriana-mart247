@@ -19,7 +19,7 @@ export function BrandMark({ className = '', size = 'md', hideText = false }: Bra
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
       <img
         src="/brand/logo.png"
-        alt="KiranaMart247"
+        alt="KiranaMart.com"
         width={currentDim.width}
         height={currentDim.height}
         className="rounded-full object-contain shadow-xs transition hover:scale-105"
@@ -28,7 +28,7 @@ export function BrandMark({ className = '', size = 'md', hideText = false }: Bra
       {!hideText && (
         <div className="flex flex-col">
           <span className="text-base sm:text-lg font-black tracking-tight text-[#073B6F] leading-none">
-            kiranamart<span className="text-[#39A9E8]">247</span>
+            kiranamart<span className="text-[#39A9E8]">.com</span>
           </span>
           <span className="hidden sm:block text-[10px] font-bold text-slate-500 tracking-tight leading-tight mt-0.5">
             Today&apos;s Wholesale Rates

@@ -44,7 +44,7 @@ export function SlideOverCartDrawer() {
       year: 'numeric',
     });
 
-    let msg = `*Namaste KiranaMart247!* 🛒\n\nI want to place this wholesale order (${dateStr}):\n\n`;
+    let msg = `*Namaste KiranaMart.com!* 🛒\n\nI want to place this wholesale order (${dateStr}):\n\n`;
 
     items.forEach((item, idx) => {
       msg += `${idx + 1}. *${item.quantity} × ${item.product.name}* (${item.product.unit}) — ₹${(item.unitPrice * item.quantity).toFixed(2)}\n`;

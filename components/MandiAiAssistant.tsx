@@ -17,7 +17,7 @@ export function MandiAiAssistant() {
     {
       id: '1',
       role: 'assistant',
-      content: "Namaste! I am **Xyon**, your KiranaMart247 assistant.\n\nAsk me about today's mandi wholesale rates, market trends, cheapest mandis, or grocery shopping!",
+      content: "Namaste! I am **Xyon**, your KiranaMart.com assistant.\n\nAsk me about today's mandi wholesale rates, market trends, cheapest mandis, or grocery shopping!",
       timestamp: new Date(),
     },
   ]);
