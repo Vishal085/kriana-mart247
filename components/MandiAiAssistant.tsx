@@ -26,10 +26,13 @@ export function MandiAiAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const quickPrompts = [
-    "Today's rice rate in Delhi?",
-    "Which commodities are rising today?",
-    "Cheapest mandi for mustard oil?",
-    "Check my cart items",
+    "Today's Mandi Rates",
+    "Rising commodities today?",
+    "Search Fortune Oil & Tata Salt",
+    "Delivery time & free delivery",
+    "Payment & COD options",
+    "Customer Support WhatsApp",
+    "How to register as Seller?",
   ];
 
   const scrollToBottom = () => {
@@ -41,6 +44,78 @@ export function MandiAiAssistant() {
       scrollToBottom();
     }
   }, [messages, isOpen]);
+
+  const renderFormattedMessage = (content: string, isUser: boolean) => {
+    const lines = content.split('\n');
+    return (
+      <div className="space-y-1">
+        {lines.map((line, lineIdx) => {
+          if (!line.trim()) {
+            return <div key={lineIdx} className="h-1.5" />;
+          }
+
+          const tokens = line.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*)/g);
+
+          return (
+            <div key={lineIdx} className="min-h-[1.25em]">
+              {tokens.map((token, tokenIdx) => {
+                const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+                if (linkMatch) {
+                  const [, text, url] = linkMatch;
+                  const isExternal = url.startsWith('http') || url.startsWith('mailto:');
+                  if (isExternal) {
+                    return (
+                      <a
+                        key={tokenIdx}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`font-semibold underline underline-offset-2 ${
+                          isUser
+                            ? 'text-cyan-200 hover:text-white'
+                            : 'text-[#0B5FA5] hover:text-[#073B6F]'
+                        }`}
+                      >
+                        {text}
+                      </a>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={tokenIdx}
+                      href={url}
+                      onClick={() => setIsOpen(false)}
+                      className={`font-semibold underline underline-offset-2 ${
+                        isUser
+                          ? 'text-cyan-200 hover:text-white'
+                          : 'text-[#0B5FA5] hover:text-[#073B6F]'
+                      }`}
+                    >
+                      {text}
+                    </Link>
+                  );
+                }
+
+                const boldMatch = token.match(/^\*\*([^*]+)\*\*$/);
+                if (boldMatch) {
+                  return (
+                    <strong
+                      key={tokenIdx}
+                      className={`font-bold ${isUser ? 'text-white font-semibold' : 'text-slate-900'}`}
+                    >
+                      {boldMatch[1]}
+                    </strong>
+                  );
+                }
+
+                return <span key={tokenIdx}>{token}</span>;
+              })}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   const handleSend = async (userText?: string) => {
     const messageToSend = userText || input;
@@ -88,7 +163,7 @@ export function MandiAiAssistant() {
         {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: 'Network connection issue. Please try asking again.',
+          content: 'Network connection issue. Please try asking again or check [Today\'s Mandi Rates](/mandi-rates).',
           timestamp: new Date(),
         },
       ]);
@@ -102,7 +177,7 @@ export function MandiAiAssistant() {
       {
         id: '1',
         role: 'assistant',
-        content: "Chat cleared! How can I assist you with today's mandi wholesale rates?",
+        content: "Chat cleared! Namaste 🙏 Main **Xyon** hoon, aapka KiranaMart.com sahayak. Mandi wholesale rates, grocery prices, ya store delivery ke baare me pooch sakte hain.",
         timestamp: new Date(),
       },
     ]);
@@ -112,7 +187,7 @@ export function MandiAiAssistant() {
     <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start font-sans">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-3 flex h-[520px] w-[370px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl transition-all sm:w-[400px]">
+        <div className="mb-3 flex h-[540px] w-[370px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl transition-all sm:w-[420px]">
           {/* Chat Header */}
           <div className="flex items-center justify-between border-b border-slate-100 bg-[#073B6F] px-5 py-4 text-white">
             <div className="flex items-center gap-3">
@@ -121,11 +196,11 @@ export function MandiAiAssistant() {
               </div>
               <div>
                 <div className="flex items-center gap-1.5 font-bold text-white">
-                  Xyon
-                  <span className="flex h-2 w-2 rounded-full bg-[#72B82A]" />
+                  Xyon AI
+                  <span className="flex h-2 w-2 rounded-full bg-[#72B82A] animate-pulse" />
                 </div>
                 <div className="text-[11px] text-[#39A9E8] font-medium">
-                  Mandi Intelligence & Grocery
+                  KiranaMart.com Mandi & Grocery
                 </div>
               </div>
             </div>
@@ -156,20 +231,13 @@ export function MandiAiAssistant() {
                   className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       isUser
                         ? 'bg-[#073B6F] text-white rounded-br-none shadow-sm'
                         : 'border border-slate-200 bg-white text-slate-800 rounded-bl-none shadow-sm'
                     }`}
                   >
-                    <div className="whitespace-pre-wrap">
-                      {m.content.split('\n').map((line, i) => (
-                        <span key={i}>
-                          {line}
-                          <br />
-                        </span>
-                      ))}
-                    </div>
+                    {renderFormattedMessage(m.content, isUser)}
                   </div>
                 </div>
               );
@@ -214,7 +282,7 @@ export function MandiAiAssistant() {
             >
               <input
                 type="text"
-                placeholder="Ask Xyon about mandi rates..."
+                placeholder="Poochhein Mandi rates, grocery items, delivery..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 className="w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
@@ -222,6 +290,7 @@ export function MandiAiAssistant() {
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
+                aria-label="Send message"
                 className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#073B6F] text-white shadow-sm transition hover:bg-[#0B5FA5] disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
