@@ -23,6 +23,7 @@ export function ProductImage({
       src={effectiveSrc}
       alt={alt}
       loading="lazy"
+      decoding="async"
       onError={(e) => {
         const target = e.currentTarget as HTMLImageElement;
         if (!target.src.endsWith('/products/placeholder.svg')) {
