@@ -417,15 +417,16 @@ ${topRates
     }
 
     // -------------------------------------------------------------
+    // -------------------------------------------------------------
     // INTENT 12: Multilingual Commodity Synonym Mapping (Mandi Wholesale Rates)
     // -------------------------------------------------------------
     const COMMODITY_MAP: Record<string, string[]> = {
+      Sugar: ['sugar', 'cheeni', 'chini', 'shakkar', 'gur', 'gud', 'jaggery', 'bura'],
       Rice: ['rice', 'chawal', 'basmati', 'parmal', 'sela', 'sona masoori', 'chaawal'],
       Wheat: ['wheat', 'gehu', 'gehun', 'kanak', 'atta', 'flour', 'maida', 'suji', 'sooji'],
       Dal: ['dal', 'daal', 'toor', 'arhar', 'moong', 'urad', 'masoor', 'chana', 'kabuli', 'rajma', 'chhole', 'besan'],
       Oil: ['oil', 'tel', 'sarson', 'mustard', 'soyabean', 'soya', 'sunflower', 'refined', 'groundnut', 'moongfali'],
       Ghee: ['ghee', 'desi ghee', 'butter', 'makhan'],
-      Sugar: ['sugar', 'cheeni', 'chini', 'shakkar', 'gur', 'gud', 'jaggery'],
       Salt: ['salt', 'namak'],
       Tea: ['tea', 'chai', 'chay', 'chai patti', 'coffee'],
       Spices: ['masala', 'mirch', 'haldi', 'jeera', 'dhaniya', 'elaichi', 'laung', 'kali mirch', 'turmeric', 'cumin', 'chilli'],
@@ -435,9 +436,11 @@ ${topRates
     };
 
     let targetCommodityKey: string | null = null;
+    let commoditySearchTerms: string[] = [];
     for (const [key, synonyms] of Object.entries(COMMODITY_MAP)) {
       if (synonyms.some((syn) => lower.includes(syn))) {
         targetCommodityKey = key;
+        commoditySearchTerms = synonyms;
         break;
       }
     }
@@ -448,28 +451,79 @@ ${topRates
       lower.includes('bhav') ||
       lower.includes('wholesale') ||
       lower.includes('quintal') ||
-      lower.includes('kental');
+      lower.includes('kental') ||
+      lower.includes('price');
 
     if (targetCommodityKey || isMandiQuery) {
+      const searchTerms = targetCommodityKey ? commoditySearchTerms : [
+        lower.replace(/(bhav|rate|price|kya|hai|today|aaj|ka|ke|ki|batao)/g, '').trim()
+      ].filter(Boolean);
+
       try {
-        const searchTerm = targetCommodityKey || (lower.replace(/(bhav|rate|price|kya|hai|today|aaj|ka|ke)/g, '').trim());
+        // 1. First look in Mandi Rates
         const matchingRates = await prisma.mandiRate.findMany({
           where: {
             active: true,
-            ...(searchTerm ? { product: { name: { contains: searchTerm, mode: 'insensitive' } } } : {}),
+            OR: searchTerms.flatMap((term) => [
+              { product: { name: { contains: term, mode: 'insensitive' } } },
+              { product: { searchKeywords: { contains: term, mode: 'insensitive' } } },
+            ]),
           },
           include: { product: true, mandi: true },
           orderBy: { updatedAt: 'desc' },
-          take: 5,
+          take: 6,
         });
 
-        if (matchingRates.length > 0) {
-          const lines = matchingRates.map(
+        // Strictly verify that returned mandi rate matches one of the search terms
+        const strictlyMatchingRates = matchingRates.filter((r: any) => {
+          const prodName = (r.product?.name || '').toLowerCase();
+          const kw = (r.product?.searchKeywords || '').toLowerCase();
+          return searchTerms.some((t) => prodName.includes(t) || kw.includes(t));
+        });
+
+        if (strictlyMatchingRates.length > 0) {
+          const lines = strictlyMatchingRates.map(
             (r: any) =>
-              `• **${r.product.name}** (${r.mandi.name}): **₹${Number(r.currentRate).toFixed(2)} / ${r.unit}** (${r.direction === 'RISING' ? '📈 Rising' : r.direction === 'FALLING' ? '📉 Falling' : '➖ Stable'})`
+              `• **${r.product.name}** (${r.mandi.name}): **₹${Number(r.currentRate).toFixed(2)} / ${r.unit}** (${r.direction === 'RISING' ? '📈 Tezi' : r.direction === 'FALLING' ? '📉 Mandi' : '➖ Sthir'})`
           );
           return {
-            reply: `📊 **Aaj ke Live Mandi Wholesale Rates (${targetCommodityKey || 'Verified Mandis'})**:\n\n${lines.join('\n')}\n\nSabhi mandiyon ke comprehensive bhav compare karne ke liye [Today's Mandi Rates](/mandi-rates) dekhein.`,
+            reply: `📊 **Aaj ke Live Mandi Wholesale Rates (${targetCommodityKey || 'Verified Mandis'})**:\n\n${lines.join('\n')}\n\nSabhi mandiyon ke bhav compare karne ke liye [Today's Mandi Rates](/mandi-rates) dekhein.`,
+          };
+        }
+
+        // 2. If no mandi wholesale rate found, check Grocery Products Catalog for this exact item
+        const matchingProducts = await prisma.product.findMany({
+          where: {
+            active: true,
+            status: 'PUBLISHED',
+            OR: searchTerms.flatMap((term) => [
+              { name: { contains: term, mode: 'insensitive' } },
+              { searchKeywords: { contains: term, mode: 'insensitive' } },
+            ]),
+          },
+          include: { brand: true, category: true },
+          take: 4,
+        });
+
+        const strictlyMatchingProducts = matchingProducts.filter((p: any) => {
+          const prodName = (p.name || '').toLowerCase();
+          const kw = (p.searchKeywords || '').toLowerCase();
+          return searchTerms.some((t) => prodName.includes(t) || kw.includes(t));
+        });
+
+        if (strictlyMatchingProducts.length > 0) {
+          const productList = strictlyMatchingProducts.map((p: any) => {
+            const retail = Number(p.retailPrice).toFixed(2);
+            const mrp = p.mrp ? Number(p.mrp).toFixed(2) : null;
+            const discount = mrp && Number(mrp) > Number(retail)
+              ? ` *(Save ${Math.round(((Number(mrp) - Number(retail)) / Number(mrp)) * 100)}%)*`
+              : '';
+            const brandLabel = p.brand ? `${p.brand.name} • ` : '';
+            return `• **[${p.name}](/products/${p.slug})**\n  ${brandLabel}Pack: ${p.unit || 'Standard'} | Price: **₹${retail}**${mrp ? ` (MRP: ₹${mrp})` : ''}${discount}\n  Stock: ${p.stockQuantity > 0 ? '✅ In Stock' : '⚠️ Out of Stock'} | [Buy / View Product](/products/${p.slug})`;
+          });
+
+          return {
+            reply: `🛒 **Kirana Store me ${targetCommodityKey || 'item'} ke taaja rates**:\n\n${productList.join('\n\n')}\n\nSabhi grocery items dekhne ke liye [KiranaMart Shop](/shop) par visit karein!`,
           };
         }
       } catch (err) {
@@ -486,7 +540,7 @@ ${topRates
       'dettol', 'surf excel', 'ariel', 'tide', 'vim', 'colgate', 'maggi', 'dabur',
       'patanjali', 'nestle', 'haldiram', 'bikano', 'saffola', 'everest', 'mdh', 'catch',
       'doodh', 'milk', 'paneer', 'biscuit', 'soap', 'sabun', 'shampoo', 'paste', 'ghee',
-      'oil', 'atta', 'chawal', 'rice', 'dal', 'cheeni', 'namak', 'spices', 'tea', 'chai',
+      'oil', 'atta', 'chawal', 'rice', 'dal', 'cheeni', 'chini', 'sugar', 'namak', 'spices', 'tea', 'chai',
       'noodle', 'noodles', 'snack', 'namkeen', 'chips', 'cleaner', 'detergent'
     ];
 
@@ -494,7 +548,7 @@ ${topRates
 
     // Extract search query: strip common filler words
     const cleanSearchQuery = lower
-      .replace(/(chahiye|milega|hai kya|price|rate|cost|kitne ka|batao|search|dikhaye|dekho|buy|kharidna)/gi, '')
+      .replace(/(chahiye|milega|hai kya|price|rate|bhav|cost|kitne ka|batao|search|dikhaye|dekho|buy|kharidna)/gi, '')
       .trim();
 
     if (matchedGroceryKeyword || cleanSearchQuery.length >= 3) {
@@ -515,8 +569,17 @@ ${topRates
           take: 5,
         });
 
-        if (products.length > 0) {
-          const productList = products.map((p: any) => {
+        // Strictly verify that returned product matches queryTerm
+        const strictlyMatching = products.filter((p: any) => {
+          const name = (p.name || '').toLowerCase();
+          const kw = (p.searchKeywords || '').toLowerCase();
+          const b = (p.brand?.name || '').toLowerCase();
+          const c = (p.category?.name || '').toLowerCase();
+          return name.includes(queryTerm) || kw.includes(queryTerm) || b.includes(queryTerm) || c.includes(queryTerm);
+        });
+
+        if (strictlyMatching.length > 0) {
+          const productList = strictlyMatching.map((p: any) => {
             const retail = Number(p.retailPrice).toFixed(2);
             const mrp = p.mrp ? Number(p.mrp).toFixed(2) : null;
             const discount = mrp && Number(mrp) > Number(retail)

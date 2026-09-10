@@ -69,6 +69,15 @@ function filterMockProducts(where: any = {}): any[] {
     }
   }
 
+  if (where.name?.contains) {
+    const term = String(where.name.contains).toLowerCase();
+    list = list.filter((p) => {
+      const nameMatch = p.name ? p.name.toLowerCase().includes(term) : false;
+      const kwMatch = p.searchKeywords ? p.searchKeywords.toLowerCase().includes(term) : false;
+      return nameMatch || kwMatch;
+    });
+  }
+
   // Handle Prisma OR search array
   if (Array.isArray(where.OR) && where.OR.length > 0) {
     const searchTerms: string[] = [];
@@ -109,10 +118,27 @@ function filterMockRates(where: any = {}): any[] {
     list = list.filter((r) => r.direction === where.direction);
   }
   if (where.product?.categoryId) {
-    list = list.filter((r) => r.product.categoryId === where.product.categoryId);
+    list = list.filter((r) => r.product?.categoryId === where.product.categoryId);
   }
   if (where.product?.brandId) {
-    list = list.filter((r) => r.product.brandId === where.product.brandId);
+    list = list.filter((r) => r.product?.brandId === where.product.brandId);
+  }
+  if (where.product?.name?.contains) {
+    const term = String(where.product.name.contains).toLowerCase();
+    list = list.filter((r) => {
+      const prodName = r.product?.name ? r.product.name.toLowerCase() : '';
+      const kw = r.product?.searchKeywords ? r.product.searchKeywords.toLowerCase() : '';
+      const cat = r.product?.category?.name ? r.product.category.name.toLowerCase() : '';
+      return prodName.includes(term) || kw.includes(term) || cat.includes(term);
+    });
+  }
+  if (where.product?.searchKeywords?.contains) {
+    const term = String(where.product.searchKeywords.contains).toLowerCase();
+    list = list.filter((r) => {
+      const prodName = r.product?.name ? r.product.name.toLowerCase() : '';
+      const kw = r.product?.searchKeywords ? r.product.searchKeywords.toLowerCase() : '';
+      return prodName.includes(term) || kw.includes(term);
+    });
   }
 
   // Handle Prisma OR search on mandi rates
@@ -120,16 +146,18 @@ function filterMockRates(where: any = {}): any[] {
     let term = '';
     for (const cond of where.OR) {
       if (cond.product?.name?.contains) term = cond.product.name.contains.toLowerCase();
+      else if (cond.product?.searchKeywords?.contains) term = cond.product.searchKeywords.contains.toLowerCase();
       else if (cond.mandi?.name?.contains) term = cond.mandi.name.contains.toLowerCase();
       else if (cond.mandi?.city?.contains) term = cond.mandi.city.contains.toLowerCase();
     }
     if (term) {
       list = list.filter((r) => {
-        const prodMatch = r.product.name.toLowerCase().includes(term);
-        const skuMatch = r.product.sku.toLowerCase().includes(term);
-        const mandiMatch = r.mandi.name.toLowerCase().includes(term);
-        const cityMatch = r.mandi.city.toLowerCase().includes(term);
-        return prodMatch || skuMatch || mandiMatch || cityMatch;
+        const prodMatch = r.product?.name ? r.product.name.toLowerCase().includes(term) : false;
+        const kwMatch = r.product?.searchKeywords ? r.product.searchKeywords.toLowerCase().includes(term) : false;
+        const skuMatch = r.product?.sku ? r.product.sku.toLowerCase().includes(term) : false;
+        const mandiMatch = r.mandi?.name ? r.mandi.name.toLowerCase().includes(term) : false;
+        const cityMatch = r.mandi?.city ? r.mandi.city.toLowerCase().includes(term) : false;
+        return prodMatch || kwMatch || skuMatch || mandiMatch || cityMatch;
       });
     }
   }
