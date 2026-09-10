@@ -35,5 +35,11 @@
   },
   "optionalDependencies": {
     "@next/swc-darwin-arm64": "^16.3.3"
+  },
+  "allowScripts": {
+    "@prisma/client@5.22.0": true,
+    "@prisma/engines@5.22.0": true,
+    "prisma@5.22.0": true,
+    "unrs-resolver@1.12.2": true
   }
 }
