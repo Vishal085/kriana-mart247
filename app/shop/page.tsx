@@ -110,12 +110,12 @@ export default async function ShopPage({
         </div>
 
         {/* Search Input Bar */}
-        <form method="GET" action="/shop" className="flex items-center gap-2">
+        <form method="GET" action="/shop" className="flex items-center gap-2 w-full lg:w-auto">
           {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
           {brandId && <input type="hidden" name="brandId" value={brandId} />}
           {minPrice && <input type="hidden" name="minPrice" value={minPrice} />}
           {maxPrice && <input type="hidden" name="maxPrice" value={maxPrice} />}
-          <div className="relative w-full sm:w-72">
+          <div className="relative flex-1 sm:w-72">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"

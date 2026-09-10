@@ -170,7 +170,7 @@ export function SiteHeader() {
             <button
               onClick={() => setSearchModalOpen(true)}
               aria-label="Open Search (Cmd+K)"
-              className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs text-slate-500 hover:border-[#39A9E8] hover:bg-white transition shrink-0"
+              className="flex h-9 w-9 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-2.5 sm:px-3 text-xs text-slate-500 hover:border-[#39A9E8] hover:bg-white transition shrink-0"
             >
               <Search className="h-3.5 w-3.5 text-slate-400" />
               <span className="hidden sm:inline 2xl:hidden font-medium">Search...</span>
@@ -184,7 +184,7 @@ export function SiteHeader() {
             <button
               onClick={openDrawer}
               aria-label="Open Cart Drawer"
-              className="relative flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F]"
+              className="relative flex h-9 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 sm:px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F]"
             >
               <ShoppingCart className="h-4 w-4" />
               <span className="hidden sm:inline text-xs font-bold font-heading">Cart</span>

@@ -93,33 +93,33 @@ export default async function HomePage() {
                 Today&apos;s Wholesale Rates & Kirana Mandi
               </div>
 
-              <h1 className="mt-5 text-4xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
+              <h1 className="mt-5 text-3xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
                 Daily Kirana Mandi Rates.{' '}
                 <span className="block text-[#0B5FA5]">Better Buying Decisions.</span>
               </h1>
 
-              <p className="mt-6 max-w-xl text-base text-slate-600 sm:text-lg leading-relaxed">
+              <p className="mt-4 sm:mt-6 max-w-xl text-sm sm:text-lg text-slate-600 leading-relaxed">
                 Track wholesale mandi prices, compare market rates, and shop essential kirana products — all in one unified platform.
               </p>
 
               {/* Action Buttons */}
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-4">
                 <Link
                   href="/mandi-rates"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#073B6F] px-7 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-[#0B5FA5]"
+                  className="inline-flex justify-center items-center gap-2 rounded-full bg-[#073B6F] px-6 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg transition hover:bg-[#0B5FA5] w-full sm:w-auto"
                 >
                   View Today&apos;s Mandi Rates <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/shop"
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-7 py-3.5 text-sm font-bold text-[#073B6F] shadow-sm transition hover:border-[#39A9E8]"
+                  className="inline-flex justify-center items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-6 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-[#073B6F] shadow-sm transition hover:border-[#39A9E8] w-full sm:w-auto"
                 >
                   <ShoppingBag className="h-4 w-4 text-[#39A9E8]" />
                   Shop Kirana Products
                 </Link>
                 <Link
                   href="/compare"
-                  className="inline-flex items-center gap-2 rounded-full border border-[#0B5FA5]/30 bg-[#EAF5FC] px-6 py-3.5 text-sm font-bold text-[#073B6F] shadow-xs transition hover:bg-[#073B6F] hover:text-white"
+                  className="inline-flex justify-center items-center gap-2 rounded-full border border-[#0B5FA5]/30 bg-[#EAF5FC] px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-[#073B6F] shadow-xs transition hover:bg-[#073B6F] hover:text-white w-full sm:w-auto"
                 >
                   <Scale className="h-4 w-4 text-[#0B5FA5]" />
                   Compare Mandis
@@ -388,7 +388,7 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {popularProducts.map((p) => (
             <ProductCard
               key={p.id}
