@@ -86,6 +86,28 @@ export function SiteHeader() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Categories mega menu dropdown
+  const [categoriesMenuOpen, setCategoriesMenuOpen] = useState(false);
+  const categoriesRef = useRef<HTMLDivElement>(null);
+
+  // Close categories dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (categoriesRef.current && !categoriesRef.current.contains(event.target as Node)) {
+        setCategoriesMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close dropdowns on route change
+  useEffect(() => {
+    setCategoriesMenuOpen(false);
+    setProfileDropdownOpen(false);
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   // Initials for avatar
   const getInitials = () => {
     if (!user || !user.fullName) return 'U';
@@ -98,130 +120,144 @@ export function SiteHeader() {
 
   const navLinks = [
     { label: 'Home', href: '/' },
-    { label: "Today's Rates", href: '/mandi-rates', icon: TrendingUp },
+    { label: "Today's Rates", href: '/mandi-rates', icon: TrendingUp, badge: 'LIVE' },
     { label: 'Mandis', href: '/mandis', icon: Store },
-    { label: 'Wholesale', href: '/shop', icon: ShoppingBag },
-    { label: 'Compare', href: '/compare', icon: Scale },
-    { label: 'Deals', href: '/shop?deals=true', icon: Sparkles },
+    { label: 'Wholesale Shop', href: '/shop', icon: ShoppingBag },
+    { label: 'Rate Compare', href: '/compare', icon: Scale },
+    { label: 'Deals', href: '/shop?deals=true', icon: Sparkles, highlight: true },
     { label: 'Orders', href: '/dashboard/customer/orders', icon: Package },
+  ];
+
+  const featuredMandis = [
+    { name: 'Azadpur Mandi', city: 'Delhi', href: '/mandis' },
+    { name: 'Narela Mandi', city: 'Delhi', href: '/mandis' },
+    { name: 'Ghazipur Mandi', city: 'Delhi', href: '/mandis' },
+    { name: 'Okhla Mandi', city: 'Delhi', href: '/mandis' },
+    { name: 'Jaipur APMC', city: 'Rajasthan', href: '/mandis' },
+  ];
+
+  const featuredCategories = [
+    { name: 'Atta, Flours & Grains', icon: '🌾', href: '/shop' },
+    { name: 'Edible Oils & Desi Ghee', icon: '🛢️', href: '/shop' },
+    { name: 'Dals, Pulses & Besan', icon: '🥣', href: '/shop' },
+    { name: 'Spices, Masala & Salt', icon: '🧂', href: '/shop' },
+    { name: 'Dairy, Tea & Beverages', icon: '🥛', href: '/shop' },
+    { name: 'Packaged Snacks & FMCG', icon: '🍪', href: '/shop' },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 lg:px-6">
-          {/* Left: Brand Logo + Desktop Nav */}
-          <div className="flex items-center gap-4 2xl:gap-6 shrink-0">
-            <Link href="/" className="shrink-0 flex items-center">
-              <BrandMark size="md" />
-            </Link>
-
-            {/* Desktop Navigation Links */}
-            <nav className="hidden xl:flex items-center gap-1 2xl:gap-1.5 text-xs font-bold text-slate-700">
-              {navLinks.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`whitespace-nowrap transition py-1.5 px-2.5 rounded-lg ${
-                      isActive
-                        ? 'text-[#073B6F] bg-[#EAF5FC] font-black'
-                        : 'hover:text-[#0B5FA5] hover:bg-slate-100/80'
-                    }`}
-                  >
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Right Section: Role CTA, Smart Search, Cart Drawer Button, Profile, Mobile Menu */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Prominent Action Button for Shopkeepers, Admins & Guests */}
-            {user?.role === 'SHOPKEEPER' ? (
-              <Link
-                href="/dashboard/seller/products/new"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#073B6F] px-3.5 py-1.5 text-xs font-black text-white shadow-xs hover:bg-[#0B5FA5] transition"
-              >
-                <Store className="h-3.5 w-3.5 text-[#39A9E8]" />
-                <span>List Your Product</span>
+      <header className="sticky top-0 z-40 bg-white shadow-xs">
+        {/* TOP MAIN HEADER TIER */}
+        <div className="border-b border-slate-200/80 bg-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 lg:px-6">
+            {/* Left: Brand Logo */}
+            <div className="shrink-0 flex items-center">
+              <Link href="/" className="shrink-0 flex items-center">
+                <BrandMark size="md" />
               </Link>
-            ) : user?.role === 'ADMIN' ? (
-              <Link
-                href="/dashboard/admin/approvals"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-black text-white shadow-xs hover:bg-amber-600 transition"
-              >
-                <Shield className="h-3.5 w-3.5" />
-                <span>Approvals</span>
-              </Link>
-            ) : (
-              <Link
-                href="/login/seller"
-                className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-[#073B6F]/20 bg-[#EAF5FC] px-3 py-1.5 text-xs font-bold text-[#073B6F] hover:bg-[#d6ecfa] transition"
-              >
-                <Store className="h-3.5 w-3.5 text-[#073B6F]" />
-                <span>List Your Product</span>
-              </Link>
-            )}
+            </div>
 
-            {/* Search Trigger Button with Cmd+K */}
-            <button
-              onClick={() => setSearchModalOpen(true)}
-              aria-label="Open Search (Cmd+K)"
-              className="flex h-9 w-9 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-2.5 sm:px-3 text-xs text-slate-500 hover:border-[#39A9E8] hover:bg-white transition shrink-0"
-            >
-              <Search className="h-3.5 w-3.5 text-slate-400" />
-              <span className="hidden sm:inline 2xl:hidden font-medium">Search...</span>
-              <span className="hidden 2xl:inline font-medium">Search mandis, commodities...</span>
-              <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
-                ⌘K
-              </kbd>
-            </button>
-
-            {/* Cart Drawer Trigger Button */}
-            <button
-              onClick={openDrawer}
-              aria-label="Open Cart Drawer"
-              className="relative flex h-9 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 sm:px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F]"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs font-bold font-heading">Cart</span>
-              {itemCount > 0 && (
-                <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#073B6F] px-1 text-[10px] font-black text-white shadow-xs">
-                  {itemCount}
-                </span>
-              )}
-            </button>
-
-            {/* Profile Dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            {/* Center: Prominent Professional Search Bar (Cmd+K) */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-4">
               <button
-                onClick={() => {
-                  setProfileDropdownOpen(!profileDropdownOpen);
-                  setActiveMenu('main');
-                }}
-                aria-label="User Account"
-                className="flex h-9 items-center gap-1.5 overflow-hidden rounded-full border border-slate-200 bg-[#EAF5FC] px-2 text-[#073B6F] transition hover:border-[#0B5FA5] focus:outline-hidden"
+                onClick={() => setSearchModalOpen(true)}
+                aria-label="Search mandis, commodities, products (Cmd+K)"
+                className="group flex w-full h-10 items-center justify-between rounded-full border border-slate-200/90 bg-slate-50/90 px-4 text-xs text-slate-500 shadow-inner hover:border-[#39A9E8] hover:bg-white hover:shadow-xs transition"
               >
-                {user ? (
-                  <>
-                    <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-[#073B6F] text-[10px] font-black text-white">
-                      {getInitials()}
-                    </div>
-                    <span className="hidden md:inline text-xs font-bold max-w-[80px] truncate">
-                      {user.fullName.split(' ')[0]}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <User className="h-4 w-4 text-slate-600" />
-                    <span className="hidden md:inline text-xs font-bold text-slate-700">Account</span>
-                  </>
-                )}
-                <ChevronDown className="h-3 w-3 text-slate-400" />
+                <div className="flex items-center gap-2.5">
+                  <Search className="h-4 w-4 text-slate-400 group-hover:text-[#073B6F] transition" />
+                  <span className="font-normal text-slate-500">Search 1,000+ FMCG groceries, live mandi rates, brands...</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="hidden lg:inline text-[11px] text-slate-400 font-medium">Quick Find</span>
+                  <kbd className="inline-flex items-center rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
+                    ⌘K
+                  </kbd>
+                </div>
               </button>
+            </div>
+
+            {/* Right Section: Role CTA, Cart, Account, Mobile Toggle */}
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+              {/* Mobile Search Icon */}
+              <button
+                onClick={() => setSearchModalOpen(true)}
+                aria-label="Open Search"
+                className="md:hidden flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+              >
+                <Search className="h-4 w-4 text-slate-600" />
+              </button>
+
+              {/* List Your Product / Seller CTA */}
+              {user?.role === 'SHOPKEEPER' ? (
+                <Link
+                  href="/dashboard/seller/products/new"
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#073B6F] px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#0B5FA5] transition"
+                >
+                  <Store className="h-3.5 w-3.5 text-[#39A9E8]" />
+                  <span>List Product</span>
+                </Link>
+              ) : user?.role === 'ADMIN' ? (
+                <Link
+                  href="/dashboard/admin/approvals"
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-amber-600 transition"
+                >
+                  <Shield className="h-3.5 w-3.5" />
+                  <span>Approvals</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/login/seller"
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[#073B6F]/20 bg-[#EAF5FC] px-3.5 py-2 text-xs font-bold text-[#073B6F] hover:bg-[#d5ecfb] transition"
+                >
+                  <Store className="h-3.5 w-3.5 text-[#073B6F]" />
+                  <span>List Your Product</span>
+                </Link>
+              )}
+
+              {/* Cart Drawer Trigger Button */}
+              <button
+                onClick={openDrawer}
+                aria-label="Open Cart Drawer"
+                className="relative flex h-9 sm:h-10 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F]"
+              >
+                <ShoppingCart className="h-4 w-4 text-[#073B6F]" />
+                <span className="hidden sm:inline text-xs font-bold">Cart</span>
+                {itemCount > 0 && (
+                  <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#073B6F] px-1 text-[10px] font-black text-white shadow-xs animate-pulse">
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Account Dropdown */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => {
+                    setProfileDropdownOpen(!profileDropdownOpen);
+                    setActiveMenu('main');
+                  }}
+                  aria-label="User Account"
+                  className="flex h-9 sm:h-10 items-center gap-1.5 sm:gap-2 overflow-hidden rounded-full border border-slate-200 bg-[#EAF5FC] px-2.5 text-[#073B6F] transition hover:border-[#0B5FA5] focus:outline-hidden"
+                >
+                  {user ? (
+                    <>
+                      <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-[#073B6F] text-[10px] font-black text-white">
+                        {getInitials()}
+                      </div>
+                      <span className="hidden md:inline text-xs font-bold max-w-[80px] truncate">
+                        {user.fullName.split(' ')[0]}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <User className="h-4 w-4 text-[#073B6F]" />
+                      <span className="hidden md:inline text-xs font-bold text-slate-700">Account</span>
+                    </>
+                  )}
+                  <ChevronDown className="h-3 w-3 text-slate-500" />
+                </button>
 
               {/* Dropdown Menu */}
               {profileDropdownOpen && (
@@ -398,11 +434,214 @@ export function SiteHeader() {
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open mobile menu"
-              className="xl:hidden flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+              className="md:hidden flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
             >
               <Menu className="h-5 w-5" />
             </button>
           </div>
+        </div>
+      </div>
+
+        {/* SECOND TIER: DEDICATED PROFESSIONAL MENU BAR */}
+        <div className="hidden md:block bg-[#073B6F] text-white border-t border-[#0B5FA5]/40 shadow-xs">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 lg:px-6">
+            {/* Left: Mega Categories & Mandis Dropdown + Nav Links */}
+            <div className="flex items-center gap-1">
+              {/* All Categories & Mandis Mega Menu Dropdown */}
+              <div className="relative" ref={categoriesRef}>
+                <button
+                  onClick={() => setCategoriesMenuOpen(!categoriesMenuOpen)}
+                  className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold transition ${
+                    categoriesMenuOpen
+                      ? 'bg-[#0B5FA5] text-white'
+                      : 'hover:bg-[#0B5FA5]/70 text-slate-100'
+                  }`}
+                  aria-expanded={categoriesMenuOpen}
+                >
+                  <Menu className="h-4 w-4 text-[#39A9E8]" />
+                  <span>All Categories & Mandis</span>
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${categoriesMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Mega Dropdown Panel */}
+                {categoriesMenuOpen && (
+                  <div className="absolute left-0 top-full z-50 mt-0 w-[520px] max-w-[90vw] rounded-b-2xl border border-slate-200 bg-white p-4 shadow-2xl text-slate-800 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Column 1: Featured Wholesale Mandis */}
+                      <div className="border-r border-slate-100 pr-3">
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-[#073B6F]">
+                            Wholesale Mandis
+                          </span>
+                          <Link
+                            href="/mandis"
+                            onClick={() => setCategoriesMenuOpen(false)}
+                            className="text-[10px] font-bold text-[#0B5FA5] hover:underline"
+                          >
+                            All 15+ Mandis →
+                          </Link>
+                        </div>
+                        <div className="space-y-1">
+                          {featuredMandis.map((m) => (
+                            <Link
+                              key={m.name}
+                              href={m.href}
+                              onClick={() => setCategoriesMenuOpen(false)}
+                              className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-[#EAF5FC] hover:text-[#073B6F] transition"
+                            >
+                              <span className="font-semibold">{m.name}</span>
+                              <span className="text-[10px] text-slate-400 font-medium">{m.city}</span>
+                            </Link>
+                          ))}
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-slate-100">
+                          <Link
+                            href="/mandi-rates"
+                            onClick={() => setCategoriesMenuOpen(false)}
+                            className="flex items-center gap-1.5 text-xs font-bold text-[#72B82A] hover:text-[#5fa020]"
+                          >
+                            <TrendingUp className="h-3.5 w-3.5" />
+                            <span>Check Today&apos;s Live Rates</span>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Column 2: Grocery & FMCG Categories */}
+                      <div>
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-[#073B6F]">
+                            Grocery Categories
+                          </span>
+                          <Link
+                            href="/shop"
+                            onClick={() => setCategoriesMenuOpen(false)}
+                            className="text-[10px] font-bold text-[#0B5FA5] hover:underline"
+                          >
+                            Full Shop →
+                          </Link>
+                        </div>
+                        <div className="space-y-1">
+                          {featuredCategories.map((c) => (
+                            <Link
+                              key={c.name}
+                              href={c.href}
+                              onClick={() => setCategoriesMenuOpen(false)}
+                              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-[#EAF5FC] hover:text-[#073B6F] transition"
+                            >
+                              <span>{c.icon}</span>
+                              <span className="font-semibold">{c.name}</span>
+                            </Link>
+                          ))}
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-slate-100">
+                          <Link
+                            href="/shop?deals=true"
+                            onClick={() => setCategoriesMenuOpen(false)}
+                            className="flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700"
+                          >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            <span>View Today&apos;s Hot Deals</span>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop Menu Bar Links */}
+              <nav className="flex items-center gap-0.5 text-xs font-semibold">
+                {navLinks.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center gap-1.5 px-3 py-2.5 transition border-b-2 ${
+                        isActive
+                          ? 'border-[#39A9E8] bg-[#0B5FA5]/50 text-white font-bold'
+                          : 'border-transparent text-slate-200 hover:text-white hover:bg-[#0B5FA5]/30'
+                      }`}
+                    >
+                      {Icon && <Icon className="h-3.5 w-3.5 text-[#39A9E8]" />}
+                      <span>{item.label}</span>
+                      {item.badge && (
+                        <span className="flex items-center gap-1 rounded bg-[#72B82A] px-1 py-0.5 text-[9px] font-black uppercase text-white tracking-wide">
+                          <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                          {item.badge}
+                        </span>
+                      )}
+                      {item.highlight && (
+                        <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black uppercase text-slate-900 tracking-wide">
+                          HOT
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Right: Trust & Support Info Badges */}
+            <div className="hidden lg:flex items-center gap-4 text-[11px] font-medium text-slate-200">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[#39A9E8]">⚡</span>
+                <span>Express Delivery in Delhi-NCR</span>
+              </div>
+              <span className="text-white/30">•</span>
+              <a
+                href="https://wa.me/918510083082"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[#39A9E8] hover:text-white hover:underline transition font-bold"
+              >
+                <span>WhatsApp: +91 8510083082</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* MOBILE HORIZONTAL QUICK STRIP */}
+        <div className="md:hidden flex items-center gap-1 overflow-x-auto bg-[#073B6F] px-3 py-2 text-xs scrollbar-none border-t border-[#0B5FA5]/30">
+          <Link
+            href="/mandi-rates"
+            className="flex shrink-0 items-center gap-1 rounded-full bg-[#0B5FA5] px-2.5 py-1 font-bold text-white shadow-xs"
+          >
+            <TrendingUp className="h-3 w-3 text-[#72B82A]" />
+            <span>Mandi Rates</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#72B82A] animate-pulse" />
+          </Link>
+          <Link
+            href="/mandis"
+            className="shrink-0 rounded-full px-2.5 py-1 font-medium text-slate-200 hover:bg-[#0B5FA5]/50 hover:text-white"
+          >
+            Mandis
+          </Link>
+          <Link
+            href="/shop"
+            className="shrink-0 rounded-full px-2.5 py-1 font-medium text-slate-200 hover:bg-[#0B5FA5]/50 hover:text-white"
+          >
+            Wholesale Shop
+          </Link>
+          <Link
+            href="/compare"
+            className="shrink-0 rounded-full px-2.5 py-1 font-medium text-slate-200 hover:bg-[#0B5FA5]/50 hover:text-white"
+          >
+            Compare
+          </Link>
+          <Link
+            href="/shop?deals=true"
+            className="shrink-0 rounded-full px-2.5 py-1 font-semibold text-amber-300 hover:bg-[#0B5FA5]/50"
+          >
+            🔥 Deals
+          </Link>
+          <Link
+            href="/dashboard/customer/orders"
+            className="shrink-0 rounded-full px-2.5 py-1 font-medium text-slate-200 hover:bg-[#0B5FA5]/50 hover:text-white"
+          >
+            Orders
+          </Link>
         </div>
       </header>
 
@@ -411,7 +650,7 @@ export function SiteHeader() {
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex justify-start xl:hidden">
+        <div className="fixed inset-0 z-50 flex justify-start md:hidden">
           <div
             className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
             onClick={() => setMobileMenuOpen(false)}
