@@ -23,7 +23,7 @@ export default function ContactPage() {
             <Mail className="h-5 w-5 text-[#39A9E8] flex-shrink-0" />
             <div>
               <div className="font-bold">Email Support</div>
-              <div className="text-slate-500">support@kiranamart247.com</div>
+              <div className="text-slate-500">support@kiranamart.com</div>
             </div>
           </div>
 

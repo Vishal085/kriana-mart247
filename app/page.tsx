@@ -93,7 +93,7 @@ export default async function HomePage() {
                 ⚡ Fast Kirana Delivery • Today&apos;s Mandi Rates
               </div>
 
-              <h1 className="mt-4 text-3xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
+              <h1 className="hero-heading mt-4 text-3xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
                 Aapki Apni Online Kirana Dukan.{' '}
                 <span className="block text-[#0B5FA5]">Daily Grocery at Mandi Rates.</span>
               </h1>
@@ -104,7 +104,7 @@ export default async function HomePage() {
 
               {/* Instant Kirana Grocery Search Bar */}
               <div className="mt-6 max-w-xl">
-                <form action="/shop" method="GET" className="relative flex items-center shadow-md rounded-2xl bg-white border border-slate-200 p-1.5 focus-within:border-[#39A9E8] transition">
+                <form action="/shop" method="GET" className="hero-search-form relative flex items-center shadow-md rounded-2xl bg-white border border-slate-200 p-1.5 focus-within:border-[#39A9E8] transition">
                   <Search className="h-5 w-5 text-slate-400 ml-3 shrink-0" />
                   <input
                     type="text"
@@ -128,7 +128,7 @@ export default async function HomePage() {
                   { name: '🥛 Milk & Dairy', href: '/shop?categoryId=cat-1' },
                   { name: '🌾 Atta & Dal', href: '/shop?categoryId=cat-11' },
                   { name: '🛢️ Cooking Oil', href: '/shop?categoryId=cat-6' },
-                  { name: '🍪 ₹5/₹10 Biscuits', href: '/shop?categoryId=cat-9' },
+                  { name: '🍚 Basmati Rice', href: '/shop?categoryId=cat-15' },
                   { name: '🧂 Spices & Masala', href: '/shop?categoryId=cat-16' },
                 ].map((pill) => (
                   <Link
@@ -142,7 +142,7 @@ export default async function HomePage() {
               </div>
 
               {/* Trust Reassurance Chips */}
-              <div className="mt-6 flex flex-wrap gap-4 text-xs font-semibold text-slate-600 border-t border-slate-200/60 pt-4">
+              <div className="trust-chips mt-6 flex flex-wrap gap-4 text-xs font-semibold text-slate-600 border-t border-slate-200/60 pt-4">
                 <div className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-black">🚚</span>
                   <span>Free Delivery on orders above ₹500</span>
@@ -158,7 +158,7 @@ export default async function HomePage() {
               </div>
 
               {/* Quick Action Links */}
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="hero-action-buttons mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/shop"
                   className="inline-flex items-center gap-2 rounded-xl bg-[#073B6F] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md transition hover:bg-[#0B5FA5]"
@@ -177,8 +177,8 @@ export default async function HomePage() {
             </div>
 
             {/* Market Snapshot Card */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-5">
+            <div className="market-card rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl">
+              <div className="market-card-header flex items-center justify-between border-b border-slate-100 pb-5">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
                     Live Session
@@ -190,28 +190,33 @@ export default async function HomePage() {
                 </div>
               </div>
 
+              {/* Mandi Selector directly in Hero Market Card */}
+              <div className="mt-4">
+                <MandiSelector variant="hero" />
+              </div>
+
               {/* Metric Counters */}
-              <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+              <div className="market-card-stats mt-6 grid grid-cols-3 gap-3 text-center">
                 <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
                   <div className="text-[11px] font-bold text-slate-500 uppercase">Tracked</div>
-                  <div className="mt-1 text-2xl font-black text-[#073B6F]">{totalTracked}</div>
+                  <div className="stat-number mt-1 text-2xl font-black text-[#073B6F]">{totalTracked}</div>
                 </div>
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
                   <div className="text-[11px] font-bold text-emerald-700 uppercase">Rising</div>
-                  <div className="mt-1 text-2xl font-black text-emerald-600">
+                  <div className="stat-number mt-1 text-2xl font-black text-emerald-600">
                     {summary.rising}
                   </div>
                 </div>
                 <div className="rounded-2xl border border-red-100 bg-red-50 p-3">
                   <div className="text-[11px] font-bold text-red-700 uppercase">Falling</div>
-                  <div className="mt-1 text-2xl font-black text-red-600">
+                  <div className="stat-number mt-1 text-2xl font-black text-red-600">
                     {summary.falling}
                   </div>
                 </div>
               </div>
 
               {/* Movement Preview Rows */}
-              <div className="mt-6 space-y-2.5">
+              <div className="market-card-movement mt-6 space-y-2.5">
                 <div className="flex items-center justify-between rounded-xl bg-[#F7FAFC] p-3 text-xs">
                   <div className="flex items-center gap-2 font-bold text-slate-700">
                     <TrendingUp className="h-4 w-4 text-emerald-600" /> Top Gainer Today
@@ -234,7 +239,7 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100">
+              <div className="market-card-footer mt-6 pt-4 border-t border-slate-100">
                 <Link
                   href="/mandi-rates"
                   className="flex items-center justify-center gap-2 text-xs font-bold text-[#0B5FA5] hover:underline"
@@ -454,10 +459,60 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* 5.5 WHOLESALE MANDIS DIRECTORY PREVIEW */}
+      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">APMC Market Hubs</span>
+            <h2 className="text-2xl font-black text-[#073B6F]">Registered Wholesale Mandis</h2>
+          </div>
+          <Link href="/mandis" className="text-xs font-bold text-[#0B5FA5] hover:underline flex items-center gap-1">
+            View All Mandis <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {mandis.map((m) => (
+            <div
+              key={m.id}
+              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#39A9E8] hover:shadow-md flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#073B6F]">
+                    <Store className="h-5 w-5" />
+                  </div>
+                  <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                    {m._count?.rates || 16} Commodities
+                  </span>
+                </div>
+                <h3 className="mt-3 font-bold text-base text-[#073B6F]">{m.name}</h3>
+                <p className="mt-1 text-xs text-slate-500 line-clamp-1">{m.address || `${m.city}, ${m.state}`}</p>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <Link
+                  href={`/mandis/${m.slug}`}
+                  className="font-bold text-[#0B5FA5] hover:underline flex items-center gap-1"
+                >
+                  Mandi Rates <ArrowRight className="h-3 w-3" />
+                </Link>
+                <Link
+                  href={`/shop?mandiId=${m.id}`}
+                  className="rounded-full bg-[#EAF5FC] px-3 py-1 font-bold text-[#073B6F] hover:bg-[#073B6F] hover:text-white transition"
+                >
+                  Shop Goods →
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* 6. XYON AI ASSISTANT PROMO */}
       <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
         <div className="rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-8 sm:p-12 text-white shadow-xl">
-          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          <div className="ai-promo-grid grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-[#39A9E8]">
                 <Bot className="h-4 w-4 text-[#72B82A]" /> Meet Xyon
@@ -490,7 +545,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-6">
         <div className="text-center max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">Seamless Workflow</span>
-          <h2 className="mt-2 text-3xl font-black text-[#073B6F]">How KiranaMart.com Works</h2>
+          <h2 className="mt-2 text-3xl font-black text-[#073B6F]">How KiranaMart Works</h2>
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-3">

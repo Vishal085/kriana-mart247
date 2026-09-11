@@ -17,6 +17,8 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
+  Milk,
+  History,
 } from 'lucide-react';
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
@@ -65,14 +67,15 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
 
   const navItems = [
     { label: 'Overview', href: '/dashboard/seller', icon: LayoutDashboard },
+    { label: 'Demand', href: '/dashboard/seller/demands', icon: Milk },
     { label: 'My Products', href: '/dashboard/seller/products', icon: Boxes },
     { label: 'List Your Product', href: '/dashboard/seller/products/new', icon: PackagePlus, highlight: true },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50/60 pb-16">
+    <div className="min-h-screen bg-slate-50/60 pb-16 print:min-h-0 print:bg-white print:p-0 print:pb-0">
       {/* Top Banner */}
-      <div className="border-b border-slate-200 bg-white">
+      <div className="border-b border-slate-200 bg-white print:hidden">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
@@ -104,10 +107,10 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 print:max-w-none print:p-0 print:m-0">
+        <div className="grid gap-6 lg:grid-cols-[240px_1fr] print:block print:w-full print:p-0 print:m-0">
           {/* Sidebar Nav */}
-          <aside className="space-y-4">
+          <aside className="space-y-4 print:hidden">
             <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-2xs">
               <nav className="space-y-1">
                 {navItems.map((item) => {
@@ -157,7 +160,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           </aside>
 
           {/* Main Content Area */}
-          <main>{children}</main>
+          <main className="min-w-0 print:w-full print:p-0 print:m-0">{children}</main>
         </div>
       </div>
     </div>

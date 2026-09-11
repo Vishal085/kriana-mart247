@@ -19,6 +19,8 @@ import { useMandi } from '@/context/MandiContext';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
 import { PriceAlertModal } from '@/components/mandis/PriceAlertModal';
 import { MandiRateRowSkeleton } from '@/components/ui/Skeleton';
+import { MandiCommodityRowAction } from '@/components/mandis/MandiCommodityRowAction';
+import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
 
 export default function MandiRatesPage() {
   const { mandis, selectedMandi, selectMandiById } = useMandi();
@@ -194,7 +196,7 @@ export default function MandiRatesPage() {
 
       {/* Filter and Search Bar */}
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="grid gap-3 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto]">
+        <div className="mandi-filter-grid grid gap-3 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto]">
           {/* Search Input */}
           <form onSubmit={handleSearchSubmit} className="relative">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -355,12 +357,11 @@ export default function MandiRatesPage() {
                       >
                         <Bell className="h-4 w-4" />
                       </button>
-                      <Link
-                        href={`/products/${row.product.slug}`}
-                        className="inline-flex items-center rounded-lg bg-[#EAF5FC] px-2.5 py-1 text-[11px] font-bold text-[#0B5FA5] hover:bg-[#073B6F] hover:text-white transition"
-                      >
-                        Spread →
-                      </Link>
+                      <MandiCommodityRowAction
+                        product={row.product}
+                        mandiRate={Number(row.currentRate)}
+                        unit={row.unit}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -378,11 +379,11 @@ export default function MandiRatesPage() {
       </div>
 
       {/* Compare Mandis Floating CTA Banner */}
-      <div className="mt-8 rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+      <div className="compare-banner mt-8 rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
         <div>
           <h3 className="text-lg font-black font-heading">Looking for the lowest rate in Delhi?</h3>
           <p className="text-xs text-slate-200 mt-0.5">
-            Compare wholesale rates across all 6 APMC terminal mandis side-by-side with interactive spread charts.
+            Compare wholesale rates across all 16 Delhi-NCR APMC & terminal mandis side-by-side with interactive spread charts.
           </p>
         </div>
         <Link
@@ -393,6 +394,9 @@ export default function MandiRatesPage() {
           <span>Open Price Comparison Tool →</span>
         </Link>
       </div>
+
+      {/* Authoritative Sources & Methodology Disclaimer */}
+      <MandiSourcesDisclaimer currentMandiName={selectedMandi?.name} />
 
       {/* Price Alert Modal */}
       {alertItem && (

@@ -58,21 +58,30 @@ export async function getCurrentSessionUser(): Promise<SessionUser | null> {
   const payload = verifySessionToken(cookie);
   if (!payload) return null;
 
-  const user = await prisma.user.findUnique({
-    where: { id: payload.id },
-    select: {
-      id: true,
-      fullName: true,
-      email: true,
-      mobile: true,
-      avatarUrl: true,
-      role: true,
-      active: true,
-    },
-  });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        mobile: true,
+        avatarUrl: true,
+        role: true,
+        active: true,
+      },
+    });
 
-  if (!user || !user.active) return null;
-  return user;
+    if (user && user.active) return user;
+  } catch (err) {
+    console.error('Error verifying user against database, checking payload:', err);
+  }
+
+  if (payload && payload.id && payload.active !== false) {
+    return payload;
+  }
+
+  return null;
 }
 
 export async function requireAuth() {

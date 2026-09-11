@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Shield,
   ShieldCheck,
+  Milk,
 } from 'lucide-react';
 import { AiRateUpdaterCard } from '@/components/admin/AiRateUpdaterCard';
 
@@ -41,6 +42,10 @@ export default async function AdminDashboardPage() {
     ordersPaid,
     recentOrders,
     pendingApprovalsCount,
+    demandsNewCount,
+    demandsProcessingCount,
+    demandsTotalCount,
+    recentDemands,
   ] = await Promise.all([
     prisma.user.count({ where: { role: Role.CUSTOMER } }),
     prisma.product.count(),
@@ -63,11 +68,22 @@ export default async function AdminDashboardPage() {
       include: { user: { select: { fullName: true, mobile: true } } },
     }),
     prisma.product.count({ where: { status: 'PENDING_REVIEW' } }),
+    prisma.demand.count({ where: { status: 'NEW' } }),
+    prisma.demand.count({ where: { status: 'PROCESSING' } }),
+    prisma.demand.count(),
+    prisma.demand.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        shopkeeper: { select: { fullName: true, mobile: true, shopName: true } },
+        items: { include: { dairyProduct: true } },
+      },
+    }),
   ]);
 
-  const rising = rateDirections.find((r) => r.direction === Direction.RISING)?._count.direction ?? 0;
-  const falling = rateDirections.find((r) => r.direction === Direction.FALLING)?._count.direction ?? 0;
-  const stable = rateDirections.find((r) => r.direction === Direction.STABLE)?._count.direction ?? 0;
+  const rising = rateDirections.find((r: any) => r.direction === Direction.RISING)?._count.direction ?? 0;
+  const falling = rateDirections.find((r: any) => r.direction === Direction.FALLING)?._count.direction ?? 0;
+  const stable = rateDirections.find((r: any) => r.direction === Direction.STABLE)?._count.direction ?? 0;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
@@ -83,13 +99,25 @@ export default async function AdminDashboardPage() {
                 Administrator Operations
               </span>
               <h1 className="text-2xl sm:text-3xl font-black text-[#073B6F]">
-                KiranaMart247 Admin Console
+                KiranaMart Admin Console
               </h1>
               <div className="text-xs text-slate-500">Logged in as {admin.fullName}</div>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/admin/demands"
+              className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition"
+            >
+              <Milk className="h-4 w-4" />
+              Dairy Demands
+              {demandsNewCount > 0 && (
+                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-blue-700">
+                  {demandsNewCount} New
+                </span>
+              )}
+            </Link>
             <Link
               href="/dashboard/admin/approvals"
               className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-600 transition"
@@ -124,7 +152,18 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Admin Modules Navigation */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8 text-xs font-bold text-slate-700">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-9 text-xs font-bold text-slate-700">
+        <Link
+          href="/dashboard/admin/demands"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50/70 p-3 hover:border-blue-400 hover:text-blue-900 transition relative"
+        >
+          <Milk className="h-4 w-4 text-blue-700" /> Demands
+          {demandsNewCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-black text-white">
+              {demandsNewCount}
+            </span>
+          )}
+        </Link>
         <Link
           href="/dashboard/admin/approvals"
           className="flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50/60 p-3 hover:border-amber-400 hover:text-amber-900 transition relative"
@@ -181,7 +220,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Metrics Grid */}
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="text-[11px] font-bold uppercase text-slate-400">Total Customers</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{customersCount}</div>
@@ -210,6 +249,15 @@ export default async function AdminDashboardPage() {
           <div className="text-[11px] font-bold uppercase text-[#073B6F]">Delivered Orders</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{ordersDelivered}</div>
         </div>
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
+          <div className="text-[11px] font-bold uppercase text-blue-800">Dairy Demands</div>
+          <div className="mt-1 text-2xl font-black text-blue-900 flex items-baseline gap-1.5">
+            {demandsTotalCount}
+            {demandsNewCount > 0 && (
+              <span className="text-xs font-bold text-amber-600">({demandsNewCount} new)</span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Market Movement Snapshot */}
@@ -228,6 +276,97 @@ export default async function AdminDashboardPage() {
             <div className="text-xs font-bold text-slate-600 uppercase">Stable Commodities</div>
             <div className="mt-1 text-2xl font-black text-slate-700">{stable}</div>
           </div>
+        </div>
+      </div>
+
+      {/* Recent Shopkeeper Dairy Demands Section (SEPARATE from Customer Orders) */}
+      <div className="mt-8 rounded-3xl border border-blue-100 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="flex items-center gap-2">
+            <Milk className="h-5 w-5 text-blue-700" />
+            <h2 className="text-lg font-black text-[#073B6F]">Recent Shopkeeper Dairy Demands</h2>
+          </div>
+          <Link
+            href="/dashboard/admin/demands"
+            className="text-xs font-bold text-blue-700 hover:underline"
+          >
+            Manage All Demands ({demandsNewCount} New) →
+          </Link>
+        </div>
+
+        <div className="mt-4 overflow-x-auto">
+          <table className="min-w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-500 font-bold uppercase">
+              <tr>
+                <th className="px-4 py-3">Demand #</th>
+                <th className="px-4 py-3">Shopkeeper</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3">Products Demanded</th>
+                <th className="px-4 py-3">Est. Amount</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {recentDemands.map((dem: any) => (
+                <tr key={dem.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-3 font-mono font-bold text-[#073B6F]">
+                    #{dem.demandNumber}
+                  </td>
+                  <td className="px-4 py-3 font-bold text-slate-800">
+                    {dem.shopkeeper?.shopkeeperProfile?.shopName || dem.shopkeeper?.shopName || dem.shopkeeper?.fullName || 'Shopkeeper'}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">{dem.shopkeeper?.mobile || 'N/A'}</td>
+                  <td className="px-4 py-3 font-medium text-slate-700">
+                    {dem.items?.length || 0} items ({dem.items?.reduce((s: number, i: any) => s + Number(i.requestedQty || i.quantity || 0), 0) || 0} units)
+                  </td>
+                  <td className="px-4 py-3 font-black text-slate-900">
+                    ₹{(
+                      Number(dem.receipt?.grandTotal) ||
+                      dem.items?.reduce((sum: number, it: any) => sum + (Number(it.requestedQty || 0) * Number(it.rate || it.dairyProduct?.defaultRate || 0)), 0) ||
+                      0
+                    ).toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold border ${
+                        dem.status === 'NEW'
+                          ? 'bg-amber-50 text-amber-800 border-amber-200'
+                          : dem.status === 'PROCESSING'
+                          ? 'bg-blue-50 text-blue-800 border-blue-200'
+                          : dem.status === 'DELIVERED'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : dem.status === 'PARTIALLY_DELIVERED'
+                          ? 'bg-teal-50 text-teal-800 border-teal-200'
+                          : 'bg-rose-50 text-rose-800 border-rose-200'
+                      }`}
+                    >
+                      {dem.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">
+                    {new Date(dem.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      href={`/dashboard/admin/demands/${dem.id}`}
+                      className="text-xs font-bold text-blue-700 hover:underline"
+                    >
+                      Manage Demand →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+              {recentDemands.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-slate-400">
+                    No dairy demands submitted yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -258,7 +397,7 @@ export default async function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {recentOrders.map((ord) => (
+              {recentOrders.map((ord: any) => (
                 <tr key={ord.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3 font-mono font-bold text-[#073B6F]">{ord.orderNumber}</td>
                   <td className="px-4 py-3 font-bold text-slate-800">{ord.deliveryName}</td>

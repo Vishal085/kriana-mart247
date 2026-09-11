@@ -187,7 +187,7 @@ export function MandiAiAssistant() {
     <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start font-sans">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-3 flex h-[540px] w-[370px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl transition-all sm:w-[420px]">
+        <div className="ai-chat-window mb-3 flex h-[540px] w-[370px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl transition-all sm:w-[420px]">
           {/* Chat Header */}
           <div className="flex items-center justify-between border-b border-slate-100 bg-[#073B6F] px-5 py-4 text-white">
             <div className="flex items-center gap-3">

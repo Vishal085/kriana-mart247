@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Store, MapPin, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
+import { MandiDetailHeaderAction } from '@/components/mandis/MandiCardActions';
+import { MandiCommodityRowAction } from '@/components/mandis/MandiCommodityRowAction';
+import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
 
 export default async function MandiDetailPage({
   params,
@@ -53,9 +56,12 @@ export default async function MandiDetailPage({
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-xs text-slate-500 uppercase font-bold">Active Rates</div>
-            <div className="text-2xl font-black text-[#073B6F]">{mandi.rates.length} Items</div>
+          <div className="flex flex-col sm:items-end gap-3">
+            <div className="text-left sm:text-right">
+              <div className="text-xs text-slate-500 uppercase font-bold">Active Commodities</div>
+              <div className="text-2xl font-black text-[#073B6F]">{mandi.rates?.length || 0} Traded Items</div>
+            </div>
+            <MandiDetailHeaderAction mandi={mandi} />
           </div>
         </div>
 
@@ -122,12 +128,11 @@ export default async function MandiDetailPage({
                       />
                     </td>
                     <td className="px-4 py-3.5 text-right">
-                      <Link
-                        href={`/products/${row.product.slug}`}
-                        className="inline-flex items-center rounded-lg bg-[#EAF5FC] px-2.5 py-1 text-[11px] font-bold text-[#0B5FA5] hover:bg-[#073B6F] hover:text-white transition"
-                      >
-                        View Product →
-                      </Link>
+                      <MandiCommodityRowAction
+                        product={row.product}
+                        mandiRate={Number(row.currentRate)}
+                        unit={row.unit}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -143,6 +148,9 @@ export default async function MandiDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Authoritative Sources & Methodology Disclaimer */}
+      <MandiSourcesDisclaimer currentMandiName={mandi.name} />
     </main>
   );
 }

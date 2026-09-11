@@ -68,7 +68,7 @@ export default function SellerRegisterPage() {
           </div>
           <h1 className="mt-2 text-2xl font-black text-[#073B6F]">Register as a Shopkeeper</h1>
           <p className="mt-1 text-xs text-slate-500 max-w-md mx-auto">
-            Expand your wholesale reach on KiranaMart247. List FMCG products, sell to traders & local kiranas with AI-assisted product descriptions.
+            Expand your wholesale reach on KiranaMart. List FMCG products, sell to traders &amp; local kiranas with AI-assisted product descriptions.
           </p>
         </div>
 

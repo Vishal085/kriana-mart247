@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
 
       <h1 className="mt-4 text-3xl font-black text-[#073B6F]">Privacy Policy</h1>
       <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm text-xs sm:text-sm text-slate-600 leading-relaxed space-y-4">
-        <p>At <strong>KiranaMart247</strong>, we are committed to safeguarding the privacy and security of our customer and visitor data.</p>
+        <p>At <strong>KiranaMart</strong>, we are committed to safeguarding the privacy and security of our customer and visitor data.</p>
         <h2 className="text-base font-bold text-[#073B6F] pt-2">1. Information We Collect</h2>
         <p>We collect essential delivery information including name, phone number, address, city, and pincode required for processing kirana orders and sending WhatsApp status alerts.</p>
         <h2 className="text-base font-bold text-[#073B6F] pt-2">2. How We Protect Your Data</h2>

@@ -205,16 +205,24 @@ async function seed() {
     subCatMap.set(sc.name, created.id);
   }
 
-  // 5. Delhi Wholesale Mandis for Live Rates & AI updates
+  // 5. Delhi-NCR Wholesale Mandis for Live Rates & AI updates
   const mandisData = [
-    { name: 'Naya Bazar Mandi', slug: 'naya-bazar-mandi', city: 'Delhi', state: 'Delhi', address: 'Old Delhi, Delhi 110006', description: 'Asia\'s premier wholesale grain, pulses, rice, oil and dry fruit market.' },
-    { name: 'Khari Baoli Spice Mandi', slug: 'khari-baoli-spice-mandi', city: 'Delhi', state: 'Delhi', address: 'Chandni Chowk, Delhi 110006', description: 'Asia\'s largest wholesale spice and dry fruits trading mandi.' },
-    { name: 'Azadpur APMC Mandi', slug: 'azadpur-apmc-mandi', city: 'Delhi', state: 'Delhi', address: 'GT Karnal Road, Delhi 110033', description: 'National capital\'s largest APMC regulated terminal trading hub.' },
-    { name: 'Okhla Mandi', slug: 'okhla-mandi', city: 'Delhi', state: 'Delhi', address: 'Okhla Phase II, New Delhi 110020', description: 'South Delhi wholesale commodity auction and redistribution mandi.' },
-    { name: 'Ghazipur APMC Mandi', slug: 'ghazipur-apmc-mandi', city: 'Delhi', state: 'Delhi', address: 'Ghazipur, East Delhi 110096', description: 'East Delhi & UP border primary wholesale commodity market.' },
-    { name: 'Keshopur APMC Mandi', slug: 'keshopur-apmc-mandi', city: 'Delhi', state: 'Delhi', address: 'Outer Ring Road, Tilak Nagar, New Delhi 110018', description: 'West Delhi primary distribution hub.' },
-    { name: 'Shahdara Grain Mandi', slug: 'shahdara-grain-mandi', city: 'Delhi', state: 'Delhi', address: 'Shahdara, North East Delhi 110032', description: 'Trans-Yamuna wholesale grains and staples market.' },
-    { name: 'Najafgarh Grain Mandi', slug: 'najafgarh-grain-mandi', city: 'Delhi', state: 'Delhi', address: 'Najafgarh, South West Delhi 110043', description: 'South-West Delhi agro-wholesale exchange.' },
+    { name: 'Naya Bazar Mandi', slug: 'naya-bazar-mandi', city: 'Delhi', state: 'Delhi', address: 'Naya Bazar, Chandni Chowk, Old Delhi 110006', description: 'Asia\'s premier wholesale foodgrain, basmati rice, pulses, and mustard oil terminal market.' },
+    { name: 'Khari Baoli Spice Mandi', slug: 'khari-baoli-spice-mandi', city: 'Delhi', state: 'Delhi', address: 'Khari Baoli, Chandni Chowk, Delhi 110006', description: 'Asia\'s largest wholesale spice, dry fruits, herbs, and condiments trading market.' },
+    { name: 'Azadpur APMC Mandi', slug: 'azadpur-apmc-mandi', city: 'Delhi', state: 'Delhi', address: 'GT Karnal Road, Azadpur, Delhi 110033', description: 'National capital\'s mega APMC terminal market regulating daily wholesale commodity auctions.' },
+    { name: 'Okhla APMC Mandi', slug: 'okhla-mandi', city: 'New Delhi', state: 'Delhi', address: 'Okhla Industrial Area Phase II, New Delhi 110020', description: 'South Delhi wholesale agro-commodity auction and redistribution terminal.' },
+    { name: 'Ghazipur APMC Mandi', slug: 'ghazipur-apmc-mandi', city: 'Delhi', state: 'Delhi', address: 'Ghazipur, Trans-Yamuna, East Delhi 110096', description: 'East Delhi & UP border primary wholesale commodity and perishables exchange.' },
+    { name: 'Keshopur APMC Mandi', slug: 'keshopur-apmc-mandi', city: 'New Delhi', state: 'Delhi', address: 'Outer Ring Road, Tilak Nagar, West Delhi 110018', description: 'West Delhi primary wholesale grain, fruit, and grocery distribution terminal.' },
+    { name: 'Shahdara Anaj Mandi', slug: 'shahdara-grain-mandi', city: 'Delhi', state: 'Delhi', address: 'Old Shahdara, North East Delhi 110032', description: 'Trans-Yamuna wholesale grains, sugar, edible oils, and daily staples trading center.' },
+    { name: 'Najafgarh Anaj Mandi', slug: 'najafgarh-grain-mandi', city: 'Delhi', state: 'Delhi', address: 'Najafgarh Main Road, South West Delhi 110043', description: 'South-West Delhi agro-wholesale hub and grain procurement market.' },
+    { name: 'Narela Anaj Mandi', slug: 'narela-anaj-mandi', city: 'Delhi', state: 'Delhi', address: 'Narela Mandi, GT Karnal Road, North Delhi 110040', description: 'Delhi\'s largest specialized wheat, paddy, and grain APMC terminal.' },
+    { name: 'Ghaziabad Mandi', slug: 'ghaziabad-mandi', city: 'Ghaziabad', state: 'Uttar Pradesh', address: 'Site 4, Sahibabad Industrial Area, Ghaziabad 201005', description: 'Ghaziabad district primary wholesale foodgrain, pulse, and edible oil terminal market.' },
+    { name: 'Noida Sector 88 Krishi Mandi', slug: 'noida-sector-88-mandi', city: 'Noida', state: 'Uttar Pradesh', address: 'Sector 88, Phase 2, Noida, Gautam Buddha Nagar 201305', description: 'Gautam Buddha Nagar primary wholesale agricultural and grocery distribution center.' },
+    { name: 'Dadri Anaj & Kirana Mandi', slug: 'dadri-anaj-mandi', city: 'Greater Noida', state: 'Uttar Pradesh', address: 'Railway Road, Dadri, Greater Noida 203207', description: 'Greater Noida regional wholesale grain, pulse, and country jaggery exchange.' },
+    { name: 'Gurugram Khandsa Anaj Mandi', slug: 'gurugram-khandsa-mandi', city: 'Gurugram', state: 'Haryana', address: 'Khandsa Road, Near Hero Honda Chowk, Gurugram 122001', description: 'Gurugram & South Haryana-NCR primary foodgrain and wholesale grocery exchange.' },
+    { name: 'Faridabad NIT Old Anaj Mandi', slug: 'faridabad-nit-mandi', city: 'Faridabad', state: 'Haryana', address: 'Old Faridabad Railway Road, NIT, Faridabad 121001', description: 'Faridabad district central wholesale grain, oilseeds, and spice market.' },
+    { name: 'Ballabhgarh Anaj Mandi', slug: 'ballabhgarh-anaj-mandi', city: 'Ballabhgarh', state: 'Haryana', address: 'Grain Market Road, Ballabhgarh, Faridabad 121004', description: 'South NCR gateway grain procurement center and essential groceries mandi.' },
+    { name: 'Sonipat New Grain Market', slug: 'sonipat-grain-mandi', city: 'Sonipat', state: 'Haryana', address: 'New Anaj Mandi, GT Road, Sonipat 131001', description: 'North NCR premier agricultural terminal, renowned for 1121 & Pusa Basmati rice auctions.' },
   ];
 
   const mandis = [];
@@ -629,65 +637,51 @@ async function seed() {
       baseRate: 420.00,
     },
     {
-      sku: 'KM-RATION-MAIDA-500G',
-      name: 'Premium Superfine Maida (500g Pouch)',
-      slug: 'premium-superfine-maida-500g',
+      sku: 'KM-RATION-MAIDA-1KG',
+      name: 'Premium Superfine Maida (1kg Pouch)',
+      slug: 'premium-superfine-maida-1kg',
       category: 'Atta, Maida & Suji',
       subCategory: 'Maida & Suji',
       brand: 'Tata',
-      unit: '500g Pouch',
-      retailPrice: 28.00,
+      unit: '1kg Pouch',
+      retailPrice: 54.00,
       description: 'Super fine all-purpose refined wheat flour for samosa, bhature, and cakes.',
-      searchKeywords: 'maida 500g, refined flour, all purpose flour, samosa maida',
+      searchKeywords: 'maida 1kg, refined flour, all purpose flour, samosa maida',
       image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80',
-      baseRate: 25.00,
+      baseRate: 48.00,
     },
     {
-      sku: 'KM-RATION-SUJI-500G',
-      name: 'Crispy Roasted Sooji / Rawa (500g Pouch)',
-      slug: 'crispy-sooji-rawa-500g',
+      sku: 'KM-RATION-SUJI-1KG',
+      name: 'Crispy Roasted Sooji / Rawa (1kg Pouch)',
+      slug: 'crispy-sooji-rawa-1kg',
       category: 'Atta, Maida & Suji',
       subCategory: 'Maida & Suji',
       brand: 'Tata',
-      unit: '500g Pouch',
-      retailPrice: 32.00,
+      unit: '1kg Pouch',
+      retailPrice: 62.00,
       description: 'Granular semolina rawa for crispy halwa, upma, idli, and chilla.',
-      searchKeywords: 'suji 500g, rawa, semolina, halwa suji',
+      searchKeywords: 'suji 1kg, rawa, semolina, halwa suji',
       image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80',
-      baseRate: 28.00,
+      baseRate: 55.00,
     },
     {
-      sku: 'KM-RATION-BESAN-500G',
-      name: 'Tata Sampann Fine Pure Gram Flour Besan (500g)',
-      slug: 'tata-sampann-gram-flour-besan-500g',
+      sku: 'KM-RATION-BESAN-1KG',
+      name: 'Tata Sampann Fine Pure Gram Flour Besan (1kg Pack)',
+      slug: 'tata-sampann-gram-flour-besan-1kg',
       category: 'Atta, Maida & Suji',
       subCategory: 'Besan & Sattu',
       brand: 'Tata',
-      unit: '500g Pouch',
-      retailPrice: 58.00,
+      unit: '1kg Pack',
+      retailPrice: 112.00,
       description: '100% unpolished chana dal besan for pakodas, kadhi, and laddoos.',
-      searchKeywords: 'besan 500g, tata besan, chana dal flour, gram flour',
+      searchKeywords: 'besan 1kg, tata besan, chana dal flour, gram flour',
       image: 'https://images.unsplash.com/photo-1627485937980-221c88ac04f9?w=500&auto=format&fit=crop&q=80',
-      baseRate: 52.00,
+      baseRate: 98.00,
     },
 
     // -------------------------------------------------------------
-    // 5. DAL & PULSES (500g, 1kg & Small Packs)
+    // 5. DAL & PULSES (1kg & Wholesale Bulk)
     // -------------------------------------------------------------
-    {
-      sku: 'KM-DAL-TOOR-500G',
-      name: 'Unpolished Desi Toor / Arhar Dal (500g Pouch)',
-      slug: 'unpolished-desi-toor-arhar-dal-500g',
-      category: 'Dal & Pulses',
-      subCategory: 'Toor & Arhar Dal',
-      brand: 'Tata',
-      unit: '500g Pouch',
-      retailPrice: 84.00,
-      description: 'Naturally unpolished protein-rich yellow Arhar/Toor dal from Naya Bazar Mandi.',
-      searchKeywords: 'toor dal 500g, arhar dal, yellow dal, pulses',
-      image: 'https://images.unsplash.com/photo-1585994192704-5e5d38e21976?w=500&auto=format&fit=crop&q=80',
-      baseRate: 76.00,
-    },
     {
       sku: 'KM-DAL-TOOR-1KG',
       name: 'Unpolished Desi Toor / Arhar Dal (1kg Bag)',
@@ -703,46 +697,46 @@ async function seed() {
       baseRate: 152.00,
     },
     {
-      sku: 'KM-DAL-MOONG-DHULI-500G',
-      name: 'Moong Dal Dhuli (Yellow Split - 500g Pouch)',
-      slug: 'moong-dal-dhuli-yellow-split-500g',
+      sku: 'KM-DAL-MOONG-DHULI-1KG',
+      name: 'Moong Dal Dhuli (Yellow Split - 1kg Bag)',
+      slug: 'moong-dal-dhuli-yellow-split-1kg',
       category: 'Dal & Pulses',
       subCategory: 'Moong & Masoor Dal',
       brand: 'Tata',
-      unit: '500g Pouch',
-      retailPrice: 62.00,
+      unit: '1kg Bag',
+      retailPrice: 120.00,
       description: 'Quick-cooking, easy-to-digest yellow split moong dal for khichdi and soups.',
-      searchKeywords: 'moong dal 500g, dhuli moong, yellow split dal, khichdi dal',
+      searchKeywords: 'moong dal 1kg, dhuli moong, yellow split dal, khichdi dal',
       image: 'https://images.unsplash.com/photo-1585994192704-5e5d38e21976?w=500&auto=format&fit=crop&q=80',
-      baseRate: 56.00,
+      baseRate: 108.00,
     },
     {
-      sku: 'KM-DAL-CHANA-500G',
-      name: 'Desi Chana Dal (500g Pouch)',
-      slug: 'desi-chana-dal-500g-pouch',
+      sku: 'KM-DAL-CHANA-1KG',
+      name: 'Desi Chana Dal (1kg Bag)',
+      slug: 'desi-chana-dal-1kg-bag',
       category: 'Dal & Pulses',
       subCategory: 'Chana & Urad Dal',
       brand: 'Tata',
-      unit: '500g Pouch',
-      retailPrice: 49.00,
+      unit: '1kg Bag',
+      retailPrice: 95.00,
       description: 'Crisp unpolished chana dal for tadka, vada, and dal fry.',
-      searchKeywords: 'chana dal 500g, bengal gram split, dal',
+      searchKeywords: 'chana dal 1kg, bengal gram split, dal',
       image: 'https://images.unsplash.com/photo-1585994192704-5e5d38e21976?w=500&auto=format&fit=crop&q=80',
-      baseRate: 44.00,
+      baseRate: 85.00,
     },
     {
-      sku: 'KM-DAL-RAJMA-CHITRA-500G',
-      name: 'Kashmiri Chitra Rajma (Kidney Beans - 500g Pouch)',
-      slug: 'kashmiri-chitra-rajma-500g',
+      sku: 'KM-DAL-RAJMA-CHITRA-1KG',
+      name: 'Kashmiri Chitra Rajma (Kidney Beans - 1kg Bag)',
+      slug: 'kashmiri-chitra-rajma-1kg',
       category: 'Dal & Pulses',
       subCategory: 'Rajma & Chhole',
       brand: 'Tata',
-      unit: '500g Pouch',
-      retailPrice: 78.00,
+      unit: '1kg Bag',
+      retailPrice: 150.00,
       description: 'Soft-boiling authentic speckled Chitra Rajma for Punjabi Rajma Chawal.',
-      searchKeywords: 'rajma 500g, chitra rajma, kidney beans, rajma chawal',
+      searchKeywords: 'rajma 1kg, chitra rajma, kidney beans, rajma chawal',
       image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80',
-      baseRate: 70.00,
+      baseRate: 135.00,
     },
 
     // -------------------------------------------------------------
@@ -961,18 +955,18 @@ async function seed() {
     // 10. SUGAR, SALT & JAGGERY
     // -------------------------------------------------------------
     {
-      sku: 'KM-SALT-TATA-LITE-500G',
-      name: 'Tata Salt Vacuum Evaporated (500g Pouch)',
-      slug: 'tata-salt-vacuum-evaporated-500g',
+      sku: 'KM-SALT-TATA-LITE-1KG',
+      name: 'Tata Salt Vacuum Evaporated (1kg Pouch)',
+      slug: 'tata-salt-vacuum-evaporated-1kg',
       category: 'Sugar, Salt & Jaggery',
       subCategory: 'Iodized Salt',
       brand: 'Tata',
-      unit: '500g Pouch',
-      retailPrice: 14.00,
-      description: 'Desh Ka Namak - pure vacuum evaporated iodized salt in 500g pack.',
-      searchKeywords: 'tata salt 500g, namak, iodized salt',
+      unit: '1kg Pouch',
+      retailPrice: 28.00,
+      description: 'Desh Ka Namak - pure vacuum evaporated iodized salt in 1kg pack.',
+      searchKeywords: 'tata salt 1kg, namak, iodized salt',
       image: 'https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?w=500&auto=format&fit=crop&q=80',
-      baseRate: 12.00,
+      baseRate: 24.00,
     },
     {
       sku: 'KM-SALT-TATA-1KG',
@@ -1534,8 +1528,21 @@ async function seed() {
     { multiplier: 1.02, dir: Direction.RISING, change: 1.2 },
     { multiplier: 1.04, dir: Direction.RISING, change: 2.0 },
   ];
+  // Filter only authentic bulk / 1kg wholesale mandi commodities (Atta, Rice, Dal, Oil, Sugar)
+  // Strictly exclude retail sachets (25g, 50g, 500g, 200ml) and biscuits/snacks
+  const mandiTrackedProducts = createdProducts.filter((p) => {
+    const isWholesaleUnit =
+      p.unit.includes('1kg') ||
+      p.unit.includes('5kg') ||
+      p.unit.includes('10kg') ||
+      p.unit.includes('50kg') ||
+      p.unit.includes('1 Litre') ||
+      p.unit.includes('15 Litre');
+    const isNotSnack = !p.name.includes('Biscuit') && !p.name.includes('Noodles') && !p.name.includes('Chips') && !p.name.includes('Namkeen');
+    return isWholesaleUnit && isNotSnack;
+  });
 
-  for (const p of createdProducts) {
+  for (const p of mandiTrackedProducts) {
     // Connect to at least 4-8 mandis
     const selectedMandis = mandis.slice(0, Math.floor(Math.random() * 4) + 4);
     for (let mi = 0; mi < selectedMandis.length; mi++) {

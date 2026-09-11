@@ -13,7 +13,7 @@ export default function TermsPage() {
       <h1 className="mt-4 text-3xl font-black text-[#073B6F]">Terms & Conditions</h1>
       <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm text-xs sm:text-sm text-slate-600 leading-relaxed space-y-4">
         <h2 className="text-base font-bold text-[#073B6F]">1. Platform Nature & Mandi Rates</h2>
-        <p>Mandi rates published on KiranaMart247 serve as informational wholesale benchmarks. While recorded from authentic trading updates, rates fluctuate based on auction dynamics.</p>
+        <p>Mandi rates published on KiranaMart serve as informational wholesale benchmarks. While recorded from authentic trading updates, rates fluctuate based on auction dynamics.</p>
         <h2 className="text-base font-bold text-[#073B6F] pt-2">2. Retail Orders & Pricing</h2>
         <p>Prices listed on the Kirana Shop are retail consumer prices. Once an order is confirmed, price snapshots are preserved against future changes.</p>
         <h2 className="text-base font-bold text-[#073B6F] pt-2">3. User Conduct</h2>

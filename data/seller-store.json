@@ -258,6 +258,162 @@
         "city": "Delhi",
         "pinCode": "110006"
       }
+    },
+    {
+      "id": "user-1789057762674-8xxb",
+      "mobile": "9876543210",
+      "fullName": "Test Shopkeeper",
+      "role": "SHOPKEEPER",
+      "shopName": "Sharma Dairy & General Store",
+      "shopAddress": "Shop 12, Main Mandi Road, Jaipur",
+      "createdAt": "2026-09-10T16:29:22.674Z",
+      "updatedAt": "2026-09-10T16:29:22.674Z"
+    },
+    {
+      "id": "user-1789057841757-vok8",
+      "fullName": "Shivam",
+      "mobile": "9999991122",
+      "email": "11111@gmail.com",
+      "passwordHash": "$2b$10$2zib23ngE0KaXneeCRc53ebGkmC7lLYvOsPHh0edi61HEDQCLtCsG",
+      "role": "SHOPKEEPER",
+      "active": true,
+      "shopkeeperProfile": {
+        "create": {
+          "shopName": "Kirana ",
+          "shopAddress": "xy mart",
+          "city": "Delhi",
+          "state": "Delhi",
+          "pinCode": "201001",
+          "gstNumber": null,
+          "status": "APPROVED"
+        }
+      },
+      "createdAt": "2026-09-10T16:30:41.757Z",
+      "updatedAt": "2026-09-10T16:30:41.757Z"
+    }
+  ],
+  "demands": [
+    {
+      "id": "dm-1789129794362-nw5a",
+      "demandNumber": "DM-000001",
+      "shopkeeperId": "seller-demo-1",
+      "status": "DELIVERED",
+      "notes": null,
+      "processedAt": "2026-09-11T12:45:45.011Z",
+      "deliveredAt": "2026-09-11T12:45:53.754Z",
+      "createdAt": "2026-09-11T12:29:54.362Z",
+      "updatedAt": "2026-09-11T12:45:53.758Z",
+      "items": [
+        {
+          "id": "item-1789129794362-0",
+          "demandId": "dm-1789129794362-nw5a",
+          "dairyProductId": "dp-1",
+          "dairyProduct": {
+            "id": "dp-1",
+            "brand": "Mother Dairy",
+            "name": "Full Cream Milk",
+            "variant": "500ml",
+            "unit": "Packet",
+            "defaultRate": 32,
+            "active": true,
+            "displayOrder": 1
+          },
+          "requestedQty": 14,
+          "deliveredQty": null,
+          "rate": 32,
+          "amount": null,
+          "createdAt": "2026-09-11T12:29:54.362Z",
+          "updatedAt": "2026-09-11T12:29:54.362Z"
+        },
+        {
+          "id": "item-1789129794362-1",
+          "demandId": "dm-1789129794362-nw5a",
+          "dairyProductId": "dp-2",
+          "dairyProduct": {
+            "id": "dp-2",
+            "brand": "Mother Dairy",
+            "name": "Full Cream Milk",
+            "variant": "1L",
+            "unit": "Packet",
+            "defaultRate": 64,
+            "active": true,
+            "displayOrder": 2
+          },
+          "requestedQty": 6,
+          "deliveredQty": null,
+          "rate": 64,
+          "amount": null,
+          "createdAt": "2026-09-11T12:29:54.362Z",
+          "updatedAt": "2026-09-11T12:29:54.362Z"
+        },
+        {
+          "id": "item-1789129794362-2",
+          "demandId": "dm-1789129794362-nw5a",
+          "dairyProductId": "dp-3",
+          "dairyProduct": {
+            "id": "dp-3",
+            "brand": "Mother Dairy",
+            "name": "Cow Milk",
+            "variant": "500ml",
+            "unit": "Packet",
+            "defaultRate": 29,
+            "active": true,
+            "displayOrder": 3
+          },
+          "requestedQty": 11,
+          "deliveredQty": null,
+          "rate": 29,
+          "amount": null,
+          "createdAt": "2026-09-11T12:29:54.362Z",
+          "updatedAt": "2026-09-11T12:29:54.362Z"
+        }
+      ],
+      "shopkeeper": {
+        "id": "seller-demo-1",
+        "fullName": "Ramesh Gupta (Gupta Kirana Store)",
+        "mobile": "9876543210",
+        "shopkeeperProfile": {
+          "id": "prof-demo-1",
+          "userId": "seller-demo-1",
+          "shopName": "Gupta Kirana & General Store",
+          "shopAddress": "Shop 14, Main Market, Azadpur",
+          "city": "Delhi",
+          "state": "Delhi",
+          "pinCode": "110033",
+          "gstNumber": "07AAAAA0000A1Z5",
+          "status": "APPROVED",
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "updatedAt": "2026-01-01T00:00:00.000Z"
+        }
+      },
+      "statusHistory": [
+        {
+          "id": "hist-1789129794362",
+          "demandId": "dm-1789129794362-nw5a",
+          "status": "NEW",
+          "note": "Demand submitted by shopkeeper.",
+          "changedBy": "seller-demo-1",
+          "createdAt": "2026-09-11T12:29:54.362Z"
+        },
+        {
+          "id": "hist-1789130745012",
+          "demandId": "dm-1789129794362-nw5a",
+          "status": "PROCESSING",
+          "note": "Processing started by admin.",
+          "changedBy": "admin-demo-1",
+          "createdAt": "2026-09-11T12:45:45.012Z"
+        },
+        {
+          "id": "hist-1789130753758",
+          "demandId": "dm-1789129794362-nw5a",
+          "status": "DELIVERED",
+          "note": "Fully delivered by admin.",
+          "changedBy": "admin-demo-1",
+          "createdAt": "2026-09-11T12:45:53.758Z"
+        }
+      ],
+      "receipt": null,
+      "whatsappLogs": []
     }
   ]
 }

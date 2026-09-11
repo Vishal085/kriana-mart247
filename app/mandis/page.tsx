@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Store, MapPin, ArrowRight, ChevronRight } from 'lucide-react';
+import { MandiCardActions } from '@/components/mandis/MandiCardActions';
+import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
 
 export default async function MandisPage() {
   const mandis = await prisma.mandi.findMany({
@@ -24,7 +26,7 @@ export default async function MandisPage() {
         <div>
           <h1 className="text-3xl font-black text-[#073B6F]">Wholesale Mandi Directory</h1>
           <p className="mt-1 text-xs text-slate-500">
-            Explore registered wholesale mandis and track daily APMC market auction rates.
+            Explore 16 registered wholesale mandis across Delhi-NCR and track daily APMC market auction rates.
           </p>
         </div>
       </div>
@@ -56,17 +58,13 @@ export default async function MandisPage() {
               )}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-              <Link
-                href={`/mandis/${mandi.slug}`}
-                className="flex items-center gap-1.5 text-xs font-bold text-[#0B5FA5] hover:underline"
-              >
-                View Today&apos;s Rates <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
+            <MandiCardActions mandi={mandi} />
           </div>
         ))}
       </div>
+
+      {/* Authoritative Sources & Methodology Disclaimer */}
+      <MandiSourcesDisclaimer />
     </main>
   );
 }

@@ -102,20 +102,24 @@ export default function RootLayout({
           <AuthProvider>
             <MandiProvider>
               <CartProvider>
-                <div className="flex min-h-screen flex-col justify-between">
+                <div className="flex min-h-screen flex-col justify-between print:min-h-0 print:block">
                   <div>
                     {/* Sticky Header with Navigation */}
-                    <SiteHeader />
+                    <div className="print:hidden">
+                      <SiteHeader />
+                    </div>
                     {children}
                   </div>
-                  <SiteFooter />
+                  <div className="print:hidden">
+                    <SiteFooter />
+                  </div>
                 </div>
-                {/* Global Slide-over Cart Drawer */}
-                <SlideOverCartDrawer />
-                {/* Mandi AI Assistant */}
-                <MandiAiAssistant />
-                {/* Floating WhatsApp Support */}
-                <WhatsAppFloatingButton />
+                {/* Global Slide-over Cart Drawer, AI Assistant, WhatsApp Floating */}
+                <div className="print:hidden">
+                  <SlideOverCartDrawer />
+                  <MandiAiAssistant />
+                  <WhatsAppFloatingButton />
+                </div>
               </CartProvider>
             </MandiProvider>
           </AuthProvider>

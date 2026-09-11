@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_BRANDS } from './mock-data';
+import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_BRANDS, MOCK_DAIRY_PRODUCTS } from './mock-data';
 
 export interface SellerProductRecord {
   id: string;
@@ -76,6 +76,7 @@ export interface CustomUserRecord {
   avatarUrl?: string | null;
   createdAt: string;
   updatedAt: string;
+  customerProfile?: any;
   shopkeeperProfile?: {
     id: string;
     userId: string;
@@ -95,6 +96,8 @@ interface StoreData {
   products: SellerProductRecord[];
   auditLogs: ProductAuditLogRecord[];
   users: CustomUserRecord[];
+  demands?: any[];
+  demandReceipts?: any[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -416,5 +419,125 @@ export class SellerStore {
     store.users.push(record);
     saveStoreData(store);
     return record;
+  }
+
+  static getDairyProducts(where: any = {}): any[] {
+    let list = [...MOCK_DAIRY_PRODUCTS];
+    if (where?.active !== undefined) {
+      list = list.filter((p) => p.active === where.active);
+    }
+    if (where?.brand) {
+      list = list.filter((p) => p.brand === where.brand);
+    }
+    if (where?.id) {
+      if (typeof where.id === 'string') {
+        list = list.filter((p) => p.id === where.id);
+      } else if (Array.isArray(where.id?.in)) {
+        list = list.filter((p) => where.id.in.includes(p.id));
+      }
+    }
+    return list;
+  }
+
+  static getDemands(where: any = {}): any[] {
+    const store = ensureDataFile();
+    if (!store.demands) store.demands = [];
+    let list = [...store.demands];
+    if (where?.shopkeeperId) {
+      list = list.filter((d) => d.shopkeeperId === where.shopkeeperId);
+    }
+    if (where?.status) {
+      list = list.filter((d) => d.status === where.status);
+    }
+    if (where?.id) {
+      list = list.filter((d) => d.id === where.id);
+    }
+    if (where?.demandNumber) {
+      list = list.filter((d) => d.demandNumber === where.demandNumber);
+    }
+    return list;
+  }
+
+  static createDemand(data: any): any {
+    const store = ensureDataFile();
+    if (!store.demands) store.demands = [];
+    const id = `dm-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const nextNum = (store.demands.length + 1).toString().padStart(6, '0');
+    const demandNumber = data.demandNumber || `DM-${nextNum}`;
+
+    const items = (data.items?.create || []).map((it: any, idx: number) => {
+      const prod = MOCK_DAIRY_PRODUCTS.find((p) => p.id === it.dairyProductId) || {
+        id: it.dairyProductId,
+        name: 'Dairy Product',
+        brand: 'Mother Dairy',
+        unit: 'Packet',
+        defaultRate: 30,
+      };
+      return {
+        id: `item-${Date.now()}-${idx}`,
+        demandId: id,
+        dairyProductId: it.dairyProductId,
+        dairyProduct: prod,
+        requestedQty: Number(it.requestedQty),
+        deliveredQty: null,
+        rate: Number(prod.defaultRate),
+        amount: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    });
+
+    const user = store.users.find((u) => u.id === data.shopkeeperId) || store.users[0];
+
+    const record = {
+      id,
+      demandNumber,
+      shopkeeperId: data.shopkeeperId,
+      status: data.status || 'NEW',
+      notes: data.notes || null,
+      processedAt: null,
+      deliveredAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      items,
+      shopkeeper: {
+        id: user?.id || data.shopkeeperId,
+        fullName: user?.fullName || 'Shopkeeper',
+        mobile: user?.mobile || '9876543210',
+        shopkeeperProfile: user?.shopkeeperProfile || { shopName: 'Kirana Store', shopAddress: 'Main Market' },
+      },
+      statusHistory: [
+        {
+          id: `hist-${Date.now()}`,
+          demandId: id,
+          status: 'NEW',
+          note: 'Demand submitted by shopkeeper.',
+          changedBy: data.shopkeeperId,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+      receipt: null,
+      whatsappLogs: [],
+    };
+
+    store.demands.unshift(record);
+    saveStoreData(store);
+    return record;
+  }
+
+  static updateDemand(id: string, updates: any): any {
+    const store = ensureDataFile();
+    if (!store.demands) store.demands = [];
+    const idx = store.demands.findIndex((d) => d.id === id);
+    if (idx === -1) return null;
+    const current = store.demands[idx];
+    const updated = {
+      ...current,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    store.demands[idx] = updated;
+    saveStoreData(store);
+    return updated;
   }
 }

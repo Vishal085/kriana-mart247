@@ -10,12 +10,12 @@ export default function AboutPage() {
         <span className="text-[#073B6F]">About Us</span>
       </div>
 
-      <h1 className="mt-4 text-3xl font-black text-[#073B6F] sm:text-4xl">About KiranaMart247</h1>
+      <h1 className="mt-4 text-3xl font-black text-[#073B6F] sm:text-4xl">About KiranaMart</h1>
       <p className="mt-2 text-sm text-[#0B5FA5] font-semibold">Today&apos;s Wholesale Rates & Kirana Mandi Platform</p>
 
       <div className="mt-8 space-y-6 text-sm text-slate-600 leading-relaxed rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
         <p>
-          <strong>KiranaMart247</strong> is dedicated to bringing transparency and efficiency to India&apos;s vast kirana and wholesale commodity marketplace. We provide daily price intelligence across major agricultural mandis, enabling retail shop owners, businesses, and households to make informed purchasing decisions.
+          <strong>KiranaMart</strong> is dedicated to bringing transparency and efficiency to India&apos;s vast kirana and wholesale commodity marketplace. We provide daily price intelligence across major agricultural mandis, enabling retail shop owners, businesses, and households to make informed purchasing decisions.
         </p>
 
         <h2 className="text-xl font-black text-[#073B6F] pt-4">Our Core Pillars</h2>
@@ -39,7 +39,7 @@ export default function AboutPage() {
 
         <h2 className="text-xl font-black text-[#073B6F] pt-4">Rate Source & Compliance Notice</h2>
         <p className="text-xs text-slate-500">
-          KiranaMart247 records mandi rates from authorized market entry points and administrative auction benchmarks for analytical reference. We do not claim official government affiliation or represent state APMC boards.
+          KiranaMart records mandi rates from authorized market entry points and administrative auction benchmarks for analytical reference. We do not claim official government affiliation or represent state APMC boards.
         </p>
       </div>
     </main>

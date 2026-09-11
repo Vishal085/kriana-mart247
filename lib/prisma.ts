@@ -30,6 +30,20 @@ function filterMockProducts(where: any = {}): any[] {
     list = list.filter((p) => p.active === where.active);
   }
 
+  // Filter by id / id in array
+  if (where.id) {
+    if (typeof where.id === 'string') {
+      list = list.filter((p) => p.id === where.id);
+    } else if (Array.isArray(where.id?.in)) {
+      list = list.filter((p) => where.id.in.includes(p.id));
+    }
+  }
+
+  // Filter by mandi name / slug
+  if (where.mandi) {
+    list = list.filter((p) => p.mandi === where.mandi);
+  }
+
   // Filter by seller ownership
   if (where.sellerId !== undefined) {
     list = list.filter((p) => p.sellerId === where.sellerId);
@@ -192,13 +206,38 @@ function handleMockQuery(model: string, action: string, args: any[]): any {
 
     case 'mandi':
       if (action === 'findMany') {
-        const take = arg.take ?? MOCK_MANDIS.length;
-        return MOCK_MANDIS.slice(0, take);
+        let list = [...MOCK_MANDIS];
+        if (arg?.where?.active !== undefined) {
+          list = list.filter((m) => m.active === arg.where.active);
+        }
+        list = list.map((m) => {
+          const rates = MOCK_MANDI_RATES.filter((r) => r.mandiId === m.id);
+          return {
+            ...m,
+            rates: arg?.include?.rates ? rates : undefined,
+            _count: { rates: rates.length || m._count?.rates || 16 },
+          };
+        });
+        const take = arg?.take ?? list.length;
+        return list.slice(0, take);
       }
       if (action === 'findUnique' || action === 'findFirst') {
-        if (arg.where?.slug) return MOCK_MANDIS.find((m) => m.slug === arg.where.slug) || null;
-        if (arg.where?.id) return MOCK_MANDIS.find((m) => m.id === arg.where.id) || null;
-        return MOCK_MANDIS[0];
+        let m = null;
+        if (arg?.where?.slug) {
+          const s = arg.where.slug;
+          m = MOCK_MANDIS.find((item) => item.slug === s || (s === 'sahibabad-mandi' && item.id === 'mandi-10')) || null;
+        } else if (arg?.where?.id) {
+          m = MOCK_MANDIS.find((item) => item.id === arg.where.id) || null;
+        } else {
+          m = MOCK_MANDIS[0];
+        }
+        if (!m) return null;
+        const rates = MOCK_MANDI_RATES.filter((r) => r.mandiId === m.id);
+        return {
+          ...m,
+          rates,
+          _count: { rates: rates.length },
+        };
       }
       if (action === 'count') return MOCK_MANDIS.length;
       break;
@@ -367,6 +406,121 @@ function handleMockQuery(model: string, action: string, args: any[]): any {
       if (action === 'count') return 0;
       break;
 
+    case 'dairyProduct':
+      if (action === 'findMany') {
+        const products = SellerStore.getDairyProducts(arg?.where);
+        return products;
+      }
+      if (action === 'findUnique' || action === 'findFirst') {
+        const products = SellerStore.getDairyProducts(arg?.where);
+        return products[0] || null;
+      }
+      if (action === 'count') {
+        return SellerStore.getDairyProducts(arg?.where).length;
+      }
+      break;
+
+    case 'demand':
+      if (action === 'findMany') {
+        const list = SellerStore.getDemands(arg?.where);
+        const take = arg?.take ?? list.length;
+        const skip = arg?.skip ?? 0;
+        return list.slice(skip, skip + take);
+      }
+      if (action === 'findUnique' || action === 'findFirst') {
+        const list = SellerStore.getDemands(arg?.where);
+        return list[0] || null;
+      }
+      if (action === 'create') {
+        return SellerStore.createDemand(arg.data);
+      }
+      if (action === 'update') {
+        return SellerStore.updateDemand(arg?.where?.id, arg.data);
+      }
+      if (action === 'count') {
+        return SellerStore.getDemands(arg?.where).length;
+      }
+      if (action === 'groupBy') {
+        const list = SellerStore.getDemands(arg?.where);
+        const groups: Record<string, number> = {};
+        for (const d of list) {
+          groups[d.status] = (groups[d.status] || 0) + 1;
+        }
+        return Object.entries(groups).map(([status, count]) => ({ status, _count: { status: count } }));
+      }
+      break;
+
+    case 'demandItem':
+      if (action === 'findMany') return [];
+      if (action === 'create') return { id: `item-${Date.now()}`, ...arg.data };
+      if (action === 'createMany') {
+        const items = arg.data || [];
+        if (items.length > 0 && items[0].demandId) {
+          const demandId = items[0].demandId;
+          const mappedItems = items.map((it: any, idx: number) => {
+            const prod = SellerStore.getDairyProducts().find((p: any) => p.id === it.dairyProductId) || {
+              id: it.dairyProductId,
+              name: 'Dairy Product',
+              brand: 'Mother Dairy',
+              unit: 'Packet',
+              defaultRate: 30,
+            };
+            return {
+              id: `item-${Date.now()}-${idx}`,
+              demandId,
+              dairyProductId: it.dairyProductId,
+              dairyProduct: prod,
+              requestedQty: Number(it.requestedQty),
+              deliveredQty: null,
+              rate: Number(prod.defaultRate),
+              amount: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+          });
+          SellerStore.updateDemand(demandId, { items: mappedItems });
+        }
+        return { count: (arg.data || []).length };
+      }
+      if (action === 'update') return { id: arg?.where?.id, ...arg.data };
+      if (action === 'deleteMany') return { count: 1 };
+      break;
+
+    case 'demandReceipt':
+      if (action === 'create') return { id: `rcp-${Date.now()}`, ...arg.data };
+      if (action === 'findUnique' || action === 'findFirst') return null;
+      if (action === 'findMany') return [];
+      break;
+
+    case 'demandStatusHistory':
+      if (action === 'create') {
+        if (arg?.data?.demandId) {
+          const demandId = arg.data.demandId;
+          const target = SellerStore.getDemands().find((d: any) => d.id === demandId);
+          if (target) {
+            const history = target.statusHistory || [];
+            const newEntry = {
+              id: `hist-${Date.now()}`,
+              ...arg.data,
+              createdAt: new Date().toISOString(),
+            };
+            SellerStore.updateDemand(demandId, {
+              statusHistory: [...history, newEntry],
+              ...(arg.data.status ? { status: arg.data.status } : {}),
+            });
+            return newEntry;
+          }
+        }
+        return { id: `hist-${Date.now()}`, ...arg.data };
+      }
+      if (action === 'findMany') return [];
+      break;
+
+    case 'demandWhatsAppLog':
+      if (action === 'create') return { id: `walog-${Date.now()}`, ...arg.data };
+      if (action === 'findMany') return [];
+      break;
+
     default:
       if (action === 'findMany') return [];
       if (action === 'count') return 0;
@@ -410,8 +564,41 @@ function createModelProxy(modelName: string, rawModel: any) {
 export const prisma: any = new Proxy(rawPrisma, {
   get(target, propKey) {
     const key = String(propKey);
+
+    if (key === '$transaction') {
+      return async (arg: any) => {
+        try {
+          if (typeof (target as any).$transaction === 'function') {
+            return await (target as any).$transaction(arg);
+          }
+        } catch (error: any) {
+          // If DB is offline or unreachable, execute the transaction callback using our proxied prisma client
+          if (typeof arg === 'function') {
+            return await arg(prisma);
+          }
+          if (Array.isArray(arg)) {
+            return await Promise.all(arg);
+          }
+          throw error;
+        }
+        if (typeof arg === 'function') {
+          return await arg(prisma);
+        }
+        if (Array.isArray(arg)) {
+          return await Promise.all(arg);
+        }
+        return null;
+      };
+    }
+
+    if (key === '$connect' || key === '$disconnect') {
+      return async () => {};
+    }
+
     if (key.startsWith('$')) {
-      return (target as any)[key];
+      return typeof (target as any)[key] === 'function'
+        ? (target as any)[key].bind(target)
+        : (target as any)[key];
     }
     return createModelProxy(key, (target as any)[key]);
   },

@@ -319,7 +319,7 @@ export default function EditProductPage() {
         <div className="flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs font-medium text-amber-900 shadow-2xs">
           <Lock className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
           <div>
-            <span className="font-bold">Under Administrative Review:</span> This listing is currently being evaluated by KiranaMart247 moderators. Direct edits are disabled until the review is finished.
+            <span className="font-bold">Under Administrative Review:</span> This listing is currently being evaluated by KiranaMart moderators. Direct edits are disabled until the review is finished.
           </div>
         </div>
       )}

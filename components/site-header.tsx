@@ -28,6 +28,7 @@ import { BrandMark } from './brand-mark';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { GlobalSearchModal } from './search/GlobalSearchModal';
+import { MandiSelector } from './mandis/MandiSelector';
 
 const LANGUAGES = [
   { id: 'en', label: 'English', native: 'English', flag: '🇬🇧' },
@@ -97,27 +98,28 @@ export function SiteHeader() {
   };
 
   const navLinks = [
-    { label: 'Home', href: '/' },
     { label: "Today's Rates", href: '/mandi-rates', icon: TrendingUp },
-    { label: 'Mandis', href: '/mandis', icon: Store },
     { label: 'Wholesale', href: '/shop', icon: ShoppingBag },
-    { label: 'Compare', href: '/compare', icon: Scale },
     { label: 'Deals', href: '/shop?deals=true', icon: Sparkles },
-    { label: 'Orders', href: '/dashboard/customer/orders', icon: Package },
   ];
 
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 lg:px-6">
-          {/* Left: Brand Logo + Desktop Nav */}
-          <div className="flex items-center gap-4 2xl:gap-6 shrink-0">
+          {/* Left: Brand Logo + Mandi Selector + Desktop Nav */}
+          <div className="flex items-center gap-3 2xl:gap-5 shrink-0">
             <Link href="/" className="shrink-0 flex items-center">
               <BrandMark size="md" />
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden xl:flex items-center gap-1 2xl:gap-1.5 text-xs font-bold text-slate-700">
+            {/* Desktop Mandi Selector */}
+            <div className="hidden md:flex items-center shrink-0">
+              <MandiSelector variant="header" />
+            </div>
+
+            {/* Desktop Navigation Links (Clean 3 options) */}
+            <nav className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-700">
               {navLinks.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -139,30 +141,19 @@ export function SiteHeader() {
 
           {/* Right Section: Role CTA, Smart Search, Cart Drawer Button, Profile, Mobile Menu */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Prominent Action Button for Shopkeepers, Admins & Guests */}
-            {user?.role === 'SHOPKEEPER' ? (
-              <Link
-                href="/dashboard/seller/products/new"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#073B6F] px-3.5 py-1.5 text-xs font-black text-white shadow-xs hover:bg-[#0B5FA5] transition"
-              >
-                <Store className="h-3.5 w-3.5 text-[#39A9E8]" />
-                <span>List Your Product</span>
-              </Link>
-            ) : user?.role === 'ADMIN' ? (
+            {/* Mobile Mandi Selector */}
+            <div className="md:hidden flex items-center">
+              <MandiSelector variant="compact" />
+            </div>
+
+            {/* Admin shortcut if logged in */}
+            {user?.role === 'ADMIN' && (
               <Link
                 href="/dashboard/admin/approvals"
                 className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-black text-white shadow-xs hover:bg-amber-600 transition"
               >
                 <Shield className="h-3.5 w-3.5" />
                 <span>Approvals</span>
-              </Link>
-            ) : (
-              <Link
-                href="/login/seller"
-                className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-[#073B6F]/20 bg-[#EAF5FC] px-3 py-1.5 text-xs font-bold text-[#073B6F] hover:bg-[#d6ecfa] transition"
-              >
-                <Store className="h-3.5 w-3.5 text-[#073B6F]" />
-                <span>List Your Product</span>
               </Link>
             )}
 
@@ -242,7 +233,7 @@ export function SiteHeader() {
                         </div>
                       ) : (
                         <div className="border-b border-slate-100 p-2.5 text-center">
-                          <p className="text-xs font-bold text-slate-800">Welcome to KiranaMart.com</p>
+                          <p className="text-xs font-bold text-slate-800">Welcome to KiranaMart</p>
                           <p className="text-[10px] text-slate-500 mb-2">Access wholesale pricing & order tracking</p>
                           <Link
                             href="/login/customer"
@@ -429,7 +420,15 @@ export function SiteHeader() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {/* Mobile Mandi Selector inside drawer */}
+              <div className="rounded-2xl bg-slate-50 p-2.5 border border-slate-200">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 px-1">
+                  Active Mandi Hub
+                </div>
+                <MandiSelector variant="hero" />
+              </div>
+
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
