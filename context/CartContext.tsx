@@ -190,14 +190,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // 2. Local / Guest optimistic cart
-    const prod = MOCK_PRODUCTS.find((p) => p.id === productId);
+    // 2. Local / Guest optimistic cart: try API first, then fallback to MOCK_PRODUCTS
+    let prod: any = null;
+    try {
+      const res = await fetch(`/api/products/${productId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.product) {
+          prod = data.product;
+        }
+      }
+    } catch (e) {
+      console.warn('API product lookup notice:', e);
+    }
+
+    if (!prod) {
+      prod = MOCK_PRODUCTS.find((p) => p.id === productId);
+    }
+
     if (!prod) {
       return { success: false, error: 'Product not found' };
     }
 
     const currentItems = cart?.items ? [...cart.items] : [];
     const existingIndex = currentItems.findIndex((i) => i.productId === productId);
+
+    const brandName = typeof prod.brand === 'object' ? prod.brand?.name : (prod.brand || 'KiranaMart');
+    const categoryName = typeof prod.category === 'object' ? prod.category?.name : (prod.category || 'General');
+    const productImage = prod.images?.[0]?.url || prod.image || '/products/placeholder.svg';
 
     if (existingIndex > -1) {
       const existing = currentItems[existingIndex];
@@ -220,12 +240,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           slug: prod.slug,
           unit: prod.unit,
           retailPrice: Number(prod.retailPrice),
-          minimumQuantity: prod.minimumQuantity,
-          maximumQuantity: prod.maximumQuantity,
-          brand: prod.brand.name,
-          category: prod.category.name,
-          image: prod.images[0]?.url || '/products/placeholder.svg',
-          active: prod.active,
+          minimumQuantity: prod.minimumQuantity || 1,
+          maximumQuantity: prod.maximumQuantity || null,
+          brand: brandName,
+          category: categoryName,
+          image: productImage,
+          active: prod.active ?? true,
         },
       });
     }

@@ -168,6 +168,20 @@ export class OrderService {
       return newOrder;
     });
 
+    // Trigger in-app notifications (non-blocking)
+    NotificationService.createNotification(
+      targetUserId,
+      'ORDER' as any,
+      `Order #${order.orderNumber} Placed`,
+      `Your order #${order.orderNumber} for ₹${order.total} has been received successfully.`
+    ).catch((e) => console.warn('Order in-app notification error:', e?.message || e));
+
+    NotificationService.notifyAdmins(
+      'ORDER' as any,
+      `New Order: #${order.orderNumber}`,
+      `New order received from ${order.deliveryName} for ₹${order.total} (${order.paymentMethod}).`
+    ).catch((e) => console.warn('Admin notification error:', e?.message || e));
+
     // If COD, send immediate WhatsApp notification and return without Razorpay order
     if (isCOD) {
       if (input.whatsappOptIn) {

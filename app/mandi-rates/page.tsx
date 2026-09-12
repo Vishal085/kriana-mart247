@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   TrendingUp,
@@ -14,6 +14,10 @@ import {
   ChevronRight,
   Bell,
   Scale,
+  MapPin,
+  CheckCircle2,
+  ShieldCheck,
+  AlertCircle,
 } from 'lucide-react';
 import { useMandi } from '@/context/MandiContext';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
@@ -21,6 +25,14 @@ import { PriceAlertModal } from '@/components/mandis/PriceAlertModal';
 import { MandiRateRowSkeleton } from '@/components/ui/Skeleton';
 import { MandiCommodityRowAction } from '@/components/mandis/MandiCommodityRowAction';
 import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
+import { normalizeRate, getRateSourceMeta } from '@/lib/rates';
+
+const STATES = [
+  { id: '', label: 'All States (16 Mandis)' },
+  { id: 'Delhi', label: 'Delhi (9 Mandis)' },
+  { id: 'Uttar Pradesh', label: 'Uttar Pradesh (3 Mandis)' },
+  { id: 'Haryana', label: 'Haryana (4 Mandis)' },
+];
 
 export default function MandiRatesPage() {
   const { mandis, selectedMandi, selectMandiById } = useMandi();
@@ -43,28 +55,53 @@ export default function MandiRatesPage() {
   } | null>(null);
 
   // Filters
+  const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedMandiId, setSelectedMandiId] = useState<string>('');
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [unitFilter, setUnitFilter] = useState('');
   const [direction, setDirection] = useState('');
   const [sortBy, setSortBy] = useState<'updatedAt' | 'rate' | 'change' | 'changePercent' | 'name'>('updatedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Filter mandis based on selected state
+  const stateFilteredMandis = useMemo(() => {
+    if (!selectedState) return mandis;
+    return mandis.filter(
+      (m) => m.state?.toLowerCase() === selectedState.toLowerCase()
+    );
+  }, [mandis, selectedState]);
+
+  // Handle state filter change
+  const handleStateChange = (stateVal: string) => {
+    setSelectedState(stateVal);
+    // If current selected mandi is not in new state, reset it
+    if (stateVal && selectedMandiId) {
+      const match = mandis.find(
+        (m) => m.id === selectedMandiId && m.state?.toLowerCase() === stateVal.toLowerCase()
+      );
+      if (!match) setSelectedMandiId('');
+    }
+  };
 
   const fetchRates = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        ...(selectedMandi ? { mandiId: selectedMandi.id } : {}),
+        ...(selectedMandiId ? { mandiId: selectedMandiId } : {}),
+        ...(selectedState ? { state: selectedState } : {}),
         ...(categoryId ? { categoryId } : {}),
+        ...(unitFilter ? { unit: unitFilter } : {}),
         ...(direction ? { direction } : {}),
         ...(search ? { search } : {}),
         sortBy,
         sortOrder,
-        limit: '50',
+        limit: '60',
       });
 
       const [ratesRes, summaryRes, catsRes] = await Promise.all([
         fetch(`/api/rates?${params.toString()}`),
-        fetch(`/api/rates/today${selectedMandi ? `?mandiId=${selectedMandi.id}` : ''}`),
+        fetch(`/api/rates/today${selectedMandiId ? `?mandiId=${selectedMandiId}` : ''}`),
         fetch('/api/categories'),
       ]);
 
@@ -94,11 +131,23 @@ export default function MandiRatesPage() {
 
   useEffect(() => {
     fetchRates();
-  }, [selectedMandi, categoryId, direction, sortBy, sortOrder]);
+  }, [selectedState, selectedMandiId, categoryId, unitFilter, direction, sortBy, sortOrder]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchRates();
+  };
+
+  // Helper to categorize market type
+  const getMarketTypeBadge = (mandiName: string) => {
+    const name = mandiName.toLowerCase();
+    if (name.includes('apmc') || name.includes('azadpur') || name.includes('narela') || name.includes('okhla') || name.includes('ghazipur') || name.includes('keshopur')) {
+      return { label: 'APMC Terminal', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
+    }
+    if (name.includes('naya bazar') || name.includes('khari baoli')) {
+      return { label: 'Wholesale Hub', bg: 'bg-sky-50 text-sky-700 border-sky-200' };
+    }
+    return { label: 'Grain Mandi', bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
   };
 
   return (
@@ -109,43 +158,78 @@ export default function MandiRatesPage() {
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
             <Link href="/" className="hover:text-[#0B5FA5]">Home</Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-[#073B6F]">Mandi Rates</span>
+            <span className="text-[#073B6F]">Wholesale Mandi Terminal</span>
           </div>
-          <h1 className="mt-2 text-3xl font-black text-[#073B6F]">
-            Today&apos;s Mandi Wholesale Rates
-          </h1>
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            <h1 className="text-3xl font-black text-[#073B6F]">
+              Wholesale Kirana Mandi Terminal
+            </h1>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Live Market Intelligence
+            </span>
+          </div>
           <p className="mt-1 text-xs text-slate-500">
-            Live commodity prices, daily price changes, and auction movements across authorized mandis.
+            State-wise physical mandi rates, authentic APMC & trade chamber auction records with per-kg normalized spreads.
           </p>
         </div>
 
-        {/* Mandi Selector Quick Dropdown */}
+        {/* State Selection Bar */}
+        <div className="flex flex-wrap items-center gap-2">
+          {STATES.map((st) => (
+            <button
+              key={st.id}
+              onClick={() => handleStateChange(st.id)}
+              className={`rounded-xl px-3.5 py-2 text-xs font-bold transition shadow-xs ${
+                selectedState === st.id
+                  ? 'bg-[#073B6F] text-white shadow-md'
+                  : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              {st.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Mandi Quick Selector */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 shadow-2xs">
         <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-slate-600">Mandi:</label>
+          <MapPin className="h-4 w-4 text-[#0B5FA5]" />
+          <span className="text-xs font-bold text-slate-700">Filter by Specific Market:</span>
           <select
-            value={selectedMandi?.id || ''}
-            onChange={(e) => {
-              if (e.target.value) selectMandiById(e.target.value);
-            }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-[#073B6F] outline-none shadow-sm focus:border-[#39A9E8]"
+            value={selectedMandiId}
+            onChange={(e) => setSelectedMandiId(e.target.value)}
+            className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-[#073B6F] outline-none shadow-xs focus:border-[#39A9E8]"
           >
-            {mandis.map((m) => (
+            <option value="">All Markets in {selectedState || 'Delhi-NCR'} ({stateFilteredMandis.length})</option>
+            {stateFilteredMandis.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.name} ({m.city})
+                {m.name} ({m.city}, {m.state})
               </option>
             ))}
           </select>
         </div>
+
+        {selectedMandiId && (
+          <button
+            onClick={() => setSelectedMandiId('')}
+            className="text-xs font-bold text-[#0B5FA5] hover:underline"
+          >
+            Show All Mandis in {selectedState || 'Region'} ✕
+          </button>
+        )}
       </div>
 
       {/* Market Summary Cards */}
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Tracked Items</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Tracked Quotes</span>
             <BarChart3 className="h-4 w-4 text-[#0B5FA5]" />
           </div>
           <div className="mt-2 text-2xl font-black text-[#073B6F]">{summary.total}</div>
+          <p className="mt-1 text-[11px] text-slate-400">Authentic auction lots</p>
         </div>
 
         <button
@@ -161,6 +245,7 @@ export default function MandiRatesPage() {
             <TrendingUp className="h-4 w-4" />
           </div>
           <div className="mt-2 text-2xl font-black text-emerald-600">{summary.rising}</div>
+          <p className="mt-1 text-[11px] text-emerald-600/70">Upward market pressure</p>
         </button>
 
         <button
@@ -176,6 +261,7 @@ export default function MandiRatesPage() {
             <TrendingDown className="h-4 w-4" />
           </div>
           <div className="mt-2 text-2xl font-black text-red-600">{summary.falling}</div>
+          <p className="mt-1 text-[11px] text-red-600/70">Discounted procurement</p>
         </button>
 
         <button
@@ -187,22 +273,23 @@ export default function MandiRatesPage() {
           }`}
         >
           <div className="flex items-center justify-between text-slate-600">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Stable</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Stable Rates</span>
             <BarChart3 className="h-4 w-4" />
           </div>
           <div className="mt-2 text-2xl font-black text-slate-700">{summary.stable}</div>
+          <p className="mt-1 text-[11px] text-slate-400">Zero price variation</p>
         </button>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="mandi-filter-grid grid gap-3 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto]">
           {/* Search Input */}
           <form onSubmit={handleSearchSubmit} className="relative">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search commodity or SKU..."
+              placeholder="Search commodity or variety..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#39A9E8] focus:bg-white"
@@ -223,16 +310,18 @@ export default function MandiRatesPage() {
             ))}
           </select>
 
-          {/* Direction Filter */}
+          {/* Unit Filter */}
           <select
-            value={direction}
-            onChange={(e) => setDirection(e.target.value)}
+            value={unitFilter}
+            onChange={(e) => setUnitFilter(e.target.value)}
             className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#39A9E8]"
           >
-            <option value="">All Market Trends</option>
-            <option value="RISING">📈 Rising Only</option>
-            <option value="FALLING">📉 Falling Only</option>
-            <option value="STABLE">➖ Stable Only</option>
+            <option value="">All Packaging Units</option>
+            <option value="50kg Bag">50kg Wholesale Bori</option>
+            <option value="15 Litre Tin">15L Wholesale Tin</option>
+            <option value="10kg Bag">10kg Bag</option>
+            <option value="1kg Bag">1kg Pack</option>
+            <option value="500g Bag">500g Pack</option>
           </select>
 
           {/* Sort By */}
@@ -245,7 +334,7 @@ export default function MandiRatesPage() {
             }}
             className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#39A9E8]"
           >
-            <option value="updatedAt-desc">Recently Updated</option>
+            <option value="updatedAt-desc">Recently Quoted</option>
             <option value="rate-desc">Highest Rate First</option>
             <option value="rate-asc">Lowest Rate First</option>
             <option value="changePercent-desc">Biggest Gainers</option>
@@ -255,8 +344,11 @@ export default function MandiRatesPage() {
 
           <button
             onClick={() => {
+              setSelectedState('');
+              setSelectedMandiId('');
               setSearch('');
               setCategoryId('');
+              setUnitFilter('');
               setDirection('');
               setSortBy('updatedAt');
               setSortOrder('desc');
@@ -274,14 +366,14 @@ export default function MandiRatesPage() {
           <table className="min-w-full text-left text-xs">
             <thead className="bg-[#EAF5FC] text-[#073B6F] font-black uppercase tracking-wider">
               <tr>
-                <th className="px-4 py-3.5">Commodity</th>
-                <th className="px-4 py-3.5">Category</th>
-                <th className="px-4 py-3.5">Mandi</th>
-                <th className="px-4 py-3.5">Unit</th>
-                <th className="px-4 py-3.5">Today&apos;s Rate</th>
+                <th className="px-4 py-3.5">Commodity & Variety</th>
+                <th className="px-4 py-3.5">Mandi / State</th>
+                <th className="px-4 py-3.5">Market Type</th>
+                <th className="px-4 py-3.5">Wholesale Rate (Lot Unit)</th>
+                <th className="px-4 py-3.5">Normalized Equivalent</th>
                 <th className="px-4 py-3.5">Previous</th>
-                <th className="px-4 py-3.5">Change (₹)</th>
-                <th className="px-4 py-3.5">Trend</th>
+                <th className="px-4 py-3.5">Movement</th>
+                <th className="px-4 py-3.5">Source & Verification</th>
                 <th className="px-4 py-3.5 text-right">Action</th>
               </tr>
             </thead>
@@ -295,81 +387,151 @@ export default function MandiRatesPage() {
                   <MandiRateRowSkeleton />
                 </>
               )}
-              {rates.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/80 transition">
-                  <td className="px-4 py-3.5 font-bold text-[#073B6F]">
-                    <Link
-                      href={`/products/${row.product.slug}`}
-                      className="hover:underline flex items-center gap-1.5"
-                    >
-                      {row.product.name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3.5 text-slate-600">
-                    {row.product.category.name}
-                  </td>
-                  <td className="px-4 py-3.5 font-medium text-slate-700">
-                    {row.mandi.name}
-                  </td>
-                  <td className="px-4 py-3.5 font-semibold text-slate-500">
-                    {row.unit}
-                  </td>
-                  <td className="px-4 py-3.5 font-black text-slate-900 text-sm">
-                    ₹{Number(row.currentRate).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3.5 text-slate-500 font-medium">
-                    ₹{Number(row.previousRate).toFixed(2)}
-                  </td>
-                  <td
-                    className={`px-4 py-3.5 font-bold ${
-                      row.direction === 'RISING'
-                        ? 'text-emerald-600'
-                        : row.direction === 'FALLING'
-                        ? 'text-red-600'
-                        : 'text-slate-500'
-                    }`}
-                  >
-                    ₹{Number(row.absoluteChange).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <RateTrendBadge
-                      direction={row.direction}
-                      percentage={Number(row.percentageChange)}
-                      size="sm"
-                    />
-                  </td>
-                  <td className="px-4 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() =>
-                          setAlertItem({
-                            commodityName: row.product.name,
-                            mandiName: row.mandi.name,
-                            currentPrice: Number(row.currentRate),
-                            unit: row.unit,
-                            productId: row.productId,
-                            mandiId: row.mandiId,
-                          })
-                        }
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition"
-                        title="Set Mandi Price Alert"
-                        aria-label="Set Mandi Price Alert"
+              {rates.map((row) => {
+                const norm = normalizeRate(row.currentRate, row.unit);
+                const sourceMeta = getRateSourceMeta(row);
+                const marketType = getMarketTypeBadge(row.mandi.name);
+
+                return (
+                  <tr key={row.id} className="hover:bg-slate-50/80 transition">
+                    {/* Commodity */}
+                    <td className="px-4 py-3.5">
+                      <Link
+                        href={`/products/${row.product.slug}`}
+                        className="font-bold text-[#073B6F] hover:underline flex flex-col"
                       >
-                        <Bell className="h-4 w-4" />
-                      </button>
-                      <MandiCommodityRowAction
-                        product={row.product}
-                        mandiRate={Number(row.currentRate)}
-                        unit={row.unit}
+                        <span>{row.product.name}</span>
+                        <span className="text-[11px] font-medium text-slate-500">
+                          {row.product.category?.name || 'Kirana Commodity'}
+                        </span>
+                      </Link>
+                    </td>
+
+                    {/* Mandi / State */}
+                    <td className="px-4 py-3.5">
+                      <div className="font-bold text-slate-800">{row.mandi.name}</div>
+                      <div className="text-[11px] font-semibold text-slate-500">
+                        {row.mandi.city}, {row.mandi.state}
+                      </div>
+                    </td>
+
+                    {/* Market Type */}
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-bold ${marketType.bg}`}>
+                        {marketType.label}
+                      </span>
+                    </td>
+
+                    {/* Wholesale Rate (Lot Unit) */}
+                    <td className="px-4 py-3.5">
+                      <div className="font-black text-slate-900 text-sm">
+                        ₹{Number(row.currentRate).toFixed(2)}
+                      </div>
+                      <div className="text-[10px] font-bold text-slate-500 uppercase">
+                        per {row.unit}
+                      </div>
+                    </td>
+
+                    {/* Normalized Equivalent */}
+                    <td className="px-4 py-3.5">
+                      {norm.displayText ? (
+                        <span className="inline-flex rounded-lg bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-800">
+                          {norm.displayText}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+
+                    {/* Previous Rate */}
+                    <td className="px-4 py-3.5 text-slate-500 font-medium">
+                      ₹{Number(row.previousRate).toFixed(2)}
+                    </td>
+
+                    {/* Movement */}
+                    <td className="px-4 py-3.5">
+                      <RateTrendBadge
+                        direction={row.direction}
+                        percentage={Number(row.percentageChange)}
+                        size="sm"
                       />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+
+                    {/* Source & Verification Status */}
+                    <td className="px-4 py-3.5">
+                      <div className="flex flex-col gap-0.5">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+                            sourceMeta.statusColor === 'emerald'
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : sourceMeta.statusColor === 'blue'
+                              ? 'bg-sky-50 text-sky-700'
+                              : 'bg-amber-50 text-amber-700'
+                          }`}
+                        >
+                          <ShieldCheck className="h-3 w-3" />
+                          {sourceMeta.statusLabel}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {sourceMeta.freshnessLabel}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Action */}
+                    <td className="px-4 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() =>
+                            setAlertItem({
+                              commodityName: row.product.name,
+                              mandiName: row.mandi.name,
+                              currentPrice: Number(row.currentRate),
+                              unit: row.unit,
+                              productId: row.productId,
+                              mandiId: row.mandiId,
+                            })
+                          }
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition"
+                          title="Set Mandi Price Alert"
+                          aria-label="Set Mandi Price Alert"
+                        >
+                          <Bell className="h-4 w-4" />
+                        </button>
+                        <MandiCommodityRowAction
+                          product={row.product}
+                          mandiRate={Number(row.currentRate)}
+                          unit={row.unit}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
               {rates.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-slate-400">
-                    No commodity rates match your current search/filter parameters.
+                  <td colSpan={9} className="px-4 py-12 text-center">
+                    <div className="mx-auto flex max-w-md flex-col items-center">
+                      <AlertCircle className="h-8 w-8 text-amber-500 mb-2" />
+                      <p className="text-sm font-bold text-slate-700">
+                        Data currently unavailable for selected mandi & filter
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        KiranaMart247 never generates synthetic or fake prices. Rates appear once authentic APMC or trade chamber market reports are verified.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSelectedState('');
+                          setSelectedMandiId('');
+                          setCategoryId('');
+                          setSearch('');
+                          setUnitFilter('');
+                        }}
+                        className="mt-4 rounded-xl bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5]"
+                      >
+                        Clear Filters
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -381,9 +543,9 @@ export default function MandiRatesPage() {
       {/* Compare Mandis Floating CTA Banner */}
       <div className="compare-banner mt-8 rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
         <div>
-          <h3 className="text-lg font-black font-heading">Looking for the lowest rate in Delhi?</h3>
+          <h3 className="text-lg font-black font-heading">Need to analyze mandi price spreads?</h3>
           <p className="text-xs text-slate-200 mt-0.5">
-            Compare wholesale rates across all 16 Delhi-NCR APMC & terminal mandis side-by-side with interactive spread charts.
+            Compare wholesale rates across all 16 Delhi, UP, and Haryana APMC & terminal mandis side-by-side with live spreads.
           </p>
         </div>
         <Link

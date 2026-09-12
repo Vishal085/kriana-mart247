@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireCustomer, getCurrentSessionUser } from '@/lib/auth';
+import { requireCustomer } from '@/lib/auth';
 import { OrderService } from '@/services/orders.service';
 import { checkoutSchema } from '@/validators';
 
@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const user = await getCurrentSessionUser();
+    const user = await requireCustomer();
     const body = await request.json();
     const parsed = checkoutSchema.safeParse(body);
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const order = await OrderService.createOrder(user?.id || '', parsed.data);
+    const order = await OrderService.createOrder(user.id, parsed.data);
     return NextResponse.json({ message: 'Order placed successfully', order }, { status: 201 });
   } catch (error: any) {
     const errorMsg =

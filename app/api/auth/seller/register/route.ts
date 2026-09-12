@@ -1,25 +1,19 @@
 import { NextResponse } from 'next/server';
 import { AuthService } from '@/services/auth.service';
 import { setSessionCookie } from '@/lib/auth';
+import { sellerRegisterSchema } from '@/validators';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { fullName, mobile, email, password, shopName, shopAddress, city, state, pinCode, gstNumber } = body;
+    const parsed = sellerRegisterSchema.safeParse(body);
 
-    if (!fullName || !mobile || !password || !shopName || !shopAddress || !city) {
-      return NextResponse.json(
-        { error: 'Please provide all required fields: Full Name, Mobile, Password, Shop Name, Address, and City' },
-        { status: 400 }
-      );
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message || 'Invalid registration details';
+      return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'Password must be at least 6 characters long' },
-        { status: 400 }
-      );
-    }
+    const { fullName, mobile, email, password, shopName, shopAddress, city, state, pinCode, gstNumber } = parsed.data;
 
     const user = await AuthService.registerShopkeeper({
       fullName,

@@ -96,6 +96,12 @@ export class AuthService {
   }
 
   static async loginAdmin(input: z.infer<typeof adminLoginSchema>) {
+    // Server-side admin email domain restriction
+    const adminDomain = '@kiranamart247.com';
+    if (!input.email.toLowerCase().endsWith(adminDomain)) {
+      throw new Error('Admin access is restricted to authorized accounts only');
+    }
+
     const user = await prisma.user.findFirst({
       where: {
         role: Role.ADMIN,
@@ -204,24 +210,7 @@ export class AuthService {
     });
 
     if (!user) {
-      // Also allow logging in with pre-seeded demo seller credentials even if offline
-      if (input.identifier === 'shopkeeper@kiranamart247.com' && input.password === 'shopkeeper123') {
-        return {
-          id: 'seller-demo-1',
-          fullName: 'Ramesh Gupta (Gupta Kirana Store)',
-          email: 'shopkeeper@kiranamart247.com',
-          mobile: '9876543210',
-          role: Role.SHOPKEEPER,
-          active: true,
-          shopkeeperProfile: {
-            shopName: 'Gupta Kirana & General Store',
-            shopAddress: 'Shop 14, Main Market, Azadpur',
-            city: 'Delhi',
-            status: 'APPROVED',
-          },
-        };
-      }
-      throw new Error('Invalid shopkeeper mobile/email or password');
+      throw new Error('Invalid credentials. Please check your mobile/email and password.');
     }
 
     if (!user.active) {

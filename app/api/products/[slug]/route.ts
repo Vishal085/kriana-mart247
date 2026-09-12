@@ -10,7 +10,14 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const mandiId = searchParams.get('mandiId') || undefined;
 
-    const product = await ProductService.getBySlug(slug, mandiId);
+    let product = await ProductService.getBySlug(slug, mandiId);
+    if (!product) {
+      const byId = await ProductService.getById(slug);
+      if (byId) {
+        product = byId as any;
+      }
+    }
+
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }

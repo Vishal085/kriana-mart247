@@ -20,6 +20,8 @@ export async function GET() {
         role: true,
         active: true,
         customerProfile: true,
+        shopkeeperProfile: true,
+        adminProfile: true,
       },
     });
 

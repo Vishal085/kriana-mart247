@@ -42,7 +42,7 @@ interface SuccessDetails {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { cart, refreshCart, clearCart } = useCart();
 
   const [formData, setFormData] = useState({
@@ -75,6 +75,50 @@ export default function CheckoutPage() {
       }));
     }
   }, [user]);
+
+  if (authLoading) {
+    return (
+      <main className="flex min-h-[60vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#073B6F] border-t-transparent" />
+      </main>
+    );
+  }
+
+  // Require customer login before checking out
+  if (!user && paymentState !== 'success') {
+    return (
+      <main className="mx-auto max-w-lg px-4 py-16 text-center">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-[#073B6F]">
+            <Lock className="h-7 w-7" />
+          </div>
+          <h1 className="mt-4 text-2xl font-black text-[#073B6F]">Sign In to Complete Checkout</h1>
+          <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+            Please log in or register a customer account to place your order. Your {cart?.items?.length || 0} cart item(s) are securely saved!
+          </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Link
+              href="/login/customer?redirect=/checkout"
+              className="flex-1 rounded-xl bg-[#073B6F] py-3 text-xs font-bold text-white shadow-md transition hover:bg-[#0B5FA5]"
+            >
+              Sign In to Account
+            </Link>
+            <Link
+              href="/register/customer?redirect=/checkout"
+              className="flex-1 rounded-xl border border-slate-200 bg-slate-50 py-3 text-xs font-bold text-slate-700 hover:bg-slate-100 transition"
+            >
+              Register as Customer
+            </Link>
+          </div>
+          <div className="mt-4">
+            <Link href="/shop" className="text-xs font-bold text-[#0B5FA5] hover:underline">
+              ← Return to Kirana Shop
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if ((!cart || cart.items.length === 0) && paymentState !== 'success') {
     return (
@@ -125,7 +169,7 @@ export default function CheckoutPage() {
             Payment Successful!
           </h1>
           <p className="mt-1 text-xs text-slate-500">
-            Thank you, {formData.deliveryName || user.fullName}! Your order has been placed and confirmed.
+            Thank you, {formData.deliveryName || user?.fullName || 'Customer'}! Your order has been placed and confirmed.
           </p>
 
           <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-5 text-left text-xs space-y-3">

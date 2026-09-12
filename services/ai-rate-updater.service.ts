@@ -56,11 +56,7 @@ export class AiRateUpdaterService {
       const baseWholesale = Math.max(8, Math.round(Number(product.retailPrice) * 0.82));
 
       for (const mandi of mandis) {
-        // AI Market Intelligence algorithm factoring mandi volume, product category, and daily wholesale fluctuations
-        const seedVal = (product.name.length * 7 + mandi.name.length * 13 + today.getDate() * 11) % 9;
-        const delta = seedVal - 4; // -4 to +4 shift
-
-        // Existing rate from yesterday or default
+        // Existing rate from authentic records
         const existing = await prisma.mandiRate.findFirst({
           where: {
             productId: product.id,
@@ -69,8 +65,9 @@ export class AiRateUpdaterService {
           orderBy: { date: 'desc' },
         });
 
+        // Maintain authentic rate without synthetic random fabrication
         const previousRate = existing ? Number(existing.currentRate) : Math.max(8, baseWholesale);
-        const newCurrentRate = Math.max(5, Math.round((previousRate + delta) * 100) / 100);
+        const newCurrentRate = previousRate;
         
         const { absolute, percentage, direction } = computeRateMetrics(newCurrentRate, previousRate);
 
@@ -78,8 +75,8 @@ export class AiRateUpdaterService {
         else if (direction === Direction.FALLING) falling++;
         else stable++;
 
-        const minimumRate = Math.max(4, Math.round((newCurrentRate - 2) * 100) / 100);
-        const maximumRate = Math.round((newCurrentRate + 2.5) * 100) / 100;
+        const minimumRate = existing?.minimumRate ? Number(existing.minimumRate) : Math.max(4, Math.round((newCurrentRate - 2) * 100) / 100);
+        const maximumRate = existing?.maximumRate ? Number(existing.maximumRate) : Math.round((newCurrentRate + 2.5) * 100) / 100;
 
         // Upsert today's MandiRate
         const updatedRate = await prisma.mandiRate.upsert({

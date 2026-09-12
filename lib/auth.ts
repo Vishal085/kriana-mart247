@@ -5,6 +5,10 @@ import { Role } from '@prisma/client';
 
 const SESSION_SECRET = process.env.AUTH_SECRET || 'kiranamart247-secure-dev-session-key';
 
+if (!process.env.AUTH_SECRET && process.env.NODE_ENV !== 'test') {
+  console.warn('[AUTH WARNING] AUTH_SECRET env variable is not set. Using insecure default. Set AUTH_SECRET in production!');
+}
+
 export type SessionUser = {
   id: string;
   fullName: string;
@@ -74,11 +78,8 @@ export async function getCurrentSessionUser(): Promise<SessionUser | null> {
 
     if (user && user.active) return user;
   } catch (err) {
-    console.error('Error verifying user against database, checking payload:', err);
-  }
-
-  if (payload && payload.id && payload.active !== false) {
-    return payload;
+    console.error('Session verification failed - DB lookup error:', err);
+    return null;
   }
 
   return null;

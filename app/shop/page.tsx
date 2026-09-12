@@ -215,7 +215,7 @@ export default async function ShopPage({
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-slate-700">
-            Showing {products.length} of {total} products
+            Showing {products.length} of {Math.max(total || 0, products.length)} products
           </span>
           {hasActiveFilters && (
             <Link

@@ -24,18 +24,9 @@ export function MandiCommodityRowAction({
   const { addItem, openDrawer } = useCart();
   const [added, setAdded] = useState(false);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
-    addItem(
-      {
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        unit: unit || product.unit || '1 Pack',
-        retailPrice: mandiRate,
-      },
-      1
-    );
+    await addItem(product.id, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };

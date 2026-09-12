@@ -192,6 +192,80 @@ export function HistoricalPriceChart({
           </ResponsiveContainer>
         )}
       </div>
+
+      {/* Chronological Written Price History Table */}
+      {data.length > 0 && (
+        <div className="mt-8 border-t border-slate-100 pt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-[#073B6F]">
+              Chronological Mandi Price Log ({data.length} Observations)
+            </h4>
+            <span className="text-[11px] font-semibold text-slate-400">
+              Official Physical Mandi Records
+            </span>
+          </div>
+
+          <div className="max-h-64 overflow-y-auto rounded-2xl border border-slate-100 bg-[#F8FAFC]">
+            <table className="min-w-full text-left text-xs">
+              <thead className="sticky top-0 bg-slate-100 text-[#073B6F] font-bold">
+                <tr>
+                  <th className="px-3.5 py-2.5">Date</th>
+                  <th className="px-3.5 py-2.5">Quoted Rate</th>
+                  <th className="px-3.5 py-2.5">Min / Max Range</th>
+                  <th className="px-3.5 py-2.5">Daily Movement</th>
+                  <th className="px-3.5 py-2.5">Mandi / Source</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200/60 font-medium text-slate-700">
+                {data.map((item, idx) => {
+                  const rateVal = Number(item.rate);
+                  const minVal = Number(item.minimum || rateVal);
+                  const maxVal = Number(item.maximum || rateVal);
+                  const changeVal = Number(item.change || 0);
+                  const changePct = Number(item.changePercent || 0);
+                  const itemDate = new Date(item.date);
+                  const isValidDate = !isNaN(itemDate.getTime());
+
+                  return (
+                    <tr key={item.id || idx} className="hover:bg-white transition">
+                      <td className="px-3.5 py-2 font-bold text-slate-800">
+                        {isValidDate ? format(itemDate, 'dd MMM yyyy') : String(item.date)}
+                      </td>
+                      <td className="px-3.5 py-2 font-black text-[#073B6F]">
+                        ₹{rateVal.toFixed(2)} <span className="text-[10px] font-normal text-slate-500">/{item.unit || unit}</span>
+                      </td>
+                      <td className="px-3.5 py-2 text-slate-500">
+                        ₹{minVal.toFixed(2)} – ₹{maxVal.toFixed(2)}
+                      </td>
+                      <td className="px-3.5 py-2">
+                        {changeVal > 0 ? (
+                          <span className="font-bold text-emerald-600">
+                            ▲ +₹{changeVal.toFixed(2)} ({changePct.toFixed(1)}%)
+                          </span>
+                        ) : changeVal < 0 ? (
+                          <span className="font-bold text-rose-600">
+                            ▼ -₹{Math.abs(changeVal).toFixed(2)} ({changePct.toFixed(1)}%)
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">➖ Stable</span>
+                        )}
+                      </td>
+                      <td className="px-3.5 py-2 text-slate-600">
+                        <span className="font-bold text-slate-700">
+                          {item.mandi?.name || 'Mandi Terminal'}
+                        </span>
+                        <span className="block text-[10px] text-slate-400">
+                          {item.updatedBy || 'Verified APMC Register'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

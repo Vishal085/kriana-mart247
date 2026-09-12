@@ -8,6 +8,9 @@ import { AlertService } from './alerts.service';
 export class RateService {
   static async getTodayRates({
     mandiId,
+    state,
+    commodity,
+    unit,
     categoryId,
     brandId,
     direction,
@@ -18,6 +21,9 @@ export class RateService {
     limit = 30,
   }: {
     mandiId?: string;
+    state?: string;
+    commodity?: string;
+    unit?: string;
     categoryId?: string;
     brandId?: string;
     direction?: Direction;
@@ -29,12 +35,15 @@ export class RateService {
   }) {
     const skip = (page - 1) * limit;
 
-    const where = {
+    const where: any = {
       active: true,
       ...(mandiId ? { mandiId } : {}),
+      ...(state ? { mandi: { state: { equals: state, mode: 'insensitive' as const } } } : {}),
+      ...(unit ? { unit: { equals: unit, mode: 'insensitive' as const } } : {}),
       ...(direction ? { direction } : {}),
       ...(categoryId ? { product: { categoryId } } : {}),
       ...(brandId ? { product: { brandId } } : {}),
+      ...(commodity ? { product: { name: { contains: commodity, mode: 'insensitive' as const } } } : {}),
       ...(search
         ? {
             OR: [

@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="55%" stop-color="#FFEDD5"/>
+      <stop offset="100%" stop-color="#FB923C" stop-opacity="0.25"/>
+    </linearGradient>
+
+    <!-- Header Banner Gradient -->
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C2410C"/>
+      <stop offset="100%" stop-color="#FB923C"/>
+    </linearGradient>
+
+    <!-- Shadow Filter -->
+    <filter id="packShadow" x="-10%" y="-10%" width="125%" height="125%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#C2410C" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background Base Canvas -->
+  <rect width="500" height="500" rx="32" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Framing Border -->
+  <rect x="8" y="8" width="484" height="484" rx="26" fill="none" stroke="#C2410C" stroke-opacity="0.2" stroke-width="2"/>
+
+  <!-- Main Product Packaging Card Canvas -->
+  <g filter="url(#packShadow)">
+    <rect x="45" y="45" width="410" height="410" rx="24" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+
+    <!-- Brand Header Ribbon -->
+    <path d="M 45 69 Q 45 45 69 45 L 431 45 Q 455 45 455 69 L 455 130 L 45 130 Z" fill="url(#primaryGrad)"/>
+
+    <!-- Brand Text -->
+    <text x="250" y="90" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="900" text-anchor="middle" fill="#FFFFFF" letter-spacing="1.5">
+      TATA SAMPANN
+    </text>
+    <text x="250" y="114" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF" opacity="0.95" letter-spacing="1">
+      WHOLESALE MANDI GRADE • DAL & PULSES
+    </text>
+
+    <!-- Price Tag Badge (Top Right) -->
+    <g transform="translate(355, 25)">
+      <rect width="90" height="44" rx="12" fill="#FF6F00" stroke="#FFFFFF" stroke-width="2"/>
+      <text x="45" y="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="17" font-weight="900" text-anchor="middle" fill="#FFFFFF">
+        ₹110
+      </text>
+    </g>
+
+    <!-- Badge Ribbon -->
+    <g transform="translate(250, 152)">
+      <rect x="-110" y="-12" width="220" height="24" rx="12" fill="#C2410C" opacity="0.95"/>
+      <text x="0" y="4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="900" text-anchor="middle" fill="#FFFFFF" letter-spacing="0.8">
+        ★ SELECT SORTEX QUALITY ★
+      </text>
+    </g>
+
+    <!-- Central Commodity Emblem Illustration -->
+    <g transform="translate(250, 235)">
+      <!-- Outer Dash Ring -->
+      <circle r="72" fill="#FFEDD5" stroke="#FB923C" stroke-width="2.5" stroke-dasharray="6 3"/>
+      <circle r="60" fill="#FFFFFF"/>
+      <circle r="44" fill="#C2410C" opacity="0.12"/>
+      
+      <!-- Central Emoji / Symbol -->
+      <text x="0" y="14" font-size="44" text-anchor="middle">
+        🥣
+      </text>
+    </g>
+
+    <!-- Product Title & Name -->
+    <text x="250" y="338" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="19" font-weight="900" text-anchor="middle" fill="#C2410C">
+      Red Lentils / Lal Masoor Malka
+    </text>
+
+    <!-- Subtitle / Variant Description -->
+    <text x="250" y="362" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#64748B">
+      Machine Cleaned Red Lentils 1kg Bag
+    </text>
+
+    <!-- Bottom Highlights Footer Bar -->
+    <g transform="translate(65, 388)">
+      <rect width="370" height="48" rx="14" fill="#FFEDD5" stroke="#FB923C" stroke-opacity="0.4"/>
+      
+      <!-- Pack Size Badge -->
+      <text x="16" y="29" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="800" fill="#C2410C">
+        📦 1kg Bag • Fast Cooking Desi Malka
+      </text>
+
+      <!-- Verified Authenticity Pill -->
+      <text x="354" y="29" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" text-anchor="end" fill="#059669">
+        ✔ 100% GENUINE
+      </text>
+    </g>
+  </g>
+</svg>

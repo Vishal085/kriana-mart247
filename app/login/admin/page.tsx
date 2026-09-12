@@ -1,22 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { BrandMark } from '@/components/brand-mark';
-import { Shield, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { Shield, Lock, ArrowRight, AlertCircle, Eye, EyeOff, User, Store } from 'lucide-react';
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/dashboard/admin';
+
   const { refreshUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError(null);
     setLoading(true);
 
@@ -29,114 +34,128 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Admin authentication failed');
+        throw new Error(data.error || 'Authentication failed');
       }
 
       await refreshUser();
-      router.push('/dashboard/admin');
+      router.push(redirectUrl);
       router.refresh();
     } catch (err: any) {
-      setError(err.message || 'Admin authentication failed');
+      setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="flex min-h-[80vh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-        <div className="text-center">
-          <div className="flex justify-center">
-            <BrandMark size="md" />
+    <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-8 shadow-2xl text-white">
+      <div className="text-center">
+        <div className="flex justify-center">
+          <BrandMark size="md" />
+        </div>
+        <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-slate-300 border border-slate-700">
+          <Shield className="h-6 w-6" />
+        </div>
+        <h1 className="mt-3 text-2xl font-black text-white">Admin Portal</h1>
+        <p className="mt-1 text-xs text-slate-400">
+          Restricted administrative access for KiranaMart operations
+        </p>
+      </div>
+
+      {error && (
+        <div className="mt-6 flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-950/50 p-3 text-xs font-semibold text-red-300">
+          <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div>
+          <label className="block text-xs font-bold text-slate-300">Admin Email *</label>
+          <div className="relative mt-1">
+            <User className="absolute left-3.5 top-3 h-4 w-4 text-slate-500" />
+            <input
+              type="email"
+              required
+              placeholder="admin@kiranamart247.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-800/80 py-2.5 pl-10 pr-3 text-sm text-white placeholder-slate-500 outline-none focus:border-sky-500 focus:bg-slate-800"
+            />
           </div>
-          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">
-            <Shield className="h-3.5 w-3.5 text-[#39A9E8]" />
-            Administrator Portal
-          </div>
-          <h1 className="mt-2 text-2xl font-black text-[#073B6F]">Admin Access</h1>
-          <p className="mt-1 text-xs text-slate-500">
-            Secure portal for rate updates, catalog management, and order fulfillment
-          </p>
         </div>
 
-        {error && (
-          <div className="mt-6 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700">Admin Email</label>
-            <div className="relative mt-1">
-              <Mail className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
-              <input
-                type="email"
-                placeholder="Enter your Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm text-slate-800 outline-none focus:border-[#073B6F] focus:bg-white"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700">Admin Password</label>
-            <div className="relative mt-1">
-              <Lock className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm text-slate-800 outline-none focus:border-[#073B6F] focus:bg-white"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-bold text-white shadow-md transition hover:bg-black disabled:opacity-50"
-          >
-            {loading ? 'Verifying Credentials...' : 'Authenticate as Admin'}
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </form>
-
-        {/* Demo Credentials Helper */}
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 text-xs">
+        <div>
           <div className="flex items-center justify-between">
-            <span className="font-bold text-slate-700">Demo Admin Account:</span>
+            <label className="block text-xs font-bold text-slate-300">Password *</label>
+            <Link
+              href="/forgot-password"
+              className="text-[11px] font-semibold text-sky-400 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <div className="relative mt-1">
+            <Lock className="absolute left-3.5 top-3 h-4 w-4 text-slate-500" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              required
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-800/80 py-2.5 pl-10 pr-10 text-sm text-white placeholder-slate-500 outline-none focus:border-sky-500 focus:bg-slate-800"
+            />
             <button
               type="button"
-              onClick={() => {
-                setEmail('admin@kiranamart247.com');
-                setPassword('admin123');
-              }}
-              className="text-[11px] font-bold text-[#073B6F] hover:underline"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 transition"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              Fill Credentials
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <p className="mt-1 text-[11px] text-slate-500">
-            Email: <code className="text-slate-700 font-semibold">admin@kiranamart247.com</code> | Pass: <code className="text-slate-700 font-semibold">admin123</code>
-          </p>
         </div>
 
-        <div className="mt-6 pt-6 text-center text-xs text-slate-500 border-t border-slate-100">
-          Not an administrator?{' '}
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 py-3 text-sm font-bold text-white shadow-md transition hover:bg-sky-500 disabled:opacity-50"
+        >
+          {loading ? 'Verifying Access...' : 'Sign In as Administrator'}
+          <ArrowRight className="h-4 w-4" />
+        </button>
+      </form>
+
+      <div className="mt-6 pt-6 border-t border-slate-800 space-y-2 text-center">
+        <p className="text-xs text-slate-400">
+          Looking for customer or shopkeeper login?
+        </p>
+        <div className="flex items-center justify-center gap-3">
           <Link
             href="/login/customer"
-            className="font-bold text-[#0B5FA5] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-400 hover:underline"
           >
-            Customer Login
+            <User className="h-3.5 w-3.5" /> Customer Login
+          </Link>
+          <span className="text-slate-600">|</span>
+          <Link
+            href="/login/seller"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-400 hover:underline"
+          >
+            <Store className="h-3.5 w-3.5" /> Shopkeeper Login
           </Link>
         </div>
       </div>
+    </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <main className="flex min-h-[85vh] items-center justify-center px-4 py-12 bg-slate-950">
+      <Suspense fallback={<div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />}>
+        <AdminLoginForm />
+      </Suspense>
     </main>
   );
 }

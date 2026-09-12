@@ -6,6 +6,9 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const mandiId = searchParams.get('mandiId') || undefined;
+    const state = searchParams.get('state') || undefined;
+    const commodity = searchParams.get('commodity') || undefined;
+    const unit = searchParams.get('unit') || undefined;
     const categoryId = searchParams.get('categoryId') || undefined;
     const brandId = searchParams.get('brandId') || undefined;
     const direction = (searchParams.get('direction') as Direction) || undefined;
@@ -17,6 +20,9 @@ export async function GET(request: Request) {
 
     const data = await RateService.getTodayRates({
       mandiId,
+      state,
+      commodity,
+      unit,
       categoryId,
       brandId,
       direction,

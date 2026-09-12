@@ -1,14 +1,58 @@
 import { z } from 'zod';
 
+const COMMON_WEAK_PASSWORDS = new Set([
+  '12345678',
+  '123456789',
+  'password',
+  'admin123',
+  'qwertyui',
+  'password123',
+  'kirana123',
+  'kiranamart',
+]);
+
+export function isStrongPassword(pwd: string): boolean {
+  if (!pwd || pwd.length < 8) return false;
+  if (COMMON_WEAK_PASSWORDS.has(pwd.toLowerCase())) return false;
+  return true;
+}
+
 export const customerRegisterSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   mobile: z.string().regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number'),
   email: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6, 'Confirm password is required'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .refine((p) => isStrongPassword(p), {
+      message: 'Password is too weak. Avoid common words or simple sequences.',
+    }),
+  confirmPassword: z.string().min(8, 'Confirm password is required'),
   address: z.string().min(3, 'Address is required'),
   city: z.string().min(2, 'City is required'),
   pinCode: z.string().regex(/^\d{6}$/, 'PIN Code must be 6 digits'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+export const sellerRegisterSchema = z.object({
+  fullName: z.string().min(2, 'Owner/Shopkeeper name must be at least 2 characters'),
+  mobile: z.string().regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number'),
+  email: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .refine((p) => isStrongPassword(p), {
+      message: 'Password is too weak. Avoid common words or simple sequences.',
+    }),
+  confirmPassword: z.string().min(8, 'Confirm password is required'),
+  shopName: z.string().min(2, 'Shop name must be at least 2 characters'),
+  shopAddress: z.string().min(3, 'Shop address must be at least 3 characters'),
+  city: z.string().min(2, 'City is required'),
+  state: z.string().optional().default('Delhi'),
+  pinCode: z.string().regex(/^\d{6}$/, 'PIN Code must be 6 digits').optional().or(z.literal('')),
+  gstNumber: z.string().optional().or(z.literal('')),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
