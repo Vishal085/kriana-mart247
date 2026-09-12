@@ -36,6 +36,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/kirana-mandi',
+        destination: '/mandi-rates',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -19,10 +19,23 @@ import { MandiSelector } from '@/components/mandis/MandiSelector';
 import { ProductCard } from '@/components/ProductCard';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
 import { MyWholesaleBasket } from '@/components/wholesale/MyWholesaleBasket';
+import { MANDI_COMMODITY_CATEGORIES, RETAIL_ONLY_CATEGORIES } from '@/services/rates.service';
 
 export const revalidate = 60; // Refresh cache every minute
 
 export default async function HomePage() {
+  const mandiCommodityWhere = {
+    active: true,
+    product: {
+      category: {
+        slug: {
+          in: MANDI_COMMODITY_CATEGORIES,
+          notIn: RETAIL_ONLY_CATEGORIES,
+        },
+      },
+    },
+  };
+
   const [categories, popularProducts, mandis, rates, rateSummary, topGainers, topLosers] =
     await Promise.all([
       prisma.category.findMany({
@@ -49,7 +62,7 @@ export default async function HomePage() {
         orderBy: { displayOrder: 'asc' },
       }),
       prisma.mandiRate.findMany({
-        where: { active: true },
+        where: mandiCommodityWhere,
         include: {
           product: { include: { category: true, brand: true } },
           mandi: true,
@@ -59,17 +72,17 @@ export default async function HomePage() {
       }),
       prisma.mandiRate.groupBy({
         by: ['direction'],
-        where: { active: true },
+        where: mandiCommodityWhere,
         _count: { direction: true },
       }),
       prisma.mandiRate.findMany({
-        where: { active: true, direction: Direction.RISING },
+        where: { ...mandiCommodityWhere, direction: Direction.RISING },
         include: { product: true, mandi: true },
         orderBy: { percentageChange: 'desc' },
         take: 4,
       }),
       prisma.mandiRate.findMany({
-        where: { active: true, direction: Direction.FALLING },
+        where: { ...mandiCommodityWhere, direction: Direction.FALLING },
         include: { product: true, mandi: true },
         orderBy: { percentageChange: 'asc' },
         take: 4,

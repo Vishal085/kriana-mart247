@@ -1516,7 +1516,7 @@ async function seed() {
       },
     });
 
-    createdProducts.push({ ...prod, baseRate: item.baseRate || Number(item.retailPrice) });
+    createdProducts.push({ ...prod, categoryName: item.category, baseRate: item.baseRate || Number(item.retailPrice) });
   }
 
   // 7. Seed Mandi Rates for commodity tracked items
@@ -1528,18 +1528,28 @@ async function seed() {
     { multiplier: 1.02, dir: Direction.RISING, change: 1.2 },
     { multiplier: 1.04, dir: Direction.RISING, change: 2.0 },
   ];
-  // Filter only authentic bulk / 1kg wholesale mandi commodities (Atta, Rice, Dal, Oil, Sugar)
-  // Strictly exclude retail sachets (25g, 50g, 500g, 200ml) and biscuits/snacks
+  // Filter only authentic bulk wholesale mandi commodities (Atta, Rice, Dal, Oil, Sugar)
+  // Strictly exclude retail items (soaps, detergents, biscuits, shampoos, chips, snacks, etc.)
+  const MANDI_COMMODITY_CATEGORIES = [
+    'Atta, Maida & Suji',
+    'Dal & Pulses',
+    'Rice',
+    'Cooking Oil',
+    'Refined Oil',
+    'Sugar, Salt & Jaggery',
+    'Ghee & Butter',
+  ];
   const mandiTrackedProducts = createdProducts.filter((p) => {
+    const isMandiCategory = MANDI_COMMODITY_CATEGORIES.includes(p.categoryName || '');
     const isWholesaleUnit =
       p.unit.includes('1kg') ||
       p.unit.includes('5kg') ||
       p.unit.includes('10kg') ||
+      p.unit.includes('25kg') ||
       p.unit.includes('50kg') ||
       p.unit.includes('1 Litre') ||
       p.unit.includes('15 Litre');
-    const isNotSnack = !p.name.includes('Biscuit') && !p.name.includes('Noodles') && !p.name.includes('Chips') && !p.name.includes('Namkeen');
-    return isWholesaleUnit && isNotSnack;
+    return isMandiCategory && isWholesaleUnit;
   });
 
   for (const p of mandiTrackedProducts) {

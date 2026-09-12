@@ -5,6 +5,39 @@ import { z } from 'zod';
 import { mandiRateSchema } from '@/validators';
 import { AlertService } from './alerts.service';
 
+// Authentic physical APMC wholesale mandi commodity categories
+export const MANDI_COMMODITY_CATEGORIES = [
+  'atta-maida-suji',
+  'dal-pulses',
+  'rice',
+  'cooking-oil',
+  'refined-oil',
+  'sugar-salt-jaggery',
+  'ghee-butter',
+  'ration-spices',
+];
+
+// Retail-only FMCG and small grocery categories that must NEVER appear in Mandi Rates
+export const RETAIL_ONLY_CATEGORIES = [
+  'soaps-personal-care',
+  'biscuits-bakery',
+  'snacks-namkeen',
+  'chips-packaged-snacks',
+  'chocolates-candies',
+  'cold-drinks-beverages',
+  'detergent-dishwash',
+  'shampoo-hair-care',
+  'toothpaste-oral-care',
+  'shaving-grooming',
+  'household-cleaning',
+  'tissue-napkins-disposable',
+  'baby-care',
+  'water-packaged-drinks',
+  'instant-food-ready-to-cook',
+  'noodles-pasta',
+  'other-kirana-essentials',
+];
+
 export class RateService {
   static async getTodayRates({
     mandiId,
@@ -37,13 +70,21 @@ export class RateService {
 
     const where: any = {
       active: true,
+      product: {
+        category: {
+          slug: {
+            in: MANDI_COMMODITY_CATEGORIES,
+            notIn: RETAIL_ONLY_CATEGORIES,
+          },
+        },
+        ...(categoryId ? { categoryId } : {}),
+        ...(brandId ? { brandId } : {}),
+        ...(commodity ? { name: { contains: commodity, mode: 'insensitive' as const } } : {}),
+      },
       ...(mandiId ? { mandiId } : {}),
       ...(state ? { mandi: { state: { equals: state, mode: 'insensitive' as const } } } : {}),
       ...(unit ? { unit: { equals: unit, mode: 'insensitive' as const } } : {}),
       ...(direction ? { direction } : {}),
-      ...(categoryId ? { product: { categoryId } } : {}),
-      ...(brandId ? { product: { brandId } } : {}),
-      ...(commodity ? { product: { name: { contains: commodity, mode: 'insensitive' as const } } } : {}),
       ...(search
         ? {
             OR: [
@@ -99,6 +140,14 @@ export class RateService {
   static async getMarketSummary(mandiId?: string) {
     const where = {
       active: true,
+      product: {
+        category: {
+          slug: {
+            in: MANDI_COMMODITY_CATEGORIES,
+            notIn: RETAIL_ONLY_CATEGORIES,
+          },
+        },
+      },
       ...(mandiId ? { mandiId } : {}),
     };
 
@@ -136,6 +185,19 @@ export class RateService {
       topLosers,
       lastUpdated: new Date(),
     };
+  }
+
+  static async getMandiCategories() {
+    return prisma.category.findMany({
+      where: {
+        active: true,
+        slug: {
+          in: MANDI_COMMODITY_CATEGORIES,
+          notIn: RETAIL_ONLY_CATEGORIES,
+        },
+      },
+      orderBy: { displayOrder: 'asc' },
+    });
   }
 
   static async getRateHistory(productId: string, mandiId?: string, range = '30D') {
@@ -194,6 +256,15 @@ export class RateService {
   }
 
   static async upsertRate(data: z.infer<typeof mandiRateSchema>, updatedBy = 'ADMIN') {
+    // Guard: strictly forbid assigning Mandi rates to retail FMCG goods
+    const prod = await prisma.product.findUnique({
+      where: { id: data.productId },
+      include: { category: true },
+    });
+    if (prod && (RETAIL_ONLY_CATEGORIES.includes(prod.category.slug) || !MANDI_COMMODITY_CATEGORIES.includes(prod.category.slug))) {
+      throw new Error(`Cannot assign Mandi rate to retail FMCG item (${prod.name}). Mandi rates are strictly reserved for bulk agricultural commodities.`);
+    }
+
     const { absolute, percentage, direction } = computeRateMetrics(
       data.currentRate,
       data.previousRate

@@ -112,7 +112,7 @@ export default function MandiRatesPage() {
       const [ratesRes, summaryRes, catsRes] = await Promise.all([
         fetch(`/api/rates?${params.toString()}`),
         fetch(`/api/rates/today${selectedMandiId ? `?mandiId=${selectedMandiId}` : ''}`),
-        fetch('/api/categories'),
+        fetch('/api/rates/categories'),
       ]);
 
       if (ratesRes.ok) {
@@ -312,7 +312,7 @@ export default function MandiRatesPage() {
             onChange={(e) => setCategoryId(e.target.value)}
             className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#39A9E8]"
           >
-            <option value="">All Categories</option>
+            <option value="">All Mandi Commodities</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}

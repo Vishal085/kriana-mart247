@@ -98,9 +98,9 @@ export function SiteHeader() {
   };
 
   const navLinks = [
-    { label: "Today's Rates", href: '/mandi-rates', icon: TrendingUp },
-    { label: 'Wholesale', href: '/shop', icon: ShoppingBag },
-    { label: 'Deals', href: '/shop?deals=true', icon: Sparkles },
+    { label: '🏪 Kirana Mandi', href: '/mandi-rates', badge: 'Live Bhav', icon: TrendingUp },
+    { label: '🛒 Retail Chhota Ration', href: '/shop?section=retail', icon: ShoppingBag },
+    { label: '⚡ ₹5 & ₹10 Packs', href: '/shop?pack=small', icon: Sparkles },
   ];
 
   return (
@@ -118,21 +118,26 @@ export function SiteHeader() {
               <MandiSelector variant="header" />
             </div>
 
-            {/* Desktop Navigation Links (Clean 3 options) */}
+            {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-700">
               {navLinks.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href || (item.href === '/mandi-rates' && pathname === '/kirana-mandi');
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`whitespace-nowrap transition py-1.5 px-2.5 rounded-lg ${
+                    className={`whitespace-nowrap transition py-1.5 px-3 rounded-xl flex items-center gap-1.5 ${
                       isActive
-                        ? 'text-[#073B6F] bg-[#EAF5FC] font-black'
+                        ? 'text-[#073B6F] bg-[#EAF5FC] font-black shadow-2xs border border-blue-200/50'
                         : 'hover:text-[#0B5FA5] hover:bg-slate-100/80'
                     }`}
                   >
                     <span>{item.label}</span>
+                    {item.badge && (
+                      <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-black text-emerald-700 uppercase tracking-wider">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}

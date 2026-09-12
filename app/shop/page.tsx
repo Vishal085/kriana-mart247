@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { ProductCard } from '@/components/ProductCard';
-import { Search, Filter, ChevronRight, Layers, Store, MapPin } from 'lucide-react';
+import { MANDI_COMMODITY_CATEGORIES, RETAIL_ONLY_CATEGORIES } from '@/services/rates.service';
+import { Search, Filter, ChevronRight, Layers, Store, MapPin, ShoppingBag, Sparkles, TrendingUp } from 'lucide-react';
 import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
 
 export default async function ShopPage({
@@ -12,13 +13,15 @@ export default async function ShopPage({
     category?: string;
     brandId?: string;
     mandiId?: string;
+    section?: string;
+    pack?: string;
     search?: string;
     minPrice?: string;
     maxPrice?: string;
     page?: string;
   }>;
 }) {
-  const { categoryId, category, brandId, mandiId, search, minPrice, maxPrice, page } = await searchParams;
+  const { categoryId, category, brandId, mandiId, section, pack, search, minPrice, maxPrice, page } = await searchParams;
   const currentPage = parseInt(page || '1', 10);
   const limit = 20;
   const skip = (currentPage - 1) * limit;
@@ -32,7 +35,9 @@ export default async function ShopPage({
           ...(minP !== undefined ? { gte: minP } : {}),
           ...(maxP !== undefined ? { lte: maxP } : {}),
         }
-      : undefined;
+      : pack === 'small'
+        ? { lte: 15 }
+        : undefined;
 
   // Resolve category by ID or slug
   const rawCat = category || categoryId;
@@ -60,9 +65,34 @@ export default async function ShopPage({
     mandiProductIds = mandiRates.map((r: any) => r.productId);
   }
 
+  const isMandiSection = section === 'mandi';
+  const isRetailSection = section === 'retail';
+  const isSmallPack = pack === 'small';
+
+  const categoryFilter = resolvedCategoryId
+    ? { categoryId: resolvedCategoryId }
+    : isMandiSection
+      ? {
+          category: {
+            slug: {
+              in: MANDI_COMMODITY_CATEGORIES,
+              notIn: RETAIL_ONLY_CATEGORIES,
+            },
+          },
+        }
+      : isRetailSection
+        ? {
+            category: {
+              slug: {
+                notIn: MANDI_COMMODITY_CATEGORIES,
+              },
+            },
+          }
+        : {};
+
   const where: any = {
     active: true,
-    ...(resolvedCategoryId ? { categoryId: resolvedCategoryId } : {}),
+    ...categoryFilter,
     ...(brandId ? { brandId } : {}),
     ...(mandiProductIds ? { id: { in: mandiProductIds } } : {}),
     ...(priceFilter ? { retailPrice: priceFilter } : {}),
@@ -78,7 +108,17 @@ export default async function ShopPage({
   };
 
   const [categories, brands, mandis, products, total] = await Promise.all([
-    prisma.category.findMany({ where: { active: true }, orderBy: { displayOrder: 'asc' } }),
+    prisma.category.findMany({
+      where: {
+        active: true,
+        ...(isMandiSection
+          ? { slug: { in: MANDI_COMMODITY_CATEGORIES, notIn: RETAIL_ONLY_CATEGORIES } }
+          : isRetailSection
+            ? { slug: { notIn: MANDI_COMMODITY_CATEGORIES } }
+            : {}),
+      },
+      orderBy: { displayOrder: 'asc' },
+    }),
     prisma.brand.findMany({ where: { active: true }, orderBy: { name: 'asc' } }),
     prisma.mandi.findMany({ where: { active: true }, orderBy: { displayOrder: 'asc' } }),
     prisma.product.findMany({
@@ -96,7 +136,7 @@ export default async function ShopPage({
   ]);
 
   const totalPages = Math.ceil(total / limit);
-  const hasActiveFilters = Boolean(categoryId || brandId || mandiId || search || minPrice || maxPrice);
+  const hasActiveFilters = Boolean(categoryId || brandId || mandiId || search || minPrice || maxPrice || section || pack);
 
   const pricePresets = [
     { label: 'All Prices', min: undefined, max: undefined },
@@ -108,6 +148,8 @@ export default async function ShopPage({
 
   const buildUrl = (updates: { [key: string]: string | undefined }) => {
     const params = new URLSearchParams();
+    if (section) params.set('section', section);
+    if (pack) params.set('pack', pack);
     if (categoryId) params.set('categoryId', categoryId);
     if (brandId) params.set('brandId', brandId);
     if (mandiId) params.set('mandiId', mandiId);
@@ -142,17 +184,27 @@ export default async function ShopPage({
       <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-black text-[#073B6F]">
-            {activeMandiName ? `${activeMandiName} Commodities & Groceries` : 'Kirana Store Catalog'}
+            {isMandiSection
+              ? '🌾 Kirana Mandi (किराना मंडी थोक बाजार)'
+              : isSmallPack
+                ? '⚡ ₹5 & ₹10 Chhota Ration (छोटा पैकेट)'
+                : activeMandiName
+                  ? `${activeMandiName} Commodities & Groceries`
+                  : '🛒 Retail Chhota Ration (दैनिक किराना)'}
           </h1>
           <p className="mt-1 text-xs text-slate-500">
-            {activeMandiName
-              ? `Live wholesale auction commodities and grocery inventory direct from ${activeMandiName}.`
-              : 'Wholesale staples, dairy, beverages, and packaged grocery essentials delivered to your doorstep.'}
+            {isMandiSection
+              ? 'Authentic wholesale APMC auction commodities, bulk grain bags, dals, and edible oil tins. Zero retail FMCG items.'
+              : isSmallPack
+                ? 'Budget-friendly ₹5 and ₹10 daily grocery items, biscuits, spice sachets, soaps, and pocket packs.'
+                : 'Packaged grocery staples, personal care, biscuits, snacks, and daily household essentials.'}
           </p>
         </div>
 
         {/* Search Input Bar */}
         <form method="GET" action="/shop" className="flex items-center gap-2 w-full lg:w-auto">
+          {section && <input type="hidden" name="section" value={section} />}
+          {pack && <input type="hidden" name="pack" value={pack} />}
           {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
           {brandId && <input type="hidden" name="brandId" value={brandId} />}
           {mandiId && <input type="hidden" name="mandiId" value={mandiId} />}
@@ -175,6 +227,56 @@ export default async function ShopPage({
             Search
           </button>
         </form>
+      </div>
+
+      {/* 2-Section Switcher Bar: Retail vs Kirana Mandi vs Small Packs */}
+      <div className="mt-5 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+        <Link
+          href="/shop?section=retail"
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition shadow-xs ${
+            isRetailSection || (!section && !isSmallPack && !isMandiSection)
+              ? 'bg-[#073B6F] text-white shadow-2xs'
+              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+          }`}
+        >
+          <ShoppingBag className="h-4 w-4" />
+          <span>🛒 Retail Chhota Ration</span>
+        </Link>
+
+        <Link
+          href="/shop?section=mandi"
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition shadow-xs ${
+            isMandiSection
+              ? 'bg-emerald-700 text-white shadow-2xs'
+              : 'border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+          }`}
+        >
+          <Store className="h-4 w-4" />
+          <span>🌾 Kirana Mandi (थोक भाव)</span>
+          <span className="rounded-full bg-emerald-200 text-emerald-900 px-1.5 py-0.2 text-[9px] font-black uppercase">
+            Wholesale
+          </span>
+        </Link>
+
+        <Link
+          href="/shop?pack=small"
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition shadow-xs ${
+            isSmallPack
+              ? 'bg-amber-600 text-white shadow-2xs'
+              : 'border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100'
+          }`}
+        >
+          <Sparkles className="h-4 w-4 text-amber-500" />
+          <span>⚡ ₹5 & ₹10 Pocket Packs</span>
+        </Link>
+
+        <Link
+          href="/mandi-rates"
+          className="sm:ml-auto flex items-center gap-1.5 rounded-xl border border-[#39A9E8] bg-[#EAF5FC] px-3.5 py-2 text-xs font-black text-[#073B6F] hover:bg-[#073B6F] hover:text-white transition"
+        >
+          <TrendingUp className="h-3.5 w-3.5 text-[#0B5FA5]" />
+          <span>Live Mandi Rates Board →</span>
+        </Link>
       </div>
 
       {/* Mandi Quick Selector Bar */}
