@@ -77,7 +77,7 @@ function AdminLoginForm() {
             <input
               type="email"
               required
-              placeholder="admin@kiranamart247.com"
+              placeholder="Enter your details"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-[#F8FAFC] py-2 pl-10 pr-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#073B6F] focus:bg-white transition"
@@ -100,7 +100,7 @@ function AdminLoginForm() {
             <input
               type={showPassword ? 'text' : 'password'}
               required
-              placeholder="••••••••"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-[#F8FAFC] py-2 pl-10 pr-10 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#073B6F] focus:bg-white transition"

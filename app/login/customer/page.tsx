@@ -75,7 +75,7 @@ function CustomerLoginForm() {
             <User className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="e.g. 9999999999 or user@example.com"
+              placeholder="Enter your details"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
@@ -98,7 +98,7 @@ function CustomerLoginForm() {
             <Lock className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

@@ -79,7 +79,7 @@ function SellerLoginForm() {
               required
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="e.g. 9876543210 or shop@example.com"
+              placeholder="Enter your details"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-[#39A9E8] focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-[#39A9E8] transition"
             />
           </div>
@@ -102,7 +102,7 @@ function SellerLoginForm() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-[#39A9E8] focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-[#39A9E8] transition"
             />
             <button
