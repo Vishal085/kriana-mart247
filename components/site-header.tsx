@@ -236,18 +236,11 @@ export function SiteHeader() {
                           <p className="text-xs font-bold text-slate-800">Welcome to KiranaMart</p>
                           <p className="text-[10px] text-slate-500 mb-2">Access wholesale pricing & order tracking</p>
                           <Link
-                            href="/login/customer"
+                            href="/login"
                             onClick={() => setProfileDropdownOpen(false)}
                             className="block w-full rounded-xl bg-[#073B6F] py-2 text-xs font-bold text-white hover:bg-[#0B5FA5] transition"
                           >
-                            Customer Login
-                          </Link>
-                          <Link
-                            href="/login/seller"
-                            onClick={() => setProfileDropdownOpen(false)}
-                            className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-slate-50 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition"
-                          >
-                            Shopkeeper / Seller Login
+                            Login
                           </Link>
                         </div>
                       )}
@@ -513,20 +506,13 @@ export function SiteHeader() {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div>
                   <Link
-                    href="/login/customer"
+                    href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block w-full text-center rounded-xl bg-[#073B6F] py-2 text-xs font-bold text-white shadow"
+                    className="block w-full text-center rounded-xl bg-[#073B6F] py-2.5 text-xs font-bold text-white shadow"
                   >
-                    Customer Login
-                  </Link>
-                  <Link
-                    href="/login/seller"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block w-full text-center rounded-xl border border-slate-200 bg-white py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
-                  >
-                    Shopkeeper / Seller Login
+                    Login
                   </Link>
                 </div>
               )}
