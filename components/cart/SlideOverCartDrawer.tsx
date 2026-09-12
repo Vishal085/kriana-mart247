@@ -105,13 +105,27 @@ export function SlideOverCartDrawer() {
               </p>
             </div>
           </div>
-          <button
-            onClick={closeDrawer}
-            className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
-            aria-label="Close cart"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {items.length > 0 && (
+              <button
+                onClick={() => {
+                  clearCart();
+                  toast.success('Cart has been emptied');
+                }}
+                className="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline px-2 py-1"
+                title="Clear all items from cart"
+              >
+                Empty Cart
+              </button>
+            )}
+            <button
+              onClick={closeDrawer}
+              className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              aria-label="Close cart"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Free Delivery Bar */}

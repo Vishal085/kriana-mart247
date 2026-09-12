@@ -18,7 +18,6 @@ import {
 import { MandiSelector } from '@/components/mandis/MandiSelector';
 import { ProductCard } from '@/components/ProductCard';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
-import { MyWholesaleBasket } from '@/components/wholesale/MyWholesaleBasket';
 import { MANDI_COMMODITY_CATEGORIES, RETAIL_ONLY_CATEGORIES } from '@/services/rates.service';
 
 export const revalidate = 60; // Refresh cache every minute
@@ -343,11 +342,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* 2.5 WHOLESALE RESTOCK BASKET */}
-      <section className="mx-auto max-w-7xl px-4 py-6 lg:px-6">
-        <MyWholesaleBasket />
       </section>
 
       {/* 3. POPULAR CATEGORIES */}

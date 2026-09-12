@@ -117,18 +117,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const closeDrawer = () => setIsDrawerOpen(false);
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
-  // Load guest cart from localStorage on initial load
+  // Ensure default cart is completely empty (reset old cached carts)
   useEffect(() => {
     try {
+      const cartVersion = localStorage.getItem('km_cart_v');
+      if (!cartVersion || cartVersion !== '2') {
+        localStorage.removeItem('km_guest_cart');
+        localStorage.setItem('km_cart_v', '2');
+        setCart(null);
+        return;
+      }
+
       const saved = localStorage.getItem('km_guest_cart');
       if (saved) {
         const parsedItems: CartItemData[] = JSON.parse(saved);
         if (Array.isArray(parsedItems) && parsedItems.length > 0) {
           setCart(calculateCartTotals(parsedItems));
+        } else {
+          setCart(null);
         }
+      } else {
+        setCart(null);
       }
     } catch {
-      // ignore
+      setCart(null);
     }
   }, []);
 
