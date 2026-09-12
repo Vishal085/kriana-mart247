@@ -31,6 +31,7 @@ interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
   refreshUser: () => Promise<void>;
+  loginUser: (user: UserProfile) => void;
   logout: () => Promise<void>;
 }
 
@@ -38,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   refreshUser: async () => {},
+  loginUser: () => {},
   logout: async () => {},
 });
 
@@ -45,6 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const loginUser = (userData: UserProfile) => {
+    setUser(userData);
+    setLoading(false);
+  };
 
   const refreshUser = async () => {
     try {
@@ -78,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, refreshUser, logout }}>
+    <AuthContext.Provider value={{ user, loading, refreshUser, loginUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

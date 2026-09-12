@@ -12,7 +12,7 @@ function CustomerRegisterForm() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/dashboard/customer';
 
-  const { refreshUser } = useAuth();
+  const { loginUser } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     mobile: '',
@@ -27,6 +27,10 @@ function CustomerRegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    router.prefetch(redirectUrl);
+  }, [router, redirectUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,12 +78,12 @@ function CustomerRegisterForm() {
         throw new Error(data.error || 'Registration failed');
       }
 
-      await refreshUser();
-      router.push(redirectUrl);
-      router.refresh();
+      if (data.user) {
+        loginUser(data.user);
+      }
+      router.replace(redirectUrl);
     } catch (err: any) {
       setError(err.message || 'Registration failed');
-    } finally {
       setLoading(false);
     }
   };

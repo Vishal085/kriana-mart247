@@ -60,18 +60,18 @@ export class AuthService {
   }
 
   static async loginCustomer(input: z.infer<typeof customerLoginSchema>) {
-    const user = await prisma.user.findFirst({
-      where: {
-        role: Role.CUSTOMER,
-        OR: [
-          { email: input.identifier },
-          { mobile: input.identifier },
-        ],
-      },
-      include: { customerProfile: true },
-    });
+    const isEmail = input.identifier.includes('@');
+    const user = isEmail
+      ? await prisma.user.findUnique({
+          where: { email: input.identifier },
+          include: { customerProfile: true },
+        })
+      : await prisma.user.findFirst({
+          where: { mobile: input.identifier, role: Role.CUSTOMER },
+          include: { customerProfile: true },
+        });
 
-    if (!user) {
+    if (!user || user.role !== Role.CUSTOMER) {
       throw new Error('Invalid mobile/email or password');
     }
 
@@ -102,15 +102,20 @@ export class AuthService {
       throw new Error('Admin access is restricted to authorized accounts only');
     }
 
-    const user = await prisma.user.findFirst({
-      where: {
-        role: Role.ADMIN,
-        email: input.email,
+    const user = await prisma.user.findUnique({
+      where: { email: input.email },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        mobile: true,
+        role: true,
+        active: true,
+        passwordHash: true,
       },
-      include: { adminProfile: true },
     });
 
-    if (!user) {
+    if (!user || user.role !== Role.ADMIN) {
       throw new Error('Invalid admin credentials');
     }
 
@@ -198,18 +203,18 @@ export class AuthService {
   }
 
   static async loginShopkeeper(input: { identifier: string; password: string }) {
-    const user = await prisma.user.findFirst({
-      where: {
-        role: Role.SHOPKEEPER,
-        OR: [
-          { email: input.identifier },
-          { mobile: input.identifier },
-        ],
-      },
-      include: { shopkeeperProfile: true },
-    });
+    const isEmail = input.identifier.includes('@');
+    const user = isEmail
+      ? await prisma.user.findUnique({
+          where: { email: input.identifier },
+          include: { shopkeeperProfile: true },
+        })
+      : await prisma.user.findFirst({
+          where: { mobile: input.identifier, role: Role.SHOPKEEPER },
+          include: { shopkeeperProfile: true },
+        });
 
-    if (!user) {
+    if (!user || user.role !== Role.SHOPKEEPER) {
       throw new Error('Invalid credentials. Please check your mobile/email and password.');
     }
 

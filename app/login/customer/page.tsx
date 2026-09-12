@@ -12,12 +12,17 @@ function CustomerLoginForm() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/shop';
 
-  const { refreshUser } = useAuth();
+  const { loginUser } = useAuth();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pre-warm destination route in background so navigation is instant
+  React.useEffect(() => {
+    router.prefetch(redirectUrl);
+  }, [router, redirectUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,12 +42,12 @@ function CustomerLoginForm() {
         throw new Error(data.error || 'Login failed');
       }
 
-      await refreshUser();
-      router.push(redirectUrl);
-      router.refresh();
+      if (data.user) {
+        loginUser(data.user);
+      }
+      router.replace(redirectUrl);
     } catch (err: any) {
       setError(err.message || 'Login failed');
-    } finally {
       setLoading(false);
     }
   };
