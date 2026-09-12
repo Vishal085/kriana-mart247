@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
-import { MOCK_PRODUCTS } from '@/lib/mock-data';
 
 export interface CartItemProduct {
   id: string;
@@ -190,7 +189,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // 2. Local / Guest optimistic cart: try API first, then fallback to MOCK_PRODUCTS
+    // 2. Local / Guest optimistic cart: lookup via live API
     let prod: any = null;
     try {
       const res = await fetch(`/api/products/${productId}`);
@@ -202,10 +201,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (e) {
       console.warn('API product lookup notice:', e);
-    }
-
-    if (!prod) {
-      prod = MOCK_PRODUCTS.find((p) => p.id === productId);
     }
 
     if (!prod) {

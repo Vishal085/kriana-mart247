@@ -26,7 +26,7 @@ export default async function MandisPage() {
         <div>
           <h1 className="text-3xl font-black text-[#073B6F]">Wholesale Mandi Directory</h1>
           <p className="mt-1 text-xs text-slate-500">
-            Explore 16 registered wholesale mandis across Delhi-NCR and track daily APMC market auction rates.
+            Explore {mandis.length} registered wholesale mandis across Delhi-NCR and track daily APMC market auction rates.
           </p>
         </div>
       </div>

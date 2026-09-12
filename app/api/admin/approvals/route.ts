@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { SellerStore } from '@/lib/seller-store';
+import { ProductStatus } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
@@ -13,59 +13,77 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
 
-    // Get all combined products from store
-    const allProducts = SellerStore.getAllCombinedProducts();
+    // Build Prisma query condition
+    const where: any = {};
 
-    // Calculate status counts across all listings
+    if (statusParam && statusParam !== 'ALL') {
+      if (Object.values(ProductStatus).includes(statusParam as ProductStatus)) {
+        where.status = statusParam as ProductStatus;
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { sku: { contains: search, mode: 'insensitive' } },
+        { shopName: { contains: search, mode: 'insensitive' } },
+        { brand: { name: { contains: search, mode: 'insensitive' } } },
+        { seller: { fullName: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    // Parallel fetch for counts and paginated items
+    const [allCount, pendingCount, needsChangesCount, publishedCount, rejectedCount, draftCount, total, products] =
+      await Promise.all([
+        prisma.product.count(),
+        prisma.product.count({ where: { status: 'PENDING_REVIEW' } }),
+        prisma.product.count({ where: { status: 'NEEDS_CHANGES' } }),
+        prisma.product.count({ where: { status: 'PUBLISHED' } }),
+        prisma.product.count({ where: { status: 'REJECTED' } }),
+        prisma.product.count({ where: { status: 'DRAFT' } }),
+        prisma.product.count({ where }),
+        prisma.product.findMany({
+          where,
+          include: {
+            category: true,
+            brand: true,
+            images: {
+              orderBy: { sortOrder: 'asc' },
+            },
+            seller: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                mobile: true,
+              },
+            },
+            auditLogs: {
+              orderBy: { createdAt: 'desc' },
+              take: 5,
+            },
+          },
+          orderBy: [
+            // If viewing all, pending reviews first
+            ...(statusParam === 'ALL' ? [{ status: 'asc' as const }] : []),
+            { updatedAt: 'desc' as const },
+          ],
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
+
     const counts = {
-      all: allProducts.length,
-      pending: allProducts.filter((p) => p.status === 'PENDING_REVIEW').length,
-      needsChanges: allProducts.filter((p) => p.status === 'NEEDS_CHANGES').length,
-      published: allProducts.filter((p) => (p.status || 'PUBLISHED') === 'PUBLISHED').length,
-      rejected: allProducts.filter((p) => p.status === 'REJECTED').length,
-      draft: allProducts.filter((p) => p.status === 'DRAFT').length,
+      all: allCount,
+      pending: pendingCount,
+      needsChanges: needsChangesCount,
+      published: publishedCount,
+      rejected: rejectedCount,
+      draft: draftCount,
     };
 
-    // Filter by status
-    let filtered = allProducts;
-    if (statusParam && statusParam !== 'ALL') {
-      filtered = filtered.filter((p) => (p.status || 'PUBLISHED') === statusParam);
-    }
-
-    // Filter by search query
-    if (search) {
-      filtered = filtered.filter((p) => {
-        const name = (p.name || '').toLowerCase();
-        const brand = (p.brand?.name || p.brand || '').toLowerCase();
-        const sku = (p.sku || '').toLowerCase();
-        const shop = (p.shopName || '').toLowerCase();
-        const seller = (p.seller?.fullName || '').toLowerCase();
-        return (
-          name.includes(search) ||
-          brand.includes(search) ||
-          sku.includes(search) ||
-          shop.includes(search) ||
-          seller.includes(search)
-        );
-      });
-    }
-
-    // Sort: Pending review first, then most recently updated
-    filtered.sort((a, b) => {
-      if (a.status === 'PENDING_REVIEW' && b.status !== 'PENDING_REVIEW') return -1;
-      if (b.status === 'PENDING_REVIEW' && a.status !== 'PENDING_REVIEW') return 1;
-      const dateA = new Date(a.updatedAt || a.createdAt || 0).getTime();
-      const dateB = new Date(b.updatedAt || b.createdAt || 0).getTime();
-      return dateB - dateA;
-    });
-
-    // Pagination
-    const total = filtered.length;
-    const startIndex = (page - 1) * limit;
-    const paginated = filtered.slice(startIndex, startIndex + limit);
-
     return NextResponse.json({
-      products: paginated,
+      products,
       counts,
       pagination: {
         page,

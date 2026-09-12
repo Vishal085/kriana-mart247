@@ -37,6 +37,7 @@ interface DemandSummary {
   }>;
   receipt?: {
     receiptNumber: string;
+    grandTotal?: number | string | null;
   } | null;
 }
 

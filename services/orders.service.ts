@@ -8,28 +8,19 @@ import { PaymentService } from './payment.service';
 
 export class OrderService {
   static async createOrder(userId: string, input: z.infer<typeof checkoutSchema>) {
-    let targetUserId = userId;
-
-    // If guest user, find or create customer record linked to mobile number
-    if (!targetUserId) {
-      const cleanPhone = (input.deliveryPhone || '').replace(/\D/g, '').trim();
-      let existingUser = await prisma.user.findFirst({
-        where: { mobile: cleanPhone },
-      });
-
-      if (!existingUser) {
-        existingUser = await prisma.user.create({
-          data: {
-            fullName: input.deliveryName,
-            mobile: cleanPhone,
-            passwordHash: '$2b$10$V0rols.Px0V10tRQH87S3OKUGcuaIVQYK70evDuLHEGklUMcPi23q',
-            role: 'CUSTOMER',
-            whatsappOptIn: input.whatsappOptIn ?? true,
-          },
-        });
-      }
-      targetUserId = existingUser.id;
+    if (!userId) {
+      throw new Error('Customer authentication is required to place an order.');
     }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.active) {
+      throw new Error('A valid active customer account is required to place an order.');
+    }
+
+    const targetUserId = user.id;
 
     interface OrderLineItem {
       productId: string;

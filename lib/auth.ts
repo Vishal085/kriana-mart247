@@ -3,11 +3,11 @@ import { createHmac } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { Role } from '@prisma/client';
 
-const SESSION_SECRET = process.env.AUTH_SECRET || 'kiranamart247-secure-dev-session-key';
-
-if (!process.env.AUTH_SECRET && process.env.NODE_ENV !== 'test') {
-  console.warn('[AUTH WARNING] AUTH_SECRET env variable is not set. Using insecure default. Set AUTH_SECRET in production!');
-}
+const SESSION_SECRET = process.env.AUTH_SECRET || (
+  process.env.NODE_ENV === 'production'
+    ? (() => { throw new Error('FATAL: AUTH_SECRET must be set in production!'); })()
+    : 'kiranamart247-local-dev-session-key-32chars-min!'
+);
 
 export type SessionUser = {
   id: string;
@@ -17,6 +17,8 @@ export type SessionUser = {
   avatarUrl?: string | null;
   role: Role;
   active: boolean;
+  iat?: number;
+  exp?: number;
 };
 
 export function signPayload(value: string) {
@@ -24,18 +26,32 @@ export function signPayload(value: string) {
 }
 
 export function createSessionToken(payload: SessionUser) {
-  const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const now = Math.floor(Date.now() / 1000);
+  const tokenPayload: SessionUser = {
+    ...payload,
+    iat: now,
+    exp: now + 60 * 60 * 24 * 7, // 7 days expiration
+  };
+  const encoded = Buffer.from(JSON.stringify(tokenPayload)).toString('base64url');
   return `${encoded}.${signPayload(encoded)}`;
 }
 
-export function verifySessionToken(token: string) {
-  const [payload, signature] = token.split('.');
+export function verifySessionToken(token: string): SessionUser | null {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+  const [payload, signature] = parts;
   if (!payload || !signature) return null;
+  
   const expected = signPayload(payload);
   if (signature !== expected) return null;
 
   try {
     const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as SessionUser;
+    // Enforce token expiration
+    if (decoded.exp && Math.floor(Date.now() / 1000) > decoded.exp) {
+      return null;
+    }
     return decoded;
   } catch {
     return null;

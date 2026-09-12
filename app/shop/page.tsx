@@ -9,6 +9,7 @@ export default async function ShopPage({
 }: {
   searchParams: Promise<{
     categoryId?: string;
+    category?: string;
     brandId?: string;
     mandiId?: string;
     search?: string;
@@ -17,7 +18,7 @@ export default async function ShopPage({
     page?: string;
   }>;
 }) {
-  const { categoryId, brandId, mandiId, search, minPrice, maxPrice, page } = await searchParams;
+  const { categoryId, category, brandId, mandiId, search, minPrice, maxPrice, page } = await searchParams;
   const currentPage = parseInt(page || '1', 10);
   const limit = 20;
   const skip = (currentPage - 1) * limit;
@@ -33,6 +34,21 @@ export default async function ShopPage({
         }
       : undefined;
 
+  // Resolve category by ID or slug
+  const rawCat = category || categoryId;
+  let resolvedCategoryId: string | undefined;
+  if (rawCat) {
+    const matchedCategory = await prisma.category.findFirst({
+      where: {
+        OR: [{ id: rawCat }, { slug: rawCat }],
+      },
+      select: { id: true },
+    });
+    if (matchedCategory) {
+      resolvedCategoryId = matchedCategory.id;
+    }
+  }
+
   let mandiProductIds: string[] | undefined;
   let activeMandiName: string | null = null;
   if (mandiId) {
@@ -46,7 +62,7 @@ export default async function ShopPage({
 
   const where: any = {
     active: true,
-    ...(categoryId ? { categoryId } : {}),
+    ...(resolvedCategoryId ? { categoryId: resolvedCategoryId } : {}),
     ...(brandId ? { brandId } : {}),
     ...(mandiProductIds ? { id: { in: mandiProductIds } } : {}),
     ...(priceFilter ? { retailPrice: priceFilter } : {}),

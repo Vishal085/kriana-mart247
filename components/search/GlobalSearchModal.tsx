@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -10,11 +9,10 @@ import {
   Store,
   Layers,
   TrendingUp,
-  Tag,
   ArrowRight,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
-import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_MANDIS, MOCK_MANDI_RATES, MOCK_BRANDS } from '@/lib/mock-data';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -24,6 +22,11 @@ interface GlobalSearchModalProps {
 export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [matchingCommodityRates, setMatchingCommodityRates] = useState<any[]>([]);
+  const [matchingProducts, setMatchingProducts] = useState<any[]>([]);
+  const [matchingMandis, setMatchingMandis] = useState<any[]>([]);
+  const [matchingCategories, setMatchingCategories] = useState<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Keyboard shortcut Cmd+K / Ctrl+K and Escape
@@ -33,8 +36,6 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
         e.preventDefault();
         if (isOpen) {
           onClose();
-        } else {
-          // Can be toggled externally via custom event or props
         }
       }
       if (e.key === 'Escape' && isOpen) {
@@ -53,55 +54,71 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
       }, 50);
     } else {
       setQuery('');
+      setMatchingCommodityRates([]);
+      setMatchingProducts([]);
+      setMatchingMandis([]);
+      setMatchingCategories([]);
     }
   }, [isOpen]);
 
+  // Live search debounced fetch
+  useEffect(() => {
+    const cleanQ = query.trim();
+    if (!cleanQ) {
+      setMatchingCommodityRates([]);
+      setMatchingProducts([]);
+      setMatchingMandis([]);
+      setMatchingCategories([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const [ratesRes, prodsRes, mandisRes, catsRes] = await Promise.all([
+          fetch(`/api/rates?search=${encodeURIComponent(cleanQ)}&limit=4`).catch(() => null),
+          fetch(`/api/products?search=${encodeURIComponent(cleanQ)}&limit=5`).catch(() => null),
+          fetch(`/api/mandis?search=${encodeURIComponent(cleanQ)}`).catch(() => null),
+          fetch(`/api/categories`).catch(() => null),
+        ]);
+
+        if (ratesRes && ratesRes.ok) {
+          const ratesData = await ratesRes.json();
+          setMatchingCommodityRates(ratesData.rates || []);
+        }
+
+        if (prodsRes && prodsRes.ok) {
+          const prodsData = await prodsRes.json();
+          setMatchingProducts(prodsData.products || []);
+        }
+
+        if (mandisRes && mandisRes.ok) {
+          const mandisData = await mandisRes.json();
+          setMatchingMandis(mandisData.mandis || []);
+        }
+
+        if (catsRes && catsRes.ok) {
+          const catsData = await catsRes.json();
+          const qLower = cleanQ.toLowerCase();
+          const filteredCats = (catsData.categories || [])
+            .filter((c: any) => c.name.toLowerCase().includes(qLower))
+            .slice(0, 4);
+          setMatchingCategories(filteredCats);
+        }
+      } catch (err) {
+        console.warn('Search query error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
   if (!isOpen) return null;
 
-  const cleanQ = query.trim().toLowerCase();
-  const sanitizedQuery = cleanQ.replace(/[₹$,]/g, '').trim();
-  const tokens = sanitizedQuery.split(/\s+/).filter((t) => t.length > 0);
-
-  // Matched results with tokenization & keyword matching
-  const matchingCommodityRates = cleanQ
-    ? MOCK_MANDI_RATES.filter((r) => {
-        const prodName = (r.product?.name || '').toLowerCase();
-        const catName = (r.product?.category?.name || '').toLowerCase();
-        const mandiName = (r.mandi?.name || '').toLowerCase();
-        const full = `${prodName} ${catName} ${mandiName}`;
-        return full.includes(cleanQ) || (tokens.length > 0 && tokens.every((t) => full.includes(t)));
-      }).slice(0, 3)
-    : [];
-
-  const matchingProducts = cleanQ
-    ? MOCK_PRODUCTS.filter((p) => {
-        const name = (p.name || '').toLowerCase();
-        const brand = (p.brand?.name || '').toLowerCase();
-        const cat = (p.category?.name || '').toLowerCase();
-        const kw = (p.searchKeywords || '').toLowerCase();
-        const sku = (p.sku || '').toLowerCase();
-        const unit = (p.unit || '').toLowerCase();
-        const full = `${name} ${brand} ${cat} ${kw} ${sku} ${unit}`;
-        return full.includes(cleanQ) || (tokens.length > 0 && tokens.every((t) => full.includes(t)));
-      }).slice(0, 5)
-    : [];
-
-  const matchingCategories = cleanQ
-    ? MOCK_CATEGORIES.filter((c) => {
-        const name = (c.name || '').toLowerCase();
-        return name.includes(cleanQ) || (tokens.length > 0 && tokens.every((t) => name.includes(t)));
-      }).slice(0, 3)
-    : [];
-
-  const matchingMandis = cleanQ
-    ? MOCK_MANDIS.filter((m) => {
-        const name = (m.name || '').toLowerCase();
-        const city = (m.city || '').toLowerCase();
-        const full = `${name} ${city}`;
-        return full.includes(cleanQ) || (tokens.length > 0 && tokens.every((t) => full.includes(t)));
-      }).slice(0, 3)
-    : [];
-
+  const cleanQ = query.trim();
   const hasResults =
     matchingCommodityRates.length > 0 ||
     matchingProducts.length > 0 ||
@@ -140,6 +157,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
             placeholder="Search products, wholesale mandis, commodities, or brands..."
             className="w-full bg-transparent text-sm sm:text-base font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden"
           />
+          {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin text-[#0B5FA5]" />}
           {query && (
             <button
               type="button"
@@ -163,7 +181,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                 <Sparkles className="h-3.5 w-3.5 text-[#39A9E8]" /> Popular Searches
               </div>
               <div className="flex flex-wrap gap-2">
-                {['Basmati Rice', 'Fortune Mustard Oil', 'Aashirvaad Atta', 'Azadpur Mandi', 'Tata Salt', 'Parle-G ₹5'].map(
+                {['Basmati Rice', 'Fortune Mustard Oil', 'Aashirvaad Atta', 'Azadpur Mandi', 'Tata Salt', 'Amul Butter'].map(
                   (term) => (
                     <button
                       key={term}
@@ -180,7 +198,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
           )}
 
           {/* If typed but nothing matched */}
-          {cleanQ && !hasResults && (
+          {cleanQ && !isLoading && !hasResults && (
             <div className="py-10 text-center">
               <Package className="h-10 w-10 mx-auto text-slate-300 mb-2" />
               <div className="text-sm font-bold text-slate-700">No matching items found</div>
@@ -197,7 +215,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                 <TrendingUp className="h-3.5 w-3.5" /> Mandi Auction Rates
               </div>
               <div className="divide-y divide-slate-100 rounded-2xl border border-slate-100 bg-slate-50/50">
-                {matchingCommodityRates.map((r) => (
+                {matchingCommodityRates.map((r: any) => (
                   <button
                     key={r.id}
                     onClick={() => handleSelect('/mandi-rates')}
@@ -205,18 +223,24 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                   >
                     <div>
                       <div className="text-xs font-bold text-[#073B6F] group-hover:text-[#0B5FA5]">
-                        {r.product.name}
+                        {r.product?.name || 'Commodity'}
                       </div>
-                      <div className="text-[11px] text-slate-500">{r.mandi.name} • {r.unit}</div>
+                      <div className="text-[11px] text-slate-500">
+                        {r.mandi?.name || 'Mandi'} • {r.unit}
+                      </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs font-black text-slate-900">₹{r.currentRate.toFixed(2)}</div>
+                      <div className="text-xs font-black text-slate-900">₹{Number(r.currentRate).toFixed(2)}</div>
                       <div
                         className={`text-[10px] font-bold ${
-                          r.direction === 'RISING' ? 'text-emerald-600' : 'text-rose-600'
+                          r.direction === 'RISING'
+                            ? 'text-emerald-600'
+                            : r.direction === 'FALLING'
+                            ? 'text-rose-600'
+                            : 'text-slate-500'
                         }`}
                       >
-                        {r.percentageChange > 0 ? `+${r.percentageChange}%` : `${r.percentageChange}%`}
+                        {Number(r.percentageChange) > 0 ? `+${r.percentageChange}%` : `${r.percentageChange}%`}
                       </div>
                     </div>
                   </button>
@@ -232,31 +256,34 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                 <Package className="h-3.5 w-3.5 text-slate-500" /> Wholesale Products
               </div>
               <div className="divide-y divide-slate-100 rounded-2xl border border-slate-100 bg-white">
-                {matchingProducts.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => handleSelect(`/products/${p.slug}`)}
-                    className="w-full flex items-center justify-between p-3 text-left hover:bg-[#F8FAFC] rounded-xl transition group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-10 w-10 shrink-0 rounded-lg bg-slate-100 p-1 flex items-center justify-center overflow-hidden">
-                        <img src={p.images[0]?.url} alt={p.name} className="h-full w-full object-contain" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-xs font-bold text-slate-800 group-hover:text-[#0B5FA5] truncate">
-                          {p.name}
+                {matchingProducts.map((p: any) => {
+                  const imageUrl = p.images?.[0]?.url || p.images?.[0] || '/products/placeholder.svg';
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => handleSelect(`/products/${p.slug}`)}
+                      className="w-full flex items-center justify-between p-3 text-left hover:bg-[#F8FAFC] rounded-xl transition group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-10 w-10 shrink-0 rounded-lg bg-slate-100 p-1 flex items-center justify-center overflow-hidden">
+                          <img src={imageUrl} alt={p.name} className="h-full w-full object-contain" />
                         </div>
-                        <div className="text-[11px] text-slate-500">
-                          {p.brand.name} • {p.unit}
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-slate-800 group-hover:text-[#0B5FA5] truncate">
+                            {p.name}
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            {p.brand?.name || p.brand || 'KiranaMart'} • {p.unit}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right shrink-0 ml-3">
-                      <div className="text-xs font-black text-slate-900">₹{Number(p.retailPrice).toFixed(2)}</div>
-                      <div className="text-[10px] font-bold text-emerald-600">Wholesale Lot</div>
-                    </div>
-                  </button>
-                ))}
+                      <div className="text-right shrink-0 ml-3">
+                        <div className="text-xs font-black text-slate-900">₹{Number(p.retailPrice).toFixed(2)}</div>
+                        <div className="text-[10px] font-bold text-emerald-600">Wholesale Lot</div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -268,7 +295,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                 <Store className="h-3.5 w-3.5 text-slate-500" /> Wholesale Mandis
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {matchingMandis.map((m) => (
+                {matchingMandis.map((m: any) => (
                   <button
                     key={m.id}
                     onClick={() => handleSelect(`/mandis/${m.slug}`)}
@@ -292,10 +319,10 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                 <Layers className="h-3.5 w-3.5 text-slate-500" /> Categories
               </div>
               <div className="flex flex-wrap gap-2">
-                {matchingCategories.map((c) => (
+                {matchingCategories.map((c: any) => (
                   <button
                     key={c.id}
-                    onClick={() => handleSelect(`/shop?categoryId=${c.id}`)}
+                    onClick={() => handleSelect(`/shop?category=${c.slug || c.id}`)}
                     className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
                   >
                     <Layers className="h-3 w-3 text-[#39A9E8]" />

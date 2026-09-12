@@ -2,49 +2,56 @@ import { NextResponse } from 'next/server';
 import { requireShopkeeper } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { AiService } from '@/services/ai.service';
-import { SellerStore } from '@/lib/seller-store';
+import { ProductStatus } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
     const user = await requireShopkeeper();
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status'); // DRAFT, PENDING_REVIEW, NEEDS_CHANGES, PUBLISHED, REJECTED
-    const search = searchParams.get('search')?.toLowerCase();
+    const search = searchParams.get('search')?.toLowerCase().trim();
 
     // Query seller's products
-    let where: any = { sellerId: user.id };
-    if (status && status !== 'ALL') {
-      where.status = status;
+    const where: any = { sellerId: user.id };
+    if (status && status !== 'ALL' && Object.values(ProductStatus).includes(status as ProductStatus)) {
+      where.status = status as ProductStatus;
     }
 
-    const allSellerProducts = await prisma.product.findMany({
-      where: { sellerId: user.id },
-      orderBy: { createdAt: 'desc' },
-    });
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { sku: { contains: search, mode: 'insensitive' } },
+        { brand: { name: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [allSellerProducts, filtered] = await Promise.all([
+      prisma.product.findMany({
+        where: { sellerId: user.id },
+        select: { id: true, status: true },
+      }),
+      prisma.product.findMany({
+        where,
+        include: {
+          category: true,
+          brand: true,
+          images: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
 
     // Compute tab counters
     const counts = {
       ALL: allSellerProducts.length,
-      DRAFT: allSellerProducts.filter((p: any) => p.status === 'DRAFT').length,
-      PENDING_REVIEW: allSellerProducts.filter((p: any) => p.status === 'PENDING_REVIEW').length,
-      NEEDS_CHANGES: allSellerProducts.filter((p: any) => p.status === 'NEEDS_CHANGES').length,
-      PUBLISHED: allSellerProducts.filter((p: any) => p.status === 'PUBLISHED').length,
-      REJECTED: allSellerProducts.filter((p: any) => p.status === 'REJECTED').length,
+      DRAFT: allSellerProducts.filter((p) => p.status === 'DRAFT').length,
+      PENDING_REVIEW: allSellerProducts.filter((p) => p.status === 'PENDING_REVIEW').length,
+      NEEDS_CHANGES: allSellerProducts.filter((p) => p.status === 'NEEDS_CHANGES').length,
+      PUBLISHED: allSellerProducts.filter((p) => p.status === 'PUBLISHED').length,
+      REJECTED: allSellerProducts.filter((p) => p.status === 'REJECTED').length,
     };
-
-    let filtered = allSellerProducts;
-    if (status && status !== 'ALL') {
-      filtered = filtered.filter((p: any) => p.status === status);
-    }
-
-    if (search) {
-      filtered = filtered.filter(
-        (p: any) =>
-          p.name.toLowerCase().includes(search) ||
-          p.sku.toLowerCase().includes(search) ||
-          (p.brand?.name && p.brand.name.toLowerCase().includes(search))
-      );
-    }
 
     return NextResponse.json({
       products: filtered,
@@ -108,20 +115,64 @@ export async function POST(request: Request) {
       }
     }
 
-    // Default shop information from user's profile if not passed
+    // Resolve Category
+    let resolvedCategoryId = categoryId;
+    if (resolvedCategoryId) {
+      const cat = await prisma.category.findFirst({
+        where: { OR: [{ id: resolvedCategoryId }, { slug: resolvedCategoryId }] },
+      });
+      if (cat) {
+        resolvedCategoryId = cat.id;
+      } else {
+        const defaultCat = await prisma.category.findFirst({ where: { active: true } });
+        resolvedCategoryId = defaultCat?.id;
+      }
+    } else {
+      const defaultCat = await prisma.category.findFirst({ where: { active: true } });
+      resolvedCategoryId = defaultCat?.id;
+    }
+
+    if (!resolvedCategoryId) {
+      return NextResponse.json({ error: 'A valid category is required to create a listing.' }, { status: 400 });
+    }
+
+    // Resolve Brand
+    let resolvedBrandId = brandId || null;
+    if (!resolvedBrandId && brand && typeof brand === 'string' && brand.trim()) {
+      const trimmed = brand.trim();
+      const slug = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const brandRecord = await prisma.brand.upsert({
+        where: { slug },
+        update: {},
+        create: { name: trimmed, slug },
+      });
+      resolvedBrandId = brandRecord.id;
+    }
+
+    // Resolve Shop Information
     const userShopName = shopName || user.fullName;
     const userShopAddress = shopAddress || 'Azadpur Mandi Commercial Hub';
 
-    const status = isSubmit ? 'PENDING_REVIEW' : 'DRAFT';
+    const status: ProductStatus = isSubmit ? 'PENDING_REVIEW' : 'DRAFT';
+    const productSku = sku || `KM-SEL-${Date.now().toString().slice(-6)}`;
+    const productSlug = `${name ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'product'}-${Date.now().toString().slice(-4)}`;
+
+    // Prepare image records
+    const imageRecords = Array.isArray(images) && images.length > 0
+      ? images.map((img: any, idx: number) => ({
+          url: typeof img === 'string' ? img : (img.url || '/products/placeholder.svg'),
+          altText: typeof img === 'object' && img.altText ? img.altText : (name || 'Product'),
+          sortOrder: idx,
+        }))
+      : [{ url: '/products/placeholder.svg', altText: name || 'Product', sortOrder: 0 }];
 
     const newProduct = await prisma.product.create({
       data: {
         name: name || 'Untitled Product Draft',
-        categoryId: categoryId || 'cat-1',
+        slug: productSlug,
+        categoryId: resolvedCategoryId,
         subCategoryId: subCategoryId || null,
-        subCategoryName: subCategoryName || null,
-        brandId: brandId || null,
-        brand: brand ? { name: brand } : undefined,
+        brandId: resolvedBrandId,
         unit: unit || '1 Pack',
         weight: weight || null,
         mrp: mrp ? Number(mrp) : null,
@@ -129,7 +180,7 @@ export async function POST(request: Request) {
         wholesalePrice: wholesalePrice ? Number(wholesalePrice) : null,
         minimumQuantity: minimumQuantity ? Number(minimumQuantity) : 1,
         stockQuantity: stockQuantity ? Number(stockQuantity) : 100,
-        sku: sku || `KM-SEL-${Date.now().toString().slice(-6)}`,
+        sku: productSku,
         mandi: mandi || null,
         location: location || null,
         shopName: userShopName,
@@ -138,11 +189,17 @@ export async function POST(request: Request) {
         gstPercent: gstPercent ? Number(gstPercent) : null,
         expiryDate: expiryDate || null,
         description: description || '',
-        images: images && images.length > 0 ? images : [{ url: '/products/placeholder.svg', altText: name }],
         sellerId: user.id,
-        seller: { id: user.id, fullName: user.fullName, email: user.email },
         status,
         aiDescriptionStatus: isSubmit ? 'GENERATING' : 'NOT_GENERATED',
+        images: {
+          create: imageRecords,
+        },
+      },
+      include: {
+        category: true,
+        brand: true,
+        images: true,
       },
     });
 
@@ -163,13 +220,13 @@ export async function POST(request: Request) {
       try {
         const aiOutput = await AiService.generateProductDescription({
           name: newProduct.name,
-          brand: brand || (newProduct.brand?.name),
+          brand: newProduct.brand?.name || undefined,
           category: newProduct.category?.name,
           unit: newProduct.unit,
           retailPrice: Number(newProduct.retailPrice),
           wholesalePrice: Number(newProduct.wholesalePrice || 0),
           shopName: userShopName,
-          description: newProduct.description,
+          description: newProduct.description || undefined,
         });
 
         await prisma.product.update({

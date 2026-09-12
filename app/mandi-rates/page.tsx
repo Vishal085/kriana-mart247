@@ -27,13 +27,6 @@ import { MandiCommodityRowAction } from '@/components/mandis/MandiCommodityRowAc
 import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
 import { normalizeRate, getRateSourceMeta } from '@/lib/rates';
 
-const STATES = [
-  { id: '', label: 'All States (16 Mandis)' },
-  { id: 'Delhi', label: 'Delhi (9 Mandis)' },
-  { id: 'Uttar Pradesh', label: 'Uttar Pradesh (3 Mandis)' },
-  { id: 'Haryana', label: 'Haryana (4 Mandis)' },
-];
-
 export default function MandiRatesPage() {
   const { mandis, selectedMandi, selectMandiById } = useMandi();
   const [rates, setRates] = useState<any[]>([]);
@@ -63,6 +56,23 @@ export default function MandiRatesPage() {
   const [direction, setDirection] = useState('');
   const [sortBy, setSortBy] = useState<'updatedAt' | 'rate' | 'change' | 'changePercent' | 'name'>('updatedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Dynamically compute states from active mandis in database
+  const availableStates = useMemo(() => {
+    const countsByState: Record<string, number> = {};
+    for (const m of mandis) {
+      const st = m.state || 'Delhi';
+      countsByState[st] = (countsByState[st] || 0) + 1;
+    }
+    const list = Object.entries(countsByState).map(([st, cnt]) => ({
+      id: st,
+      label: `${st} (${cnt} Mandis)`,
+    }));
+    return [
+      { id: '', label: `All Regions (${mandis.length} Mandis)` },
+      ...list,
+    ];
+  }, [mandis]);
 
   // Filter mandis based on selected state
   const stateFilteredMandis = useMemo(() => {
@@ -176,7 +186,7 @@ export default function MandiRatesPage() {
 
         {/* State Selection Bar */}
         <div className="flex flex-wrap items-center gap-2">
-          {STATES.map((st) => (
+          {availableStates.map((st) => (
             <button
               key={st.id}
               onClick={() => handleStateChange(st.id)}

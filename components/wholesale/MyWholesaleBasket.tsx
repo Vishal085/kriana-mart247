@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { ShoppingBag, Sparkles, Plus, Check, ArrowRight, TrendingDown } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/components/ui/Toast';
-import { MOCK_PRODUCTS } from '@/lib/mock-data';
 
 interface BasketItem {
   id: string;
@@ -21,35 +20,35 @@ export function MyWholesaleBasket() {
   const { toast } = useToast();
   const [addingAll, setAddingAll] = useState(false);
 
-  // Curated staple wholesale basket for Indian kirana stores / households
+  // Curated staple wholesale basket from live database catalogue
   const basketItems: BasketItem[] = [
     {
-      id: 'prod-28', // Aashirvaad Atta
-      name: 'Aashirvaad Shudh Chakki Atta',
+      id: 'cmte64r5p008r7ltxqo0ykz1b', // Aashirvaad Atta 10kg
+      name: 'Aashirvaad Shudh Chakki Atta (10kg Wholesale Bag)',
       unit: '10kg Bag',
       quantity: 5,
-      todayRate: 420.00,
-      lastWeekRate: 435.00,
+      todayRate: 460.00,
+      lastWeekRate: 475.00,
     },
     {
-      id: 'prod-41', // Fortune Mustard Oil
-      name: 'Fortune Kachi Ghani Mustard Oil',
+      id: 'cmte64r5w009u7ltxjvk5t7zg', // Fortune Mustard Oil 1L
+      name: 'Fortune Kachi Ghani Pure Mustard Oil (1 Litre Pouch)',
       unit: '1L Pouch',
       quantity: 12,
-      todayRate: 148.00,
-      lastWeekRate: 155.00,
+      todayRate: 158.00,
+      lastWeekRate: 165.00,
     },
     {
-      id: 'prod-37', // India Gate Basmati
-      name: 'India Gate Feast Rozzana Basmati Rice',
+      id: 'cmte64r5u009l7ltxk8cl9hzt', // India Gate Classic Royal Basmati Rice 5kg
+      name: 'India Gate Classic Royal Basmati Rice (5kg Bag)',
       unit: '5kg Bag',
       quantity: 4,
-      todayRate: 385.00,
-      lastWeekRate: 400.00,
+      todayRate: 590.00,
+      lastWeekRate: 610.00,
     },
     {
-      id: 'prod-52', // Tata Salt
-      name: 'Tata Salt Vacuum Evaporated Iodized Salt',
+      id: 'cmte64r6300ar7ltxbhwlufcu', // Tata Salt 1kg
+      name: 'Tata Salt Vacuum Evaporated Iodized Salt (1kg Pack)',
       unit: '1kg Pouch',
       quantity: 25,
       todayRate: 28.00,

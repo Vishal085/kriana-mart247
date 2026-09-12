@@ -37,7 +37,7 @@ export async function POST(
       shopName: product.shopName || undefined,
       description: customInstructions
         ? `${product.description || ''}\nAdmin Instruction: ${customInstructions}`
-        : product.description,
+        : product.description || undefined,
       tone,
       length,
       language,

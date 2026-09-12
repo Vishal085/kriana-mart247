@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { SellerStore } from '@/lib/seller-store';
 
 function normalize(str: string): string {
   return (str || '')
@@ -41,6 +40,7 @@ export async function GET(
       include: {
         category: true,
         brand: true,
+        images: true,
       },
     });
 
@@ -48,7 +48,16 @@ export async function GET(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const allProducts = SellerStore.getAllCombinedProducts();
+    const allProducts = await prisma.product.findMany({
+      where: {
+        id: { not: id },
+      },
+      include: {
+        category: true,
+        brand: true,
+        images: true,
+      },
+    });
     const duplicates: any[] = [];
 
     const currentBrandName =

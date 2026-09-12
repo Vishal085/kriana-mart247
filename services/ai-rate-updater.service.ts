@@ -51,10 +51,8 @@ export class AiRateUpdaterService {
     let falling = 0;
     let stable = 0;
 
-    // 2. Compute AI Market Intelligence rates for each product across mandis
+    // 2. Refresh Market Intelligence rates for existing observed products across mandis
     for (const product of products) {
-      const baseWholesale = Math.max(8, Math.round(Number(product.retailPrice) * 0.82));
-
       for (const mandi of mandis) {
         // Existing rate from authentic records
         const existing = await prisma.mandiRate.findFirst({
@@ -65,9 +63,14 @@ export class AiRateUpdaterService {
           orderBy: { date: 'desc' },
         });
 
-        // Maintain authentic rate without synthetic random fabrication
-        const previousRate = existing ? Number(existing.currentRate) : Math.max(8, baseWholesale);
-        const newCurrentRate = previousRate;
+        if (!existing) {
+          // Do not fabricate rates for unobserved product-mandi pairs
+          continue;
+        }
+
+        // Maintain authentic rate observations without synthetic random fabrication
+        const previousRate = Number(existing.previousRate || existing.currentRate);
+        const newCurrentRate = Number(existing.currentRate);
         
         const { absolute, percentage, direction } = computeRateMetrics(newCurrentRate, previousRate);
 
@@ -75,8 +78,8 @@ export class AiRateUpdaterService {
         else if (direction === Direction.FALLING) falling++;
         else stable++;
 
-        const minimumRate = existing?.minimumRate ? Number(existing.minimumRate) : Math.max(4, Math.round((newCurrentRate - 2) * 100) / 100);
-        const maximumRate = existing?.maximumRate ? Number(existing.maximumRate) : Math.round((newCurrentRate + 2.5) * 100) / 100;
+        const minimumRate = existing.minimumRate ? Number(existing.minimumRate) : newCurrentRate;
+        const maximumRate = existing.maximumRate ? Number(existing.maximumRate) : newCurrentRate;
 
         // Upsert today's MandiRate
         const updatedRate = await prisma.mandiRate.upsert({

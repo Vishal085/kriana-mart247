@@ -17,6 +17,7 @@ import {
   Filter,
   MapPin,
   AlertCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   BarChart,
@@ -38,6 +39,9 @@ interface RateItem {
   previousRate: number;
   unit: string;
   direction: 'RISING' | 'FALLING' | 'STABLE';
+  date?: string;
+  updatedAt?: string;
+  updatedBy?: string | null;
   product: {
     id: string;
     name: string;
@@ -82,6 +86,15 @@ export default function CompareMandiPricesPage() {
     loadRates();
   }, []);
 
+  // Available states computed dynamically from authentic records
+  const availableStates = useMemo(() => {
+    const statesSet = new Set<string>();
+    for (const r of rates) {
+      if (r.mandi?.state) statesSet.add(r.mandi.state);
+    }
+    return ['All States', ...Array.from(statesSet)];
+  }, [rates]);
+
   // Unique commodities available in real rates
   const uniqueProducts = useMemo(() => {
     const map = new Map<string, { id: string; name: string; slug: string; unit: string }>();
@@ -124,6 +137,9 @@ export default function CompareMandiPricesPage() {
     return filtered.map((r) => {
       const numRate = Number(r.currentRate);
       const norm = normalizeRate(numRate, r.unit);
+      const sourceMeta = getRateSourceMeta(r);
+      const isComparable = !activeProduct?.unit || r.unit === activeProduct.unit || norm.isNormalized;
+
       return {
         mandiId: r.mandi.id,
         mandiName: r.mandi.name,
@@ -135,12 +151,14 @@ export default function CompareMandiPricesPage() {
         direction: r.direction,
         isLowest: numRate === minRate && filtered.length > 1,
         isHighest: numRate === maxRate && filtered.length > 1,
+        sourceMeta,
+        isComparable,
       };
     });
-  }, [rates, selectedProductId, selectedState]);
+  }, [rates, selectedProductId, selectedState, activeProduct]);
 
   // Metrics calculation from verified data
-  const ratesArray = comparisonData.map((d) => d.rate);
+  const ratesArray = comparisonData.filter((d) => d.isComparable).map((d) => d.rate);
   const lowestRate = ratesArray.length > 0 ? Math.min(...ratesArray) : 0;
   const highestRate = ratesArray.length > 0 ? Math.max(...ratesArray) : 0;
   const avgRate =
@@ -177,7 +195,7 @@ export default function CompareMandiPricesPage() {
               Compare Wholesale Mandi Rates Side-by-Side
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-              Analyze authentic wholesale auction rates across registered mandis in Delhi, Uttar Pradesh, and Haryana. Real market rates only—zero synthetic estimations.
+              Analyze authentic wholesale auction rates across registered physical mandis in Delhi-NCR. Real market rates only—zero synthetic estimations.
             </p>
           </div>
 
@@ -219,10 +237,11 @@ export default function CompareMandiPricesPage() {
               onChange={(e) => setSelectedState(e.target.value)}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:border-[#0B5FA5] focus:outline-hidden"
             >
-              <option value="All States">All Mandis (Delhi, UP & Haryana)</option>
-              <option value="Delhi">Delhi Only (9 Mandis)</option>
-              <option value="Uttar Pradesh">Uttar Pradesh Only (3 Mandis)</option>
-              <option value="Haryana">Haryana Only (4 Mandis)</option>
+              {availableStates.map((st) => (
+                <option key={st} value={st}>
+                  {st === 'All States' ? `All Mandis (${rates.length} rates)` : `${st} Mandis`}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -389,7 +408,7 @@ export default function CompareMandiPricesPage() {
               <div>
                 <div className="border-b border-slate-100 pb-4 mb-4">
                   <h2 className="text-lg font-black text-[#073B6F] font-heading">Mandi Comparison Breakdown</h2>
-                  <p className="text-xs text-slate-500">Ranked by procurement cost</p>
+                  <p className="text-xs text-slate-500">Ranked by procurement cost with source verification</p>
                 </div>
 
                 <div className="divide-y divide-slate-100">
@@ -397,37 +416,45 @@ export default function CompareMandiPricesPage() {
                     .sort((a, b) => a.rate - b.rate)
                     .map((mandi, idx) => (
                       <div key={mandi.mandiId} className="py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
                             {idx + 1}
                           </span>
-                          <div>
-                            <div className="text-xs font-bold text-[#073B6F] flex items-center gap-2">
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-[#073B6F] flex items-center gap-2 truncate">
                               {mandi.mandiName}
                               {mandi.isLowest && (
-                                <span className="rounded-full bg-emerald-100 px-2 py-0.2 text-[9px] font-black text-emerald-800">
+                                <span className="rounded-full bg-emerald-100 px-2 py-0.2 text-[9px] font-black text-emerald-800 shrink-0">
                                   LOWEST
                                 </span>
                               )}
                             </div>
                             <div className="text-[11px] text-slate-400">
-                              {mandi.city}, {mandi.state}
+                              {mandi.city}, {mandi.state} • {mandi.sourceMeta.sourceName.slice(0, 32)}
                             </div>
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <div className="text-sm font-black text-slate-900">
-                            ₹{mandi.rate.toFixed(2)}
-                          </div>
-                          <div className="text-[10px] text-slate-500 font-medium">
-                            per {mandi.unit}
-                            {mandi.normalizedText && (
-                              <span className="block font-bold text-sky-700">
-                                {mandi.normalizedText}
-                              </span>
-                            )}
-                          </div>
+                        <div className="text-right shrink-0 ml-3">
+                          {!mandi.isComparable ? (
+                            <div className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                              <AlertTriangle className="h-3 w-3" /> Unit Mismatch
+                            </div>
+                          ) : (
+                            <>
+                              <div className="text-sm font-black text-slate-900">
+                                ₹{mandi.rate.toFixed(2)}
+                              </div>
+                              <div className="text-[10px] text-slate-500 font-medium">
+                                per {mandi.unit}
+                                {mandi.normalizedText && (
+                                  <span className="block font-bold text-sky-700">
+                                    {mandi.normalizedText}
+                                  </span>
+                                )}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     ))}

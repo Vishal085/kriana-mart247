@@ -42,6 +42,9 @@ export default async function HomePage() {
       }),
       prisma.mandi.findMany({
         where: { active: true },
+        include: {
+          _count: { select: { rates: true } },
+        },
         take: 6,
         orderBy: { displayOrder: 'asc' },
       }),
@@ -125,11 +128,11 @@ export default async function HomePage() {
               <div className="mt-4 flex flex-wrap items-center gap-1.5 text-xs">
                 <span className="font-bold text-slate-400 text-[11px] uppercase mr-1">Popular:</span>
                 {[
-                  { name: '🥛 Milk & Dairy', href: '/shop?categoryId=cat-1' },
-                  { name: '🌾 Atta & Dal', href: '/shop?categoryId=cat-11' },
-                  { name: '🛢️ Cooking Oil', href: '/shop?categoryId=cat-6' },
-                  { name: '🍚 Basmati Rice', href: '/shop?categoryId=cat-15' },
-                  { name: '🧂 Spices & Masala', href: '/shop?categoryId=cat-16' },
+                  { name: '🥛 Milk & Dairy', href: '/shop?category=milk-dairy' },
+                  { name: '🌾 Atta & Dal', href: '/shop?category=atta-maida-suji' },
+                  { name: '🛢️ Cooking Oil', href: '/shop?category=cooking-oil' },
+                  { name: '🍚 Basmati Rice', href: '/shop?category=rice' },
+                  { name: '🧂 Spices & Masala', href: '/shop?category=masala-spices' },
                 ].map((pill) => (
                   <Link
                     key={pill.name}

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { SellerStore } from '@/lib/seller-store';
 
 export async function GET(
   request: Request,
@@ -22,7 +21,9 @@ export async function GET(
             shopkeeperProfile: true,
           },
         },
-        auditLogs: true,
+        auditLogs: {
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 
@@ -30,14 +31,8 @@ export async function GET(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    // Also get audit logs directly from store if needed
-    const auditLogs = SellerStore.getAuditLogsByProductId(id);
-
     return NextResponse.json({
-      product: {
-        ...product,
-        auditLogs: auditLogs.length > 0 ? auditLogs : product.auditLogs || [],
-      },
+      product,
     });
   } catch (error: any) {
     console.error('Admin approval product GET error:', error);
@@ -137,8 +132,17 @@ export async function POST(
       if (edits) {
         if (edits.name !== undefined) updateData.name = edits.name;
         if (edits.categoryId !== undefined) updateData.categoryId = edits.categoryId;
-        if (edits.subCategoryName !== undefined) updateData.subCategoryName = edits.subCategoryName;
-        if (edits.brand !== undefined) updateData.brand = edits.brand;
+        if (edits.brandId !== undefined) {
+          updateData.brandId = edits.brandId;
+        } else if (edits.brand && typeof edits.brand === 'string') {
+          const brandSlug = edits.brand.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+          const b = await prisma.brand.upsert({
+            where: { slug: brandSlug },
+            update: {},
+            create: { name: edits.brand.trim(), slug: brandSlug },
+          });
+          updateData.brandId = b.id;
+        }
         if (edits.unit !== undefined) updateData.unit = edits.unit;
         if (edits.weight !== undefined) updateData.weight = edits.weight;
         if (edits.retailPrice !== undefined) updateData.retailPrice = Number(edits.retailPrice);

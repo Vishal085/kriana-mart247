@@ -87,14 +87,36 @@ export async function PUT(
       newStatus = 'PENDING_REVIEW';
     }
 
+    let resolvedBrandId = body.brandId !== undefined ? body.brandId : existing.brandId;
+    if (!resolvedBrandId && body.brand && typeof body.brand === 'string' && body.brand.trim()) {
+      const brandSlug = body.brand.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+      const b = await prisma.brand.upsert({
+        where: { slug: brandSlug },
+        update: {},
+        create: { name: body.brand.trim(), slug: brandSlug },
+      });
+      resolvedBrandId = b.id;
+    }
+
+    if (body.images && Array.isArray(body.images) && body.images.length > 0) {
+      await prisma.productImage.deleteMany({ where: { productId: id } });
+      await prisma.productImage.createMany({
+        data: body.images.map((img: any, idx: number) => ({
+          productId: id,
+          url: typeof img === 'string' ? img : (img.url || '/products/placeholder.svg'),
+          altText: typeof img === 'object' && img.altText ? img.altText : (body.name || existing.name),
+          sortOrder: idx,
+        })),
+      });
+    }
+
     const updated = await prisma.product.update({
       where: { id },
       data: {
         name: body.name !== undefined ? body.name : existing.name,
         categoryId: body.categoryId !== undefined ? body.categoryId : existing.categoryId,
         subCategoryId: body.subCategoryId !== undefined ? body.subCategoryId : existing.subCategoryId,
-        subCategoryName: body.subCategoryName !== undefined ? body.subCategoryName : existing.subCategoryName,
-        brandId: body.brandId !== undefined ? body.brandId : existing.brandId,
+        brandId: resolvedBrandId,
         unit: body.unit !== undefined ? body.unit : existing.unit,
         weight: body.weight !== undefined ? body.weight : existing.weight,
         mrp: body.mrp !== undefined ? (body.mrp ? Number(body.mrp) : null) : existing.mrp,
@@ -106,10 +128,14 @@ export async function PUT(
         location: body.location !== undefined ? body.location : existing.location,
         deliveryAvailability: body.deliveryAvailability !== undefined ? body.deliveryAvailability : existing.deliveryAvailability,
         description: body.description !== undefined ? body.description : existing.description,
-        images: body.images !== undefined ? body.images : existing.images,
         status: newStatus,
         publishedVersionId: existing.status === 'PUBLISHED' ? existing.id : existing.publishedVersionId,
         aiDescriptionStatus: isSubmit ? 'GENERATING' : existing.aiDescriptionStatus,
+      },
+      include: {
+        category: true,
+        brand: true,
+        images: true,
       },
     });
 
@@ -137,7 +163,7 @@ export async function PUT(
           retailPrice: Number(updated.retailPrice),
           wholesalePrice: Number(updated.wholesalePrice || 0),
           shopName: updated.shopName || user.fullName,
-          description: updated.description,
+          description: updated.description || undefined,
         });
 
         await prisma.product.update({

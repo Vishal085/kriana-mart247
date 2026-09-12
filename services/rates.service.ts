@@ -148,10 +148,26 @@ export class RateService {
     };
 
     const days = daysMap[range] || 30;
-    const cutoffDate = new Date();
+
+    // Anchor history to the latest recorded observation date
+    const latestRecord = await prisma.rateHistory.findFirst({
+      where: {
+        productId,
+        ...(mandiId ? { mandiId } : {}),
+      },
+      orderBy: { date: 'desc' },
+      select: { date: true },
+    });
+
+    if (!latestRecord) {
+      return [];
+    }
+
+    const anchorDate = new Date(latestRecord.date);
+    const cutoffDate = new Date(anchorDate);
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    return prisma.rateHistory.findMany({
+    const history = await prisma.rateHistory.findMany({
       where: {
         productId,
         ...(mandiId ? { mandiId } : {}),
@@ -160,6 +176,21 @@ export class RateService {
       include: { mandi: true },
       orderBy: { date: 'asc' },
     });
+
+    // If fewer than 2 points in the relative window, return latest available records up to the window limit
+    if (history.length < 2) {
+      return prisma.rateHistory.findMany({
+        where: {
+          productId,
+          ...(mandiId ? { mandiId } : {}),
+        },
+        include: { mandi: true },
+        orderBy: { date: 'asc' },
+        take: Math.min(days, 30),
+      });
+    }
+
+    return history;
   }
 
   static async upsertRate(data: z.infer<typeof mandiRateSchema>, updatedBy = 'ADMIN') {

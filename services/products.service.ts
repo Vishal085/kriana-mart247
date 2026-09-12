@@ -118,6 +118,7 @@ export class ProductService {
       const created = await tx.product.create({
         data: {
           ...productData,
+          stockQuantity: productData.stockQuantity ?? 100,
           images: images && images.length > 0 ? {
             create: images.map((img, idx) => ({
               url: img.url,
@@ -158,9 +159,14 @@ export class ProductService {
         });
       }
 
+      const updateData: any = { ...productData };
+      if (updateData.stockQuantity === null) {
+        delete updateData.stockQuantity;
+      }
+
       return tx.product.update({
         where: { id },
-        data: productData,
+        data: updateData,
         include: { images: true, brand: true, category: true },
       });
     });
