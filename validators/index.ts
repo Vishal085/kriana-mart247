@@ -20,7 +20,7 @@ export function isStrongPassword(pwd: string): boolean {
 export const customerRegisterSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   mobile: z.string().regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number'),
-  email: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
+  email: z.string().email('Please enter a valid Gmail / Email address'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -39,7 +39,7 @@ export const customerRegisterSchema = z.object({
 export const sellerRegisterSchema = z.object({
   fullName: z.string().min(2, 'Owner/Shopkeeper name must be at least 2 characters'),
   mobile: z.string().regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number'),
-  email: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
+  email: z.string().email('Please enter a valid Gmail / Email address'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -56,6 +56,35 @@ export const sellerRegisterSchema = z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
+});
+
+export const otpSendSchema = z.object({
+  role: z.enum(['CUSTOMER', 'SHOPKEEPER']),
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  mobile: z.string().regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number'),
+  email: z.string().email('Please enter a valid Gmail / Email address'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .refine((p) => isStrongPassword(p), {
+      message: 'Password is too weak. Avoid common words or simple sequences.',
+    }),
+  confirmPassword: z.string().min(8, 'Confirm password is required'),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  pinCode: z.string().optional(),
+  shopName: z.string().optional(),
+  shopAddress: z.string().optional(),
+  state: z.string().optional(),
+  gstNumber: z.string().optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+export const otpVerifySchema = z.object({
+  verificationId: z.string().min(1, 'Verification ID is required'),
+  otp: z.string().length(6, 'OTP must be exactly 6 digits'),
 });
 
 export const customerLoginSchema = z.object({

@@ -690,3 +690,19 @@ model DemandWhatsAppLog {
 
   @@index([demandId])
 }
+
+model OtpVerification {
+  id               String   @id @default(cuid())
+  email            String
+  mobile           String
+  otp              String
+  role             Role     @default(CUSTOMER)
+  registrationData Json
+  expiresAt        DateTime
+  attempts         Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  @@index([email])
+  @@index([mobile])
+  @@index([expiresAt])
+}
