@@ -173,16 +173,21 @@ export class OrderService {
       `New order received from ${order.deliveryName} for ₹${order.total} (${order.paymentMethod}).`
     ).catch((e) => console.warn('Admin notification error:', e?.message || e));
 
-    // If COD, send immediate WhatsApp notification and return without Razorpay order
+    // AUTOMATIC WHATSAPP RECEIPT:
+    // Trigger rich itemized receipt dispatch immediately upon order creation for every order
+    let whatsappReceipt: any = null;
+    try {
+      whatsappReceipt = await WhatsAppService.sendOrderReceipt(order.id, isCOD);
+    } catch (e: any) {
+      console.warn('[OrderService] Automatic WhatsApp receipt notice:', e?.message || e);
+    }
+
+    // If COD, return without Razorpay order
     if (isCOD) {
-      if (input.whatsappOptIn) {
-        WhatsAppService.sendOrderStatusNotification(order.id, OrderStatus.CONFIRMED).catch((e) =>
-          console.warn('WhatsApp COD notification trigger notice:', e?.message || e)
-        );
-      }
       return {
         ...order,
         razorpayOrder: null,
+        whatsappDirectUrl: whatsappReceipt?.directUrl || null,
       };
     }
 
@@ -192,6 +197,7 @@ export class OrderService {
     return {
       ...order,
       razorpayOrder,
+      whatsappDirectUrl: whatsappReceipt?.directUrl || null,
     };
   }
 

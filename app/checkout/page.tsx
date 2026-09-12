@@ -38,6 +38,8 @@ interface SuccessDetails {
   paymentMethod?: string;
   amount: number;
   status: string;
+  whatsappDirectUrl?: string | null;
+  deliveryPhone?: string;
 }
 
 export default function CheckoutPage() {
@@ -162,15 +164,58 @@ export default function CheckoutPage() {
           </div>
 
           <span className="mt-4 inline-block rounded-full bg-emerald-50 px-3.5 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-            Verified Secure Transaction
+            {successDetails.paymentId === 'COD-PAY-ON-DELIVERY' ? 'Order Placed & Confirmed' : 'Verified Secure Transaction'}
           </span>
 
           <h1 className="mt-3 text-2xl sm:text-3xl font-black text-[#073B6F]">
-            Payment Successful!
+            {successDetails.paymentId === 'COD-PAY-ON-DELIVERY' ? 'Order Placed Successfully!' : 'Payment & Order Confirmed!'}
           </h1>
           <p className="mt-1 text-xs text-slate-500">
             Thank you, {formData.deliveryName || user?.fullName || 'Customer'}! Your order has been placed and confirmed.
           </p>
+
+          {/* Automatic WhatsApp Receipt Card */}
+          <div className="mt-6 rounded-2xl border border-emerald-300 bg-emerald-50/70 p-4 sm:p-5 text-left transition hover:shadow-sm">
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-md text-xl">
+                📲
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-950 uppercase tracking-wide">
+                    <span className="h-2 w-2 rounded-full bg-[#25D366] animate-pulse" />
+                    WhatsApp Receipt Dispatched Automatically
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-800 bg-white/90 px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-xs">
+                    ✓ Instant Delivery
+                  </span>
+                </div>
+                <p className="mt-1.5 text-xs text-emerald-900 leading-relaxed">
+                  A complete itemized Tax Invoice & Order Receipt has been sent automatically to your WhatsApp at{' '}
+                  <strong className="font-black text-emerald-950">
+                    +91 {successDetails.deliveryPhone || formData.deliveryPhone}
+                  </strong>
+                  .
+                </p>
+                {successDetails.whatsappDirectUrl && (
+                  <div className="mt-3.5 pt-2.5 border-t border-emerald-200/80 flex flex-wrap items-center gap-3">
+                    <a
+                      href={successDetails.whatsappDirectUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 text-xs font-bold text-white shadow-md transition hover:bg-[#1EBE5D] hover:shadow-lg"
+                    >
+                      <span>💬 Open Receipt in WhatsApp</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                    <span className="text-[11px] text-emerald-800 italic">
+                      Click to view full receipt, share, or save copy
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-5 text-left text-xs space-y-3">
             <div className="flex justify-between items-center">
@@ -178,13 +223,25 @@ export default function CheckoutPage() {
               <span className="font-mono font-bold text-[#073B6F]">#{successDetails.orderNumber}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-medium">Payment ID (Razorpay):</span>
-              <span className="font-mono font-bold text-slate-800 truncate max-w-[200px]">
-                {successDetails.paymentId}
+              <span className="text-slate-500 font-medium">Payment Mode:</span>
+              <span className="font-semibold text-slate-800">
+                {successDetails.paymentId === 'COD-PAY-ON-DELIVERY'
+                  ? 'Cash / Pay on Delivery (Cash/UPI to Rider)'
+                  : 'Online (Razorpay)'}
               </span>
             </div>
+            {successDetails.paymentId !== 'COD-PAY-ON-DELIVERY' && (
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-medium">Payment ID (Razorpay):</span>
+                <span className="font-mono font-bold text-slate-800 truncate max-w-[200px]">
+                  {successDetails.paymentId}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-medium">Amount Paid:</span>
+              <span className="text-slate-500 font-medium">
+                {successDetails.paymentId === 'COD-PAY-ON-DELIVERY' ? 'Payable on Delivery:' : 'Amount Paid:'}
+              </span>
               <span className="text-base font-black text-[#073B6F]">
                 ₹{successDetails.amount.toFixed(2)}
               </span>
@@ -198,6 +255,17 @@ export default function CheckoutPage() {
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            {successDetails.whatsappDirectUrl && (
+              <a
+                href={successDetails.whatsappDirectUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-5 py-3 text-xs font-bold text-white shadow-md hover:bg-[#1EBE5D] transition"
+              >
+                <span>📲 View WhatsApp Receipt</span>
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            )}
             <Link
               href={`/dashboard/customer/orders/${successDetails.orderId}`}
               className="flex items-center justify-center gap-2 rounded-2xl bg-[#073B6F] px-6 py-3 text-xs font-bold text-white hover:bg-[#0B5FA5] transition"
@@ -284,8 +352,11 @@ export default function CheckoutPage() {
               orderId: orderId,
               orderNumber: razorpayOrder.orderNumber,
               paymentId: response.razorpay_payment_id,
+              paymentMethod: 'ONLINE (Razorpay)',
               amount: Number(verifyData.order?.total || cart.grandTotal),
               status: verifyData.order?.status || 'CONFIRMED',
+              whatsappDirectUrl: verifyData.whatsappDirectUrl || null,
+              deliveryPhone: formData.deliveryPhone,
             });
             setPaymentState('success');
           } catch (verifyErr: any) {
@@ -411,6 +482,8 @@ export default function CheckoutPage() {
           paymentMethod: 'Cash / Pay on Delivery (Cash or UPI to Delivery Partner)',
           amount: Number(createdOrder.total),
           status: 'CONFIRMED',
+          whatsappDirectUrl: createdOrder.whatsappDirectUrl || null,
+          deliveryPhone: formData.deliveryPhone,
         });
         setPaymentState('success');
         return;

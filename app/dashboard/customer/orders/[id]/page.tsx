@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { requireCustomer } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { ChevronRight, CheckCircle2, Clock, Truck, Package, ShieldCheck, MapPin, CreditCard, AlertCircle } from 'lucide-react';
+import { ChevronRight, CheckCircle2, Clock, Truck, Package, ShieldCheck, MapPin, CreditCard, AlertCircle, ExternalLink } from 'lucide-react';
 import { CustomerOrderPaymentAction } from '@/components/CustomerOrderPaymentAction';
+import { WhatsAppTemplateBuilder } from '@/lib/whatsapp/templates';
+import { WhatsAppService } from '@/services/whatsapp.service';
 
 export default async function CustomerOrderDetailPage({
   params,
@@ -30,6 +32,34 @@ export default async function CustomerOrderDetailPage({
 
   if (!order) return notFound();
 
+  const receiptBuild = WhatsAppTemplateBuilder.buildOrderReceipt({
+    orderNumber: order.orderNumber,
+    customerName: order.deliveryName || user.fullName || 'Valued Customer',
+    customerPhone: order.deliveryPhone || user.mobile || undefined,
+    orderDate: order.createdAt,
+    items: order.items.map((i) => ({
+      name: i.productNameSnapshot,
+      quantity: i.quantity,
+      unit: i.unit,
+      unitPrice: Number(i.unitPrice),
+      subtotal: Number(i.subtotal),
+    })),
+    subtotal: Number(order.subtotal),
+    deliveryCharge: Number(order.deliveryCharge),
+    total: Number(order.total),
+    paymentMethod: order.paymentMethod,
+    paymentStatus: order.paymentStatus,
+    address: order.deliveryAddress,
+    city: order.city,
+    pincode: order.pincode,
+    orderId: order.id,
+  });
+
+  const whatsappDirectUrl = WhatsAppService.getDirectWhatsAppUrl(
+    order.deliveryPhone || user.mobile,
+    receiptBuild.fallbackText
+  );
+
   const statuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'DISPATCHED', 'DELIVERED'];
   const currentIndex = statuses.indexOf(order.status);
 
@@ -54,6 +84,18 @@ export default async function CustomerOrderDetailPage({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {whatsappDirectUrl && (
+            <a
+              href={whatsappDirectUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] hover:bg-[#1EBE5D] text-white px-3.5 py-1 text-xs font-bold shadow-xs transition hover:shadow-sm"
+              title="Open itemized invoice receipt on WhatsApp"
+            >
+              <span>📲 WhatsApp Receipt</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
           <span
             className={`rounded-full px-3.5 py-1 text-xs font-bold ${
               order.paymentStatus === 'PAID'
@@ -197,17 +239,38 @@ export default async function CustomerOrderDetailPage({
               </div>
             )}
 
-            {/* WhatsApp notification indicator */}
-            {order.whatsappLogs.length > 0 && (
-              <div className="mt-6 rounded-2xl bg-emerald-50 p-3.5 text-xs text-emerald-800 border border-emerald-200">
-                <div className="font-bold flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#72B82A]" /> WhatsApp Notification Dispatched
+            {/* WhatsApp Receipt Card */}
+            <div className="mt-6 rounded-2xl border border-emerald-300 bg-emerald-50/70 p-4 text-xs text-emerald-900">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white font-bold text-lg shadow-xs">
+                  📲
                 </div>
-                <div className="text-[11px] text-emerald-700 mt-1">
-                  Status: {order.whatsappLogs[0].status}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-emerald-950">WhatsApp Order Receipt</span>
+                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                      {order.whatsappLogs.length > 0 ? '✓ Auto-Dispatched' : '✓ Generated'}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-emerald-800 leading-relaxed">
+                    Itemized tax invoice receipt for +91 <strong>{order.deliveryPhone || user.mobile}</strong>. Click below to view and share instantly.
+                  </p>
+                  {whatsappDirectUrl && (
+                    <div className="mt-2.5">
+                      <a
+                        href={whatsappDirectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:shadow"
+                      >
+                        <span>Open Receipt in WhatsApp</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Payment & Transaction Info */}

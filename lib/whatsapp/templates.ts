@@ -68,6 +68,95 @@ export class WhatsAppTemplateBuilder {
   }
 
   /**
+   * Complete Itemized Order Receipt & Tax Invoice Template
+   */
+  static buildOrderReceipt(data: {
+    orderNumber: string;
+    customerName: string;
+    customerPhone?: string | null;
+    orderDate?: Date | string | null;
+    items: Array<{
+      name: string;
+      quantity: number;
+      unit: string;
+      unitPrice: number | string;
+      subtotal: number | string;
+    }>;
+    subtotal: number;
+    deliveryCharge: number;
+    total: number;
+    paymentMethod?: string | null;
+    paymentStatus?: string | null;
+    address?: string | null;
+    city?: string | null;
+    pincode?: string | null;
+    orderId?: string | null;
+  }) {
+    const templateName: WhatsAppTemplateName = 'kiranamart_order_confirmation';
+    const components: MetaTemplateComponent[] = [
+      {
+        type: 'body',
+        parameters: [
+          { type: 'text', text: data.customerName },
+          { type: 'text', text: data.orderNumber },
+          { type: 'text', text: `₹${Number(data.total).toFixed(2)}` },
+          { type: 'text', text: `${data.address || 'Address'}, ${data.city || 'Delhi'} - ${data.pincode || ''}` },
+        ],
+      },
+    ];
+
+    const dateStr = data.orderDate
+      ? new Date(data.orderDate).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })
+      : new Date().toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        });
+
+    const itemsFormatted = data.items
+      .map((item, idx) => {
+        const lineTotal = Number(item.subtotal).toFixed(2);
+        const rate = Number(item.unitPrice).toFixed(2);
+        return `${idx + 1}. *${item.name}*\n   ↳ ${item.quantity} ${item.unit} × ₹${rate} = *₹${lineTotal}*`;
+      })
+      .join('\n\n');
+
+    const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const paymentDisplay = `${data.paymentMethod || 'PAY ON DELIVERY'} (${data.paymentStatus || 'CONFIRMED'})`;
+
+    const fallbackText =
+      `🧾 *KIRANAMART — ORDER RECEIPT & INVOICE*\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `*Order ID:* #${data.orderNumber}\n` +
+      `*Date & Time:* ${dateStr}\n` +
+      `*Customer:* ${data.customerName}\n` +
+      (data.customerPhone ? `*Phone:* ${data.customerPhone}\n` : '') +
+      `*Delivery Address:* ${data.address || ''}, ${data.city || 'Delhi'} - ${data.pincode || ''}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `*ORDERED ITEMS:*\n\n` +
+      `${itemsFormatted}\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `*Items Subtotal:* ₹${Number(data.subtotal).toFixed(2)}\n` +
+      `*Delivery Charges:* ${Number(data.deliveryCharge) === 0 ? 'FREE' : `₹${Number(data.deliveryCharge).toFixed(2)}`}\n` +
+      `*GRAND TOTAL:* *₹${Number(data.total).toFixed(2)}*\n` +
+      `*Payment Mode:* ${paymentDisplay}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      (data.orderId
+        ? `📲 *Track Order & Digital Receipt:*\n` +
+          `${appUrl}/dashboard/customer/orders/${data.orderId}\n\n`
+        : '') +
+      `✅ *Aapka order successfully confirm ho gaya hai!*\n` +
+      `KiranaMart se shopping karne ke liye dhanyawad.\n` +
+      `━━━━━━━━━━━━━━━━━━━━`;
+
+    return { templateName, components, fallbackText };
+  }
+
+  /**
    * 2. Order Packed Template
    */
   static buildOrderPacked(data: OrderNotificationData) {

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { OrderStatus, WhatsAppMessageStatus, WhatsAppMessageType } from '@prisma/client';
 import { WhatsAppClient } from '@/lib/whatsapp/client';
-import { WhatsAppTemplateBuilder, WhatsAppTemplateName } from '@/lib/whatsapp/templates';
+import { WhatsAppTemplateBuilder } from '@/lib/whatsapp/templates';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { MetaWebhookPayload } from '@/lib/whatsapp/types';
 
@@ -9,9 +9,10 @@ export class WhatsAppService {
   /**
    * Generates 1-click WhatsApp Web chat URL
    */
-  static getDirectWhatsAppUrl(phone: string, message: string): string {
-    const norm = normalizePhoneNumber(phone);
-    const recipient = norm.isValid ? norm.digits : phone.replace(/[^\d]/g, '');
+  static getDirectWhatsAppUrl(phone?: string | null, message: string = ''): string {
+    const cleanDigits = (phone || '').replace(/[^\d]/g, '');
+    const norm = cleanDigits ? normalizePhoneNumber(cleanDigits) : { isValid: false, digits: cleanDigits };
+    const recipient = norm.isValid ? norm.digits : cleanDigits;
     return `https://wa.me/${recipient}?text=${encodeURIComponent(message)}`;
   }
 
@@ -112,6 +113,7 @@ export class WhatsAppService {
           skipped: true,
           reason: 'IDEMPOTENT_SUPPRESSION',
           messageId: existingSent.metaMessageId,
+          directUrl: this.getDirectWhatsAppUrl(phoneNorm.digits, templateBuild.fallbackText),
         };
       }
 
@@ -197,7 +199,116 @@ export class WhatsAppService {
     orderDate?: Date;
     status?: string;
   }) {
-    return this.sendOrderStatusNotification(payload.orderId, OrderStatus.PENDING);
+    return this.sendOrderReceipt(payload.orderId);
+  }
+
+  /**
+   * Automatically formats and sends an itemized Tax Invoice & Order Receipt via WhatsApp
+   */
+  static async sendOrderReceipt(orderId: string, isPaid = false) {
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: true,
+          user: true,
+        },
+      });
+
+      if (!order) {
+        return { success: false, error: `Order ${orderId} not found` };
+      }
+
+      const phoneNorm = normalizePhoneNumber(order.deliveryPhone || order.user.mobile);
+      if (!phoneNorm.isValid) {
+        return { success: false, error: 'Invalid delivery phone number for WhatsApp' };
+      }
+
+      const receiptBuild = WhatsAppTemplateBuilder.buildOrderReceipt({
+        orderNumber: order.orderNumber,
+        customerName: order.deliveryName || order.user.fullName || 'Valued Customer',
+        customerPhone: order.deliveryPhone || order.user.mobile || undefined,
+        orderDate: order.createdAt,
+        items: order.items.map((i) => ({
+          name: i.productNameSnapshot,
+          quantity: i.quantity,
+          unit: i.unit,
+          unitPrice: Number(i.unitPrice),
+          subtotal: Number(i.subtotal),
+        })),
+        subtotal: Number(order.subtotal),
+        deliveryCharge: Number(order.deliveryCharge),
+        total: Number(order.total),
+        paymentMethod: order.paymentMethod,
+        paymentStatus: isPaid ? 'PAID' : order.paymentStatus,
+        address: order.deliveryAddress,
+        city: order.city,
+        pincode: order.pincode,
+        orderId: order.id,
+      });
+
+      // 1. Record in WhatsAppMessage
+      const messageRecord = await prisma.whatsAppMessage.create({
+        data: {
+          orderId: order.id,
+          userId: order.userId,
+          phoneNumber: phoneNorm.e164,
+          messageType: WhatsAppMessageType.TEMPLATE,
+          templateName: receiptBuild.templateName,
+          templateLanguage: 'en',
+          status: WhatsAppMessageStatus.PENDING,
+          payload: {
+            receipt: true,
+            fallbackText: receiptBuild.fallbackText,
+          },
+        },
+      });
+
+      // 2. Dispatch via Meta Cloud API Client (or development simulation)
+      const result = await WhatsAppClient.sendTemplate(
+        phoneNorm.digits,
+        receiptBuild.templateName,
+        receiptBuild.components,
+        'en'
+      );
+
+      // 3. Update Record with dispatch result
+      const now = new Date();
+      await prisma.whatsAppMessage.update({
+        where: { id: messageRecord.id },
+        data: {
+          status: result.success ? WhatsAppMessageStatus.SENT : WhatsAppMessageStatus.FAILED,
+          metaMessageId: result.messageId || null,
+          errorCode: result.errorCode || null,
+          errorMessage: result.error || null,
+          sentAt: result.success ? now : null,
+          failedAt: !result.success ? now : null,
+        },
+      });
+
+      // 4. Log in WhatsAppNotificationLog
+      await prisma.whatsAppNotificationLog.create({
+        data: {
+          orderId: order.id,
+          status: result.success ? 'SENT' : 'FAILED',
+          providerMessageId: result.messageId || null,
+          failureReason: result.error || null,
+        },
+      });
+
+      const directUrl = this.getDirectWhatsAppUrl(phoneNorm.digits, receiptBuild.fallbackText);
+
+      return {
+        success: result.success,
+        messageId: result.messageId,
+        simulated: result.simulated,
+        directUrl,
+        receiptText: receiptBuild.fallbackText,
+      };
+    } catch (err: any) {
+      console.error('[WhatsAppService] sendOrderReceipt error:', err);
+      return { success: false, error: err.message || 'Internal error dispatching receipt' };
+    }
   }
 
   /**

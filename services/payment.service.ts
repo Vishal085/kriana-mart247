@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { OrderStatus, PaymentStatus, Role } from '@prisma/client';
+import { OrderStatus, PaymentStatus } from '@prisma/client';
 import {
   getRazorpayClient,
   isRazorpayConfigured,
@@ -254,16 +254,18 @@ export class PaymentService {
       console.error('Admin payment notification error:', e);
     }
 
-    // 3. Trigger WhatsApp Confirmation Notification (non-blocking)
+    // 3. Trigger WhatsApp Order Receipt Notification (non-blocking)
+    let whatsappReceipt: any = null;
     try {
-      await WhatsAppService.sendOrderStatusNotification(order.id, OrderStatus.CONFIRMED);
+      whatsappReceipt = await WhatsAppService.sendOrderReceipt(order.id, true);
     } catch (err) {
-      console.error('WhatsApp order confirmation dispatch error:', err);
+      console.error('WhatsApp order receipt dispatch error:', err);
     }
 
     return {
       success: true,
       order: updatedOrder,
+      whatsappDirectUrl: whatsappReceipt?.directUrl || null,
     };
   }
 
