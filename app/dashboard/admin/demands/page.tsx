@@ -45,13 +45,13 @@ interface DemandSummary {
     deliveredQty?: number | null;
     rate?: number | null;
     amount?: number | null;
-    dairyProduct: {
+    dairyProduct?: {
       brand: string;
       name: string;
       variant?: string | null;
       unit: string;
       defaultRate: number;
-    };
+    } | null;
   }>;
   receipt?: {
     id: string;
@@ -300,9 +300,9 @@ export default function AdminDemandsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredDemands.map((demand) => {
-                  const totalUnits = demand.items.reduce((s, i) => s + Number(i.requestedQty), 0);
-                  const estAmount = demand.items.reduce(
-                    (s, i) => s + Number(i.requestedQty) * Number(i.dairyProduct.defaultRate),
+                  const totalUnits = (demand.items || []).reduce((s, i) => s + Number(i.requestedQty || 0), 0);
+                  const estAmount = (demand.items || []).reduce(
+                    (s, i) => s + Number(i.requestedQty || 0) * Number(i.rate || i.dairyProduct?.defaultRate || 0),
                     0
                   );
                   const isNew = demand.status === 'NEW';
@@ -338,10 +338,10 @@ export default function AdminDemandsPage() {
                       {/* Items */}
                       <td className="px-5 py-4">
                         <div className="font-bold text-slate-800">
-                          {demand.items.length} Products ({totalUnits} Units)
+                          {(demand.items || []).length} Products ({totalUnits} Units)
                         </div>
                         <div className="text-[10px] text-slate-400 truncate max-w-xs mt-0.5">
-                          {demand.items.map((i) => `${i.requestedQty}x ${i.dairyProduct.name}`).join(', ')}
+                          {(demand.items || []).map((i) => `${i.requestedQty || 0}x ${i.dairyProduct?.name || 'Dairy Item'}`).join(', ')}
                         </div>
                       </td>
 

@@ -348,7 +348,20 @@ export const DemandService = {
       prisma.demand.findMany({
         where,
         include: {
-          items: { select: { id: true } },
+          items: {
+            include: {
+              dairyProduct: {
+                select: {
+                  id: true,
+                  name: true,
+                  brand: true,
+                  variant: true,
+                  unit: true,
+                  defaultRate: true,
+                },
+              },
+            },
+          },
           shopkeeper: {
             select: {
               fullName: true,
