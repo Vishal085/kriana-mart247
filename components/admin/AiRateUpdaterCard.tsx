@@ -33,18 +33,24 @@ export function AiRateUpdaterCard({ onUpdated }: { onUpdated?: () => void }) {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold backdrop-blur-md">
             <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-            <span>AI Market Intelligence Engine</span>
+            <span>APMC Spot Rate Engine</span>
             <span className="text-[#39A9E8]">•</span>
             <Clock className="h-3.5 w-3.5 text-emerald-300" />
-            <span className="text-emerald-200">Scheduled Daily at 10:30 AM IST</span>
+            <span className="text-emerald-200">Daily Sync at 10:30 AM IST (Post-Auction)</span>
           </div>
 
-          <h2 className="text-xl font-black sm:text-2xl">
-            Instant AI Rate Auto-Updater
+          <h2 className="text-xl font-black sm:text-2xl tracking-tight">
+            APMC Spot Rate Aggregator & Sync Engine
           </h2>
           <p className="text-xs text-slate-200 max-w-2xl leading-relaxed">
-            Fetch and update all commodity rates across all mandi locations in 1 single click with live wholesale fluctuation calculations, APMC auction spread, and instant WhatsApp confirmation dispatch to Admin.
+            Synchronize live wholesale spot rates across all 8 Delhi-NCR physical mandis (Azadpur, Ghazipur, Okhla, Narela, Najafgarh, Keshavpur, Tilak Nagar, Shahdara). Automatically computes auction spreads, modal parity, and dispatches wholesale alerts.
           </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] font-mono text-blue-200">
+            <span className="rounded-md bg-white/10 px-2 py-0.5">8 Physical Yards</span>
+            <span className="rounded-md bg-white/10 px-2 py-0.5">AGMARKNET Benchmark</span>
+            <span className="rounded-md bg-white/10 px-2 py-0.5">WhatsApp Admin Alerts</span>
+          </div>
         </div>
 
         <div className="flex-shrink-0">
@@ -56,12 +62,12 @@ export function AiRateUpdaterCard({ onUpdated }: { onUpdated?: () => void }) {
             {aiUpdating ? (
               <>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#073B6F] border-t-transparent" />
-                <span>Scanning Mandis & Updating Rates...</span>
+                <span>Scanning APMC Yards & Updating Rates...</span>
               </>
             ) : (
               <>
                 <Bot className="h-4 w-4 text-[#0B5FA5]" />
-                <span>⚡ Run AI Auto-Update Now</span>
+                <span>⚡ Run APMC Rate Sync Now</span>
               </>
             )}
           </button>

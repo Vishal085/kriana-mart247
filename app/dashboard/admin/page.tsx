@@ -92,59 +92,87 @@ export default async function AdminDashboardPage() {
   const stable = rateDirections.find((r: any) => r.direction === Direction.STABLE)?._count.direction ?? 0;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
+    <main className="mx-auto max-w-7xl px-4 py-6 lg:px-6">
+      {/* Live APMC Yard Status Bar */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-white shadow-sm">
+        <div className="flex items-center gap-3">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+          </span>
+          <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+            APMC Spot Feed Live
+          </span>
+          <span className="hidden sm:inline text-slate-700">|</span>
+          <span className="hidden sm:inline text-[11px] text-slate-300">
+            Delhi-NCR Yards: Azadpur • Ghazipur • Okhla • Narela • Najafgarh • Keshavpur
+          </span>
+        </div>
+        <div className="flex items-center gap-3 text-[11px] font-mono text-slate-400">
+          <span className="text-slate-300 font-bold">8 APMC Mandis</span>
+          <span>•</span>
+          <span className="text-slate-300 font-bold">{ratesCount} Spot Quotes</span>
+          <span>•</span>
+          <span className="text-emerald-400 font-bold">DB Synced</span>
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md">
               <Shield className="h-7 w-7 text-[#39A9E8]" />
             </div>
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#0B5FA5]">
-                Administrator Operations
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-[#073B6F]">
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-[#0B5FA5]">
+                <span>APMC Wholesale Spot Terminal</span>
+                <span>•</span>
+                <span className="text-emerald-600">Active Session</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#073B6F]">
                 KiranaMart Admin Console
               </h1>
-              <div className="text-xs text-slate-500">Logged in as {admin.fullName}</div>
+              <div className="mt-0.5 text-xs text-slate-500 font-medium">
+                Terminal Operator: <span className="font-bold text-slate-700">{admin.fullName}</span> (SuperAdmin)
+              </div>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <Link
               href="/dashboard/admin/demands"
-              className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition"
+              className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition"
             >
-              <Milk className="h-4 w-4" />
+              <Milk className="h-3.5 w-3.5" />
               Dairy Demands
               {demandsNewCount > 0 && (
-                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-blue-700">
+                <span className="rounded-full bg-white px-1.5 py-0.2 text-[10px] font-black text-blue-700">
                   {demandsNewCount} New
                 </span>
               )}
             </Link>
             <Link
               href="/dashboard/admin/approvals"
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-600 transition"
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-600 transition"
             >
-              <ShieldCheck className="h-4 w-4" />
+              <ShieldCheck className="h-3.5 w-3.5" />
               Product Approvals
               {pendingApprovalsCount > 0 && (
-                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-amber-600">
+                <span className="rounded-full bg-white px-1.5 py-0.2 text-[10px] font-black text-amber-600">
                   {pendingApprovalsCount}
                 </span>
               )}
             </Link>
             <Link
               href="/dashboard/admin/rates"
-              className="rounded-full bg-[#073B6F] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#0B5FA5]"
+              className="rounded-full bg-[#073B6F] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#0B5FA5] transition"
             >
               Manage Rates
             </Link>
             <Link
               href="/dashboard/admin/orders"
-              className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-[#073B6F]"
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-[#073B6F] hover:bg-slate-50 transition"
             >
               View Orders ({ordersPending} Pending)
             </Link>
@@ -158,7 +186,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Admin Modules Navigation */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-9 text-xs font-bold text-slate-700">
+      <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-9 text-xs font-bold text-slate-700">
         <Link
           href="/dashboard/admin/demands"
           className="flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50/70 p-3 hover:border-blue-400 hover:text-blue-900 transition relative"
@@ -183,86 +211,94 @@ export default async function AdminDashboardPage() {
         </Link>
         <Link
           href="/dashboard/admin/rates"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F]"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
         >
           <TrendingUp className="h-4 w-4 text-[#0B5FA5]" /> Rates Manager
         </Link>
         <Link
           href="/dashboard/admin/orders"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F]"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
         >
           <ShoppingBag className="h-4 w-4 text-[#0B5FA5]" /> Orders
         </Link>
         <Link
           href="/dashboard/admin/products"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F]"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
         >
           <Package className="h-4 w-4 text-[#0B5FA5]" /> Products
         </Link>
         <Link
           href="/dashboard/admin/categories"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F]"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
         >
           <Layers className="h-4 w-4 text-[#0B5FA5]" /> Categories
         </Link>
         <Link
           href="/dashboard/admin/brands"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F]"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
         >
           <Tag className="h-4 w-4 text-[#0B5FA5]" /> Brands
         </Link>
         <Link
           href="/dashboard/admin/mandis"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F]"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
         >
           <Store className="h-4 w-4 text-[#0B5FA5]" /> Mandis
         </Link>
         <Link
           href="/dashboard/admin/users"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F]"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
         >
           <Users className="h-4 w-4 text-[#0B5FA5]" /> Customers
         </Link>
       </div>
 
       {/* Metrics Grid */}
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-slate-400">Total Customers</div>
+      <div className="mt-8 grid grid-cols-2 gap-3.5 sm:grid-cols-4 lg:grid-cols-8">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Registered Buyers</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{customersCount}</div>
+          <div className="mt-0.5 text-[10px] text-slate-400 font-medium">Kirana Store Accounts</div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-slate-400">Products</div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Master Catalog</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{productsCount}</div>
+          <div className="mt-0.5 text-[10px] text-slate-400 font-medium">Verified Active SKUs</div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-slate-400">Active Mandis</div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Physical Mandis</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{mandisCount}</div>
+          <div className="mt-0.5 text-[10px] text-slate-400 font-medium">Delhi-NCR Yards</div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-slate-400">Rates Tracked</div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Live Spot Quotes</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{ratesCount}</div>
+          <div className="mt-0.5 text-[10px] text-slate-400 font-medium">Commodity Rates</div>
         </div>
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-emerald-800">Paid Orders</div>
-          <div className="mt-1 text-2xl font-black text-emerald-600">{ordersPaid}</div>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Paid Orders</div>
+          <div className="mt-1 text-2xl font-black text-emerald-700">{ordersPaid}</div>
+          <div className="mt-0.5 text-[10px] text-emerald-600 font-medium">Settled Invoices</div>
         </div>
-        <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-amber-700">Pending Orders</div>
-          <div className="mt-1 text-2xl font-black text-amber-600">{ordersPending}</div>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-amber-800">Pending Orders</div>
+          <div className="mt-1 text-2xl font-black text-amber-700">{ordersPending}</div>
+          <div className="mt-0.5 text-[10px] text-amber-600 font-medium">Awaiting Dispatch</div>
         </div>
-        <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-[#073B6F]">Delivered Orders</div>
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[#073B6F]">Delivered</div>
           <div className="mt-1 text-2xl font-black text-[#073B6F]">{ordersDelivered}</div>
+          <div className="mt-0.5 text-[10px] text-slate-500 font-medium">Fulfilled Orders</div>
         </div>
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
-          <div className="text-[11px] font-bold uppercase text-blue-800">Dairy Demands</div>
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/80 p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-blue-900">Dairy Indents</div>
           <div className="mt-1 text-2xl font-black text-blue-900 flex items-baseline gap-1.5">
             {demandsTotalCount}
             {demandsNewCount > 0 && (
               <span className="text-xs font-bold text-amber-600">({demandsNewCount} new)</span>
             )}
           </div>
+          <div className="mt-0.5 text-[10px] text-blue-700 font-medium">B2B FMCG Demands</div>
         </div>
       </div>
 
