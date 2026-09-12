@@ -9,7 +9,7 @@ export default function LoginPage() {
           <div className="flex justify-center">
             <BrandMark size="lg" />
           </div>
-          <h1 className="mt-4 text-3xl font-black text-[#073B6F]">Welcome to KiranaMart247</h1>
+          <h1 className="mt-4 text-3xl font-black text-[#073B6F]">KiranaMart</h1>
           <p className="mt-2 text-sm text-slate-500">
             Select your account type to sign in
           </p>
@@ -69,7 +69,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 text-center text-xs text-slate-500">
-          New to KiranaMart247?{' '}
+          New to KiranaMart?{' '}
           <Link href="/register/customer" className="font-bold text-[#0B5FA5] hover:underline">
             Create Customer Account
           </Link>
