@@ -183,26 +183,26 @@ export default async function ShopPage({
       {/* Header & In-Page Search */}
       <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-black text-[#073B6F]">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#073B6F] tracking-tight">
             {isMandiSection
-              ? '🌾 Kirana Mandi (किराना मंडी थोक बाजार)'
+              ? 'Wholesale Mandi Catalog'
               : isSmallPack
-                ? '⚡ ₹5 & ₹10 Chhota Ration (छोटा पैकेट)'
+                ? '₹5 & ₹10 Pocket Packs'
                 : activeMandiName
-                  ? `${activeMandiName} Commodities & Groceries`
-                  : '🛒 Retail Chhota Ration (दैनिक किराना)'}
+                  ? `${activeMandiName} Commodities`
+                  : 'Daily Kirana Grocery'}
           </h1>
           <p className="mt-1 text-xs text-slate-500">
             {isMandiSection
-              ? 'Authentic wholesale APMC auction commodities, bulk grain bags, dals, and edible oil tins. Zero retail FMCG items.'
+              ? 'Wholesale APMC auction commodities & bulk grain bags with live rates.'
               : isSmallPack
-                ? 'Budget-friendly ₹5 and ₹10 daily grocery items, biscuits, spice sachets, soaps, and pocket packs.'
-                : 'Packaged grocery staples, personal care, biscuits, snacks, and daily household essentials.'}
+                ? 'Budget-friendly ₹5 and ₹10 daily grocery essentials and pocket packs.'
+                : 'Packaged grocery staples, pulses, cooking oil, and household essentials.'}
           </p>
         </div>
 
         {/* Search Input Bar */}
-        <form method="GET" action="/shop" className="flex items-center gap-2 w-full lg:w-auto">
+        <form method="GET" action="/shop" className="relative flex items-center w-full lg:w-80 rounded-full border border-slate-200 bg-white p-1 shadow-xs focus-within:border-[#39A9E8] transition">
           {section && <input type="hidden" name="section" value={section} />}
           {pack && <input type="hidden" name="pack" value={pack} />}
           {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
@@ -210,173 +210,80 @@ export default async function ShopPage({
           {mandiId && <input type="hidden" name="mandiId" value={mandiId} />}
           {minPrice && <input type="hidden" name="minPrice" value={minPrice} />}
           {maxPrice && <input type="hidden" name="maxPrice" value={maxPrice} />}
-          <div className="relative flex-1 sm:w-72">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              name="search"
-              defaultValue={search || ''}
-              placeholder="Search products in catalog..."
-              className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs text-slate-800 placeholder-slate-400 shadow-xs outline-none focus:border-[#39A9E8]"
-            />
-          </div>
+          <Search className="h-4 w-4 text-slate-400 ml-2.5 shrink-0" />
+          <input
+            type="text"
+            name="search"
+            defaultValue={search || ''}
+            placeholder="Search products..."
+            className="w-full bg-transparent px-2.5 py-1 text-xs text-slate-800 placeholder-slate-400 outline-none"
+          />
           <button
             type="submit"
-            className="rounded-full bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5] transition shrink-0"
+            className="rounded-full bg-[#073B6F] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#0B5FA5] transition shrink-0"
           >
             Search
           </button>
         </form>
       </div>
 
-      {/* 2-Section Switcher Bar: Retail vs Kirana Mandi vs Small Packs */}
-      <div className="mt-5 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
-        <Link
-          href="/shop?section=retail"
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition shadow-xs ${
-            isRetailSection || (!section && !isSmallPack && !isMandiSection)
-              ? 'bg-[#073B6F] text-white shadow-2xs'
-              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-          }`}
-        >
-          <ShoppingBag className="h-4 w-4" />
-          <span>🛒 Retail Chhota Ration</span>
-        </Link>
-
-        <Link
-          href="/shop?section=mandi"
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition shadow-xs ${
-            isMandiSection
-              ? 'bg-emerald-700 text-white shadow-2xs'
-              : 'border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-          }`}
-        >
-          <Store className="h-4 w-4" />
-          <span>🌾 Kirana Mandi (थोक भाव)</span>
-          <span className="rounded-full bg-emerald-200 text-emerald-900 px-1.5 py-0.2 text-[9px] font-black uppercase">
-            Wholesale
-          </span>
-        </Link>
-
-        <Link
-          href="/shop?pack=small"
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition shadow-xs ${
-            isSmallPack
-              ? 'bg-amber-600 text-white shadow-2xs'
-              : 'border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100'
-          }`}
-        >
-          <Sparkles className="h-4 w-4 text-amber-500" />
-          <span>⚡ ₹5 & ₹10 Pocket Packs</span>
-        </Link>
-
-        <Link
-          href="/mandi-rates"
-          className="sm:ml-auto flex items-center gap-1.5 rounded-xl border border-[#39A9E8] bg-[#EAF5FC] px-3.5 py-2 text-xs font-black text-[#073B6F] hover:bg-[#073B6F] hover:text-white transition"
-        >
-          <TrendingUp className="h-3.5 w-3.5 text-[#0B5FA5]" />
-          <span>Live Mandi Rates Board →</span>
-        </Link>
-      </div>
-
-      {/* Mandi Quick Selector Bar */}
-      <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
-        <span className="shrink-0 text-xs font-bold text-slate-500 flex items-center gap-1">
-          <Store className="h-3.5 w-3.5 text-[#39A9E8]" /> Wholesale Mandi:
-        </span>
-        <Link
-          href={buildUrl({ mandiId: undefined, page: undefined })}
-          className={`shrink-0 rounded-full px-3.5 py-1 text-xs font-bold transition shadow-2xs ${
-            !mandiId
-              ? 'bg-[#073B6F] text-white'
-              : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-          }`}
-        >
-          All Mandis
-        </Link>
-        {mandis.map((m) => {
-          const isActive = mandiId === m.id;
-          return (
-            <Link
-              key={m.id}
-              href={buildUrl({ mandiId: m.id, page: undefined })}
-              className={`shrink-0 rounded-full px-3.5 py-1 text-xs font-bold transition shadow-2xs ${
-                isActive
-                  ? 'bg-[#0B5FA5] text-white'
-                  : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8] hover:bg-[#EAF5FC]'
-              }`}
-            >
-              📍 {m.name} ({m.city})
-            </Link>
-          );
-        })}
-      </div>
-
-      {activeMandiName && (
-        <div className="mt-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Store className="h-4 w-4 text-emerald-600 shrink-0" />
-            <span>
-              Showing live commodities and wholesale products available at <strong>{activeMandiName}</strong>.
-            </span>
-          </div>
+      {/* Sleek Segmented Switcher & Search Bar */}
+      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 pb-3">
+        {/* Modern Segmented Control */}
+        <div className="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-bold shrink-0 self-start sm:self-auto">
           <Link
-            href={buildUrl({ mandiId: undefined })}
-            className="text-xs font-bold text-emerald-700 underline shrink-0 hover:text-emerald-900"
+            href="/shop?section=retail"
+            className={`rounded-lg px-3.5 py-1.5 transition ${
+              isRetailSection || (!section && !isSmallPack && !isMandiSection)
+                ? 'bg-white text-[#073B6F] shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
           >
-            Show All Mandis
+            All Grocery
+          </Link>
+          <Link
+            href="/shop?section=mandi"
+            className={`rounded-lg px-3.5 py-1.5 transition flex items-center gap-1.5 ${
+              isMandiSection
+                ? 'bg-white text-emerald-700 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <span>Wholesale Mandi</span>
+            <span className="rounded-md bg-emerald-100 text-emerald-800 px-1 py-0.2 text-[9px] font-bold uppercase">
+              Live
+            </span>
+          </Link>
+          <Link
+            href="/shop?pack=small"
+            className={`rounded-lg px-3.5 py-1.5 transition ${
+              isSmallPack
+                ? 'bg-white text-amber-700 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            ₹5/₹10 Packs
           </Link>
         </div>
-      )}
 
-      {/* Filter Status & Active Clear Button */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-700">
-            Showing {products.length} of {Math.max(total || 0, products.length)} products
-          </span>
-          {hasActiveFilters && (
-            <Link
-              href="/shop"
-              className="rounded-lg bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-rose-600 hover:bg-rose-100 transition"
-            >
-              Clear All Filters ✕
-            </Link>
-          )}
-        </div>
-
-        {/* Price Presets */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1 shrink-0">Price:</span>
-          {pricePresets.map((preset) => {
-            const isSelected =
-              (preset.min === undefined && preset.max === undefined && !minPrice && !maxPrice) ||
-              (preset.min === minPrice && preset.max === maxPrice);
-            return (
-              <Link
-                key={preset.label}
-                href={buildUrl({ minPrice: preset.min, maxPrice: preset.max, page: undefined })}
-                className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-                  isSelected
-                    ? 'bg-[#073B6F] text-white font-bold'
-                    : 'border border-slate-200 bg-white text-slate-600 hover:border-[#39A9E8]'
-                }`}
-              >
-                {preset.label}
-              </Link>
-            );
-          })}
-        </div>
+        {/* Live Mandi Rates Quick Link */}
+        <Link
+          href="/mandi-rates"
+          className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-[#0B5FA5] hover:text-[#073B6F] transition shrink-0"
+        >
+          <TrendingUp className="h-3.5 w-3.5" />
+          <span>Live Rates Board →</span>
+        </Link>
       </div>
 
       {/* Horizontal Category Carousel */}
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
+      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
         <Link
           href={buildUrl({ categoryId: undefined, page: undefined })}
-          className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-xs ${
+          className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
             !categoryId
-              ? 'bg-[#073B6F] text-white'
-              : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]'
+              ? 'bg-[#073B6F] text-white shadow-xs'
+              : 'border border-slate-200/80 bg-white text-slate-700 hover:border-[#39A9E8]'
           }`}
         >
           All Categories
@@ -385,10 +292,10 @@ export default async function ShopPage({
           <Link
             key={c.id}
             href={buildUrl({ categoryId: c.id, page: undefined })}
-            className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-xs ${
+            className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
               categoryId === c.id
-                ? 'bg-[#073B6F] text-white'
-                : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]'
+                ? 'bg-[#073B6F] text-white shadow-xs'
+                : 'border border-slate-200/80 bg-white text-slate-700 hover:border-[#39A9E8]'
             }`}
           >
             {c.name}
@@ -396,28 +303,59 @@ export default async function ShopPage({
         ))}
       </div>
 
-      {/* Brand Filters Bar */}
-      <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">Brands:</span>
-        <Link
-          href={buildUrl({ brandId: undefined, page: undefined })}
-          className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-            !brandId ? 'bg-[#EAF5FC] text-[#073B6F] font-bold' : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          All Brands
-        </Link>
-        {brands.map((b) => (
+      {/* Compact Secondary Filters: Mandi Hub + Price Ranges */}
+      <div className="mt-2.5 flex items-center justify-between gap-2 overflow-x-auto pb-1 text-xs scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Hub:</span>
           <Link
-            key={b.id}
-            href={buildUrl({ brandId: b.id, page: undefined })}
-            className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-              brandId === b.id ? 'bg-[#EAF5FC] text-[#073B6F] font-bold' : 'text-slate-500 hover:text-slate-800'
+            href={buildUrl({ mandiId: undefined, page: undefined })}
+            className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
+              !mandiId ? 'bg-[#EAF5FC] text-[#073B6F]' : 'bg-slate-100/70 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            {b.name}
+            All Mandis
           </Link>
-        ))}
+          {mandis.map((m) => (
+            <Link
+              key={m.id}
+              href={buildUrl({ mandiId: m.id, page: undefined })}
+              className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
+                mandiId === m.id ? 'bg-[#0B5FA5] text-white shadow-2xs' : 'bg-slate-100/70 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {m.city}
+            </Link>
+          ))}
+        </div>
+
+        {/* Price Ranges & Reset */}
+        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">Price:</span>
+          {pricePresets.slice(1).map((preset) => {
+            const isSelected = preset.min === minPrice && preset.max === maxPrice;
+            return (
+              <Link
+                key={preset.label}
+                href={buildUrl({ minPrice: isSelected ? undefined : preset.min, maxPrice: isSelected ? undefined : preset.max, page: undefined })}
+                className={`shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-semibold transition ${
+                  isSelected
+                    ? 'bg-[#073B6F] text-white font-bold'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:border-[#39A9E8]'
+                }`}
+              >
+                {preset.label}
+              </Link>
+            );
+          })}
+          {hasActiveFilters && (
+            <Link
+              href="/shop"
+              className="shrink-0 rounded-lg bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 hover:bg-rose-100 transition ml-1"
+            >
+              Reset ✕
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Product Grid: 4 columns desktop, 3 columns tablet, 2 columns mobile */}

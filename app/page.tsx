@@ -10,10 +10,11 @@ import {
   Store,
   ShieldCheck,
   Sparkles,
-  Bot,
-  Layers,
   Search,
-  Scale,
+  Truck,
+  CreditCard,
+  Layers,
+  Bot,
 } from 'lucide-react';
 import { MandiSelector } from '@/components/mandis/MandiSelector';
 import { ProductCard } from '@/components/ProductCard';
@@ -103,9 +104,9 @@ export default async function HomePage() {
           <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div>
               {/* Brand Tagline Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#39A9E8]/40 bg-[#EAF5FC] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#39A9E8]/30 bg-[#EAF5FC] px-3.5 py-1 text-xs font-semibold text-[#0B5FA5]">
                 <Sparkles className="h-3.5 w-3.5 text-[#39A9E8]" />
-                ⚡ Fast Kirana Delivery • Today&apos;s Mandi Rates
+                Daily Kirana Essentials & Mandi Rates
               </div>
 
               <h1 className="hero-heading mt-4 text-3xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
@@ -119,12 +120,12 @@ export default async function HomePage() {
 
               {/* Instant Kirana Grocery Search Bar */}
               <div className="mt-6 max-w-xl">
-                <form action="/shop" method="GET" className="hero-search-form relative flex items-center shadow-md rounded-2xl bg-white border border-slate-200 p-1.5 focus-within:border-[#39A9E8] transition">
+                <form action="/shop" method="GET" className="hero-search-form relative flex items-center shadow-sm rounded-2xl bg-white border border-slate-200 p-1.5 focus-within:border-[#39A9E8] transition">
                   <Search className="h-5 w-5 text-slate-400 ml-3 shrink-0" />
                   <input
                     type="text"
                     name="search"
-                    placeholder="Search 'Atta', 'Fortune Oil', 'Parle-G ₹5', 'Sugar'..."
+                    placeholder="Search 'Atta', 'Fortune Oil', 'Parle-G', 'Sugar'..."
                     className="w-full bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none"
                   />
                   <button
@@ -137,71 +138,71 @@ export default async function HomePage() {
               </div>
 
               {/* Quick Grocery Category Shortcuts */}
-              <div className="mt-4 flex flex-wrap items-center gap-1.5 text-xs">
-                <span className="font-bold text-slate-400 text-[11px] uppercase mr-1">Popular:</span>
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="font-semibold text-slate-400 text-[11px] uppercase mr-1">Popular:</span>
                 {[
-                  { name: '🥛 Milk & Dairy', href: '/shop?category=milk-dairy' },
-                  { name: '🌾 Atta & Dal', href: '/shop?category=atta-maida-suji' },
-                  { name: '🛢️ Cooking Oil', href: '/shop?category=cooking-oil' },
-                  { name: '🍚 Basmati Rice', href: '/shop?category=rice' },
-                  { name: '🧂 Spices & Masala', href: '/shop?category=masala-spices' },
+                  { name: 'Milk & Dairy', href: '/shop?category=milk-dairy' },
+                  { name: 'Atta & Flours', href: '/shop?category=atta-maida-suji' },
+                  { name: 'Cooking Oil', href: '/shop?category=cooking-oil' },
+                  { name: 'Basmati Rice', href: '/shop?category=rice' },
+                  { name: 'Spices', href: '/shop?category=masala-spices' },
                 ].map((pill) => (
                   <Link
                     key={pill.name}
                     href={pill.href}
-                    className="rounded-full bg-white border border-slate-200/80 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-[#39A9E8] hover:text-[#073B6F] shadow-2xs transition"
+                    className="rounded-full bg-white border border-slate-200 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
                   >
                     {pill.name}
                   </Link>
                 ))}
               </div>
 
-              {/* Trust Reassurance Chips */}
-              <div className="trust-chips mt-6 flex flex-wrap gap-4 text-xs font-semibold text-slate-600 border-t border-slate-200/60 pt-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-black">🚚</span>
-                  <span>Free Delivery on orders above ₹500</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[#0B5FA5] font-black">💵</span>
-                  <span>Cash on Delivery & UPI</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-amber-600 font-black">✔</span>
-                  <span>100% Genuine Sealed Brands</span>
-                </div>
-              </div>
-
-              {/* Quick Action Links */}
+              {/* Action Buttons */}
               <div className="hero-action-buttons mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/shop"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#073B6F] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md transition hover:bg-[#0B5FA5]"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#073B6F] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#0B5FA5]"
                 >
                   <ShoppingBag className="h-4 w-4" />
-                  Explore Full Grocery Shop
+                  Shop All Products
                 </Link>
                 <Link
                   href="/mandi-rates"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs sm:text-sm font-bold text-[#073B6F] shadow-xs transition hover:border-[#39A9E8]"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#073B6F] shadow-xs transition hover:border-[#39A9E8]"
                 >
                   <TrendingUp className="h-4 w-4 text-[#0B5FA5]" />
-                  Today&apos;s Mandi Rates
+                  Live Mandi Rates
                 </Link>
+              </div>
+
+              {/* Trust Reassurance Chips */}
+              <div className="trust-chips mt-6 flex flex-wrap gap-5 text-xs text-slate-500 border-t border-slate-200/60 pt-4">
+                <div className="flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>Free delivery over ₹500</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-[#0B5FA5] shrink-0" />
+                  <span>Cash on Delivery & UPI</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-amber-600 shrink-0" />
+                  <span>100% Genuine Brands</span>
+                </div>
               </div>
             </div>
 
             {/* Market Snapshot Card */}
-            <div className="market-card rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl">
-              <div className="market-card-header flex items-center justify-between border-b border-slate-100 pb-5">
+            <div className="market-card rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-lg">
+              <div className="market-card-header flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     Live Session
                   </span>
-                  <h2 className="text-2xl font-black text-[#073B6F]">Today&apos;s Market</h2>
+                  <h2 className="text-xl font-black text-[#073B6F]">Today&apos;s Mandi Overview</h2>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#0B5FA5]">
-                  <BarChart3 className="h-6 w-6" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF5FC] text-[#0B5FA5]">
+                  <BarChart3 className="h-5 w-5" />
                 </div>
               </div>
 
@@ -211,42 +212,44 @@ export default async function HomePage() {
               </div>
 
               {/* Metric Counters */}
-              <div className="market-card-stats mt-6 grid grid-cols-3 gap-3 text-center">
-                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                  <div className="text-[11px] font-bold text-slate-500 uppercase">Tracked</div>
-                  <div className="stat-number mt-1 text-2xl font-black text-[#073B6F]">{totalTracked}</div>
+              <div className="market-card-stats mt-4 grid grid-cols-3 gap-2.5 text-center">
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-2.5">
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tracked</div>
+                  <div className="stat-number mt-0.5 text-xl font-black text-[#073B6F]">{totalTracked}</div>
                 </div>
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
-                  <div className="text-[11px] font-bold text-emerald-700 uppercase">Rising</div>
-                  <div className="stat-number mt-1 text-2xl font-black text-emerald-600">
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-2.5">
+                  <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Rising</div>
+                  <div className="stat-number mt-0.5 text-xl font-black text-emerald-600">
                     {summary.rising}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-red-100 bg-red-50 p-3">
-                  <div className="text-[11px] font-bold text-red-700 uppercase">Falling</div>
-                  <div className="stat-number mt-1 text-2xl font-black text-red-600">
+                <div className="rounded-xl border border-red-100 bg-red-50/60 p-2.5">
+                  <div className="text-[10px] font-bold text-red-700 uppercase tracking-wider">Falling</div>
+                  <div className="stat-number mt-0.5 text-xl font-black text-red-600">
                     {summary.falling}
                   </div>
                 </div>
               </div>
 
               {/* Movement Preview Rows */}
-              <div className="market-card-movement mt-6 space-y-2.5">
-                <div className="flex items-center justify-between rounded-xl bg-[#F7FAFC] p-3 text-xs">
-                  <div className="flex items-center gap-2 font-bold text-slate-700">
-                    <TrendingUp className="h-4 w-4 text-emerald-600" /> Top Gainer Today
+              <div className="market-card-movement mt-4 space-y-2">
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs">
+                  <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                    <TrendingUp className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    <span>Top Gainer</span>
                   </div>
-                  <div className="font-bold text-emerald-600">
+                  <div className="font-bold text-emerald-600 truncate max-w-[170px] text-right">
                     {topGainers[0]
                       ? `${topGainers[0].product.name} (+${Number(topGainers[0].percentageChange).toFixed(1)}%)`
                       : 'None'}
                   </div>
                 </div>
-                <div className="flex items-center justify-between rounded-xl bg-[#F7FAFC] p-3 text-xs">
-                  <div className="flex items-center gap-2 font-bold text-slate-700">
-                    <TrendingDown className="h-4 w-4 text-red-600" /> Top Loser Today
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs">
+                  <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                    <TrendingDown className="h-3.5 w-3.5 text-red-600 shrink-0" />
+                    <span>Top Loser</span>
                   </div>
-                  <div className="font-bold text-red-600">
+                  <div className="font-bold text-red-600 truncate max-w-[170px] text-right">
                     {topLosers[0]
                       ? `${topLosers[0].product.name} (${Number(topLosers[0].percentageChange).toFixed(1)}%)`
                       : 'None'}
@@ -254,12 +257,12 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="market-card-footer mt-6 pt-4 border-t border-slate-100">
+              <div className="market-card-footer mt-5 pt-3.5 border-t border-slate-100">
                 <Link
                   href="/mandi-rates"
-                  className="flex items-center justify-center gap-2 text-xs font-bold text-[#0B5FA5] hover:underline"
+                  className="flex items-center justify-center gap-1.5 text-xs font-semibold text-[#0B5FA5] hover:underline"
                 >
-                  View complete rate board with 30+ commodities <ArrowRight className="h-3.5 w-3.5" />
+                  View full 30+ commodity rate board <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             </div>

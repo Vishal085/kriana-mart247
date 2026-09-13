@@ -157,20 +157,12 @@ export function ProductCard({
         <div className="flex items-start justify-between gap-1 mb-2">
           <div className="flex flex-wrap gap-1">
             {isOutOfStock ? (
-              <span className="rounded-md bg-rose-50 border border-rose-200/60 px-2 py-0.5 text-[10px] font-black text-rose-700 uppercase tracking-tight">
+              <span className="rounded-md bg-rose-50 border border-rose-200/60 px-2 py-0.5 text-[10px] font-bold text-rose-700 uppercase tracking-tight">
                 Out of Stock
               </span>
             ) : isSmallPack ? (
-              <span className="rounded-md bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-black text-amber-800 uppercase tracking-tight">
-                Chhota Pack
-              </span>
-            ) : isSpecialOffer ? (
-              <span className="rounded-md bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-black text-emerald-800 uppercase tracking-tight flex items-center gap-0.5">
-                <Sparkles className="h-2.5 w-2.5 text-emerald-600" /> Special Offer
-              </span>
-            ) : isEssential ? (
-              <span className="rounded-md bg-sky-50 border border-sky-200/60 px-2 py-0.5 text-[10px] font-black text-sky-800 uppercase tracking-tight flex items-center gap-0.5">
-                <Zap className="h-2.5 w-2.5 text-sky-600" /> Fast Delivery
+              <span className="rounded-md bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 tracking-tight">
+                Pocket Pack
               </span>
             ) : null}
           </div>
@@ -181,10 +173,10 @@ export function ProductCard({
             className={`rounded-full p-1.5 transition ${
               wishlisted
                 ? 'bg-rose-50 text-rose-500'
-                : 'text-slate-400 hover:bg-slate-100 hover:text-rose-500'
+                : 'text-slate-300 hover:bg-slate-100 hover:text-rose-500'
             }`}
           >
-            <Heart className={`h-4 w-4 ${wishlisted ? 'fill-rose-500' : ''}`} />
+            <Heart className={`h-3.5 w-3.5 ${wishlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
           </button>
         </div>
 
@@ -207,7 +199,7 @@ export function ProductCard({
             />
 
             {discountPercent > 0 && (
-              <span className="absolute top-2 left-2 rounded-md bg-[#073B6F] text-white text-[10px] font-black px-1.5 py-0.5 shadow-xs">
+              <span className="absolute top-2 left-2 rounded-md bg-[#073B6F] text-white text-[10px] font-bold px-1.5 py-0.5 shadow-xs">
                 {discountPercent}% OFF
               </span>
             )}
@@ -215,44 +207,42 @@ export function ProductCard({
         </Link>
 
         {/* Brand & Pack Size */}
-        <div className="mt-3 flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-slate-500">
-          <span className="uppercase tracking-wider text-[#0B5FA5] truncate max-w-[85px] sm:max-w-[120px]">
+        <div className="mt-2.5 flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-slate-500">
+          <span className="uppercase tracking-wider text-[#0B5FA5] truncate max-w-[85px] sm:max-w-[120px] font-bold text-[10px]">
             {brandDisplayName}
           </span>
-          <span className="rounded-md bg-slate-100 px-1.5 py-0.5 font-medium text-slate-600 shrink-0">
+          <span className="rounded-md bg-slate-100/80 px-1.5 py-0.5 font-medium text-slate-600 shrink-0 text-[10px]">
             {weight || unit}
           </span>
         </div>
 
         {/* Title */}
         <Link href={`/products/${slug}`} className="mt-1 block">
-          <h3 className="text-[11px] sm:text-xs font-bold text-slate-900 line-clamp-2 leading-snug group-hover:text-[#073B6F] transition min-h-[30px]">
+          <h3 className="text-xs font-semibold text-slate-900 line-clamp-2 leading-snug group-hover:text-[#073B6F] transition min-h-[32px]">
             {name}
           </h3>
         </Link>
       </div>
 
-      {/* Pricing & Reactive Quantity Stepper Footer */}
+      {/* Pricing & Add Button Footer */}
       <div className="mt-3 pt-2.5 border-t border-slate-100">
-        <div className="flex items-end justify-between gap-1">
-          <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-1">
+          <div className="min-w-0">
             <div className="flex items-baseline gap-1 sm:gap-1.5 flex-wrap">
-              <span className="text-xs sm:text-sm font-black text-slate-900">
+              <span className="text-sm sm:text-base font-black text-slate-900 leading-none">
                 ₹{price.toFixed(2)}
               </span>
               {hasAuthenticDiscount && (
-                <span className="text-[10px] sm:text-[11px] text-slate-400 line-through">
+                <span className="text-[10px] sm:text-xs text-slate-400 line-through">
                   ₹{numericMrp!.toFixed(2)}
                 </span>
               )}
             </div>
-            <div className="text-[9px] sm:text-[10px] text-slate-500 font-medium tracking-tight truncate">
-              {isOutOfStock ? (
-                <span className="text-rose-600 font-bold">Currently Unavailable</span>
-              ) : (
-                <span className="text-emerald-700 font-bold">✅ In Stock</span>
-              )}
-            </div>
+            {isOutOfStock && (
+              <div className="text-[10px] text-rose-600 font-bold mt-0.5">
+                Unavailable
+              </div>
+            )}
           </div>
 
           {/* Stepper / Add Button */}

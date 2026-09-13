@@ -98,9 +98,9 @@ export function SiteHeader() {
   };
 
   const navLinks = [
-    { label: '🏪 Kirana Mandi', shortLabel: 'Mandi Rates', href: '/mandi-rates', badge: 'Live', icon: TrendingUp },
-    { label: '🛒 Retail Chhota Ration', shortLabel: 'Retail Ration', href: '/shop?section=retail', icon: ShoppingBag },
-    { label: '⚡ ₹5 & ₹10 Packs', shortLabel: '₹5/₹10 Packs', href: '/shop?pack=small', icon: Sparkles },
+    { label: 'Mandi Rates', shortLabel: 'Mandi Rates', href: '/mandi-rates', badge: 'Live', icon: TrendingUp },
+    { label: 'Daily Grocery', shortLabel: 'Grocery', href: '/shop', icon: ShoppingBag },
+    { label: '₹5 & ₹10 Packs', shortLabel: '₹5/₹10 Packs', href: '/shop?pack=small', icon: Sparkles },
   ];
 
   return (

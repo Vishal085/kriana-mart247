@@ -300,22 +300,22 @@ export function MandiAiAssistant() {
         </div>
       )}
 
-      {/* Circular Floating Trigger Button */}
+      {/* Floating Trigger Button - Modern Squircle Style */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="group relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-white bg-[#073B6F] text-white shadow-2xl transition-all duration-300 hover:scale-110 hover:bg-[#0B5FA5] focus:outline-none"
+        className="group relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl border border-white/60 bg-[#073B6F] text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-[#0B5FA5] focus:outline-none"
         aria-label="Open Xyon Assistant"
         title="Ask Xyon - Today's Wholesale Rates"
       >
         <div className="relative flex items-center justify-center">
           {isOpen ? (
-            <X className="h-6 w-6 text-white transition-transform duration-200" />
+            <X className="h-5 w-5 text-white transition-transform duration-200" />
           ) : (
             <>
-              <Bot className="h-7 w-7 text-white transition-transform duration-200 group-hover:scale-110" />
-              <span className="absolute -right-1.5 -top-1.5 flex h-3.5 w-3.5">
+              <Bot className="h-5 w-5 sm:h-6 sm:w-6 text-white transition-transform duration-200" />
+              <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#72B82A] opacity-75" />
-                <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-[#073B6F] bg-[#72B82A]" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full border border-[#073B6F] bg-[#72B82A]" />
               </span>
             </>
           )}
@@ -323,8 +323,8 @@ export function MandiAiAssistant() {
 
         {/* Hover Tooltip */}
         {!isOpen && (
-          <span className="pointer-events-none absolute left-16 whitespace-nowrap rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-bold text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
-            Ask Xyon 💬
+          <span className="pointer-events-none absolute left-14 whitespace-nowrap rounded-xl bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-md transition-opacity duration-200 group-hover:opacity-100">
+            Ask Xyon
           </span>
         )}
       </button>

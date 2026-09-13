@@ -99,9 +99,9 @@ export function SlideOverCartDrawer() {
               <ShoppingBag className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-black text-[#073B6F] font-heading">Wholesale Basket</h2>
+              <h2 className="text-base font-bold text-[#073B6F] font-heading">Shopping Cart</h2>
               <p className="text-[11px] text-slate-500 font-medium">
-                {items.length} {items.length === 1 ? 'item' : 'items'} • Fast APMC Sourcing
+                {items.length} {items.length === 1 ? 'item' : 'items'} • Same-day Delivery
               </p>
             </div>
           </div>
@@ -112,10 +112,10 @@ export function SlideOverCartDrawer() {
                   clearCart();
                   toast.success('Cart has been emptied');
                 }}
-                className="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline px-2 py-1"
+                className="text-xs font-semibold text-rose-600 hover:text-rose-800 hover:underline px-2 py-1"
                 title="Clear all items from cart"
               >
-                Empty Cart
+                Clear
               </button>
             )}
             <button
@@ -131,13 +131,13 @@ export function SlideOverCartDrawer() {
         {/* Free Delivery Bar */}
         <div className="border-b border-slate-100 bg-[#F8FAFC] px-5 py-3">
           <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
-            <span className="flex items-center gap-1 text-slate-700">
+            <span className="flex items-center gap-1.5 text-slate-700">
               <Truck className="h-3.5 w-3.5 text-[#0B5FA5]" />
               {remainingForFreeDelivery === 0 ? (
-                <span className="text-emerald-700 font-bold">🎉 FREE Mandi Delivery Unlocked!</span>
+                <span className="text-emerald-700 font-bold">FREE Delivery unlocked!</span>
               ) : (
                 <span>
-                  Add <strong className="text-[#073B6F]">₹{remainingForFreeDelivery.toFixed(0)}</strong> more for FREE Delivery
+                  Add <strong className="text-[#073B6F]">₹{remainingForFreeDelivery.toFixed(0)}</strong> more for free delivery
                 </span>
               )}
             </span>
@@ -268,16 +268,16 @@ export function SlideOverCartDrawer() {
               </div>
 
               {bulkSavings > 0 && (
-                <div className="flex justify-between text-emerald-600 font-bold">
+                <div className="flex justify-between text-emerald-600 font-medium">
                   <span className="flex items-center gap-1">
-                    <Sparkles className="h-3.5 w-3.5" /> Wholesale Tier Savings
+                    <Sparkles className="h-3.5 w-3.5" /> Bulk Savings
                   </span>
                   <span>-₹{bulkSavings.toFixed(2)}</span>
                 </div>
               )}
 
               <div className="flex justify-between text-slate-600">
-                <span>Delivery Charge</span>
+                <span>Delivery Fee</span>
                 <span className="font-semibold text-slate-800">
                   {deliveryCharge === 0 ? (
                     <span className="text-emerald-600 font-bold">FREE</span>
@@ -287,8 +287,8 @@ export function SlideOverCartDrawer() {
                 </span>
               </div>
 
-              <div className="flex justify-between border-t border-slate-200 pt-2 text-sm font-black text-[#073B6F]">
-                <span>Grand Total</span>
+              <div className="flex justify-between border-t border-slate-200 pt-2 text-sm font-bold text-[#073B6F]">
+                <span>Total Amount</span>
                 <span>₹{grandTotal.toFixed(2)}</span>
               </div>
             </div>
@@ -297,24 +297,24 @@ export function SlideOverCartDrawer() {
             <div className="space-y-2 pt-1">
               <button
                 onClick={handleCheckout}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#073B6F] hover:bg-[#0B5FA5] py-3 text-xs font-bold text-white shadow-md transition active:scale-[0.99]"
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#073B6F] hover:bg-[#0B5FA5] py-3 text-xs font-bold text-white shadow-sm transition active:scale-[0.99]"
               >
                 Proceed to Checkout <ArrowRight className="h-4 w-4" />
               </button>
 
               <button
                 onClick={handleWhatsAppOrder}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl border border-emerald-500 bg-emerald-50 hover:bg-emerald-100 py-2.5 text-xs font-bold text-emerald-800 transition"
+                className="w-full flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/50 bg-emerald-50/60 hover:bg-emerald-100 py-2.5 text-xs font-semibold text-emerald-800 transition"
               >
                 <MessageCircle className="h-4 w-4 text-emerald-600" />
-                Order via WhatsApp (Instant Bill)
+                Order via WhatsApp
               </button>
             </div>
 
             {/* Trust Footer */}
-            <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500 pt-1">
+            <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 pt-1">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-              <span>100% Genuine APMC Regulated Wholesale Quality</span>
+              <span>Safe & Secure Checkout • 100% Genuine Items</span>
             </div>
           </div>
         )}
