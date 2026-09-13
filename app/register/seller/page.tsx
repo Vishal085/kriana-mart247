@@ -22,12 +22,15 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
+import { useMandi, matchMandiForLocation } from '@/context/MandiContext';
+
 function SellerRegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/dashboard/seller';
 
   const { loginUser } = useAuth();
+  const { selectMandi, selectMandiByLocation, mandis } = useMandi();
   const [step, setStep] = useState<'DETAILS' | 'OTP'>('DETAILS');
   const [formData, setFormData] = useState({
     fullName: '',
@@ -37,11 +40,13 @@ function SellerRegisterForm() {
     confirmPassword: '',
     shopName: '',
     shopAddress: '',
-    city: 'Delhi',
-    state: 'Delhi',
+    city: 'Ghaziabad',
+    state: 'Uttar Pradesh',
     pinCode: '',
     gstNumber: '',
   });
+
+  const matchedMandi = matchMandiForLocation(formData.city, formData.state, mandis);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -172,6 +177,11 @@ function SellerRegisterForm() {
 
       if (data.user) {
         loginUser(data.user);
+      }
+      if (matchedMandi) {
+        selectMandi(matchedMandi);
+      } else {
+        selectMandiByLocation(formData.city, formData.state);
       }
       router.replace(redirectUrl);
     } catch (err: any) {
@@ -355,15 +365,53 @@ function SellerRegisterForm() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700">City *</label>
+                  <label className="block text-xs font-bold text-slate-700">District / City *</label>
                   <input
                     type="text"
                     required
                     name="city"
                     value={formData.city}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const autoState =
+                        val.toLowerCase().includes('ghaziabad') ||
+                        val.toLowerCase().includes('noida') ||
+                        val.toLowerCase().includes('dadri')
+                          ? 'Uttar Pradesh'
+                          : val.toLowerCase().includes('gurugram') ||
+                            val.toLowerCase().includes('faridabad')
+                          ? 'Haryana'
+                          : formData.state;
+                      setFormData((prev) => ({ ...prev, city: val, state: autoState }));
+                    }}
+                    placeholder="e.g. Ghaziabad"
                     className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs text-slate-800 focus:border-[#39A9E8] focus:outline-hidden"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700">State *</label>
+                  <select
+                    name="state"
+                    value={formData.state}
+                    onChange={(e) => {
+                      const nextState = e.target.value;
+                      let nextCity = formData.city;
+                      if (nextState === 'Uttar Pradesh' && !formData.city.toLowerCase().includes('ghaziabad') && !formData.city.toLowerCase().includes('noida')) {
+                        nextCity = 'Ghaziabad';
+                      } else if (nextState === 'Delhi') {
+                        nextCity = 'Delhi';
+                      } else if (nextState === 'Haryana') {
+                        nextCity = 'Gurugram';
+                      }
+                      setFormData((prev) => ({ ...prev, state: nextState, city: nextCity }));
+                    }}
+                    className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs text-slate-800 focus:border-[#39A9E8] focus:outline-hidden font-bold"
+                  >
+                    <option value="Uttar Pradesh">Uttar Pradesh (Ghaziabad / Noida)</option>
+                    <option value="Delhi">Delhi (NCT APMC Markets)</option>
+                    <option value="Haryana">Haryana (Gurugram / Faridabad)</option>
+                  </select>
                 </div>
 
                 <div>
@@ -374,26 +422,72 @@ function SellerRegisterForm() {
                     maxLength={6}
                     value={formData.pinCode}
                     onChange={handleChange}
-                    placeholder="110033"
+                    placeholder="201005"
                     className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs text-slate-800 focus:border-[#39A9E8] focus:outline-hidden"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700">GST Number (Optional)</label>
-                  <div className="relative mt-1">
-                    <FileText className="absolute left-3 top-3 h-3.5 w-3.5 text-slate-400" />
-                    <input
-                      type="text"
-                      name="gstNumber"
-                      value={formData.gstNumber}
-                      onChange={handleChange}
-                      placeholder="07AAAAA0000A1Z5"
-                      className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:border-[#39A9E8] focus:outline-hidden uppercase"
-                    />
-                  </div>
+              {/* Quick Hub Selector Pills */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Quick NCR Hub:</span>
+                {[
+                  { name: 'Ghaziabad (UP)', city: 'Ghaziabad', state: 'Uttar Pradesh' },
+                  { name: 'Sahibabad (UP)', city: 'Sahibabad', state: 'Uttar Pradesh' },
+                  { name: 'Noida (UP)', city: 'Noida', state: 'Uttar Pradesh' },
+                  { name: 'Delhi APMC', city: 'Delhi', state: 'Delhi' },
+                  { name: 'Gurugram (HR)', city: 'Gurugram', state: 'Haryana' },
+                ].map((loc) => (
+                  <button
+                    key={loc.name}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, city: loc.city, state: loc.state }))}
+                    className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
+                      formData.city.toLowerCase() === loc.city.toLowerCase()
+                        ? 'bg-[#073B6F] text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {loc.name}
+                  </button>
+                ))}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700">GST Number (Optional)</label>
+                <div className="relative mt-1">
+                  <FileText className="absolute left-3 top-3 h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    name="gstNumber"
+                    value={formData.gstNumber}
+                    onChange={handleChange}
+                    placeholder="07AAAAA0000A1Z5"
+                    className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:border-[#39A9E8] focus:outline-hidden uppercase"
+                  />
                 </div>
               </div>
+
+              {/* Live Auto-Matched Mandi Banner */}
+              {matchedMandi && (
+                <div className="rounded-2xl border-2 border-[#39A9E8]/40 bg-gradient-to-r from-[#EAF5FC] to-white p-3.5 text-xs text-[#073B6F] shadow-sm animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-black text-sm text-[#073B6F]">
+                      <Store className="h-4.5 w-4.5 text-[#0B5FA5] shrink-0" />
+                      <span>Assigned Wholesale Mandi: {matchedMandi.name}</span>
+                    </div>
+                    <span className="rounded-md bg-[#073B6F] px-2 py-0.5 text-[10px] font-black text-white">
+                      {matchedMandi.state}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-[11px] font-bold text-slate-700">
+                    District: <span className="text-[#073B6F] underline">{matchedMandi.district || matchedMandi.city}</span> • {matchedMandi.address}
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-600">
+                    Aapke shop district ({formData.city || matchedMandi.city}, {formData.state || matchedMandi.state}) ke according wholesale mandi auction rates aur B2B inventory <strong>{matchedMandi.name}</strong> se link ho gaye hain.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

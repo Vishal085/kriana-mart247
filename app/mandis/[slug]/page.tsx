@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
-import { Store, MapPin, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { MandiService } from '@/services/mandis.service';
+import { getMandiDistrict } from '@/context/MandiContext';
+import { Store, MapPin, ChevronRight, TrendingUp, TrendingDown, Minus, Building2 } from 'lucide-react';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
 import { MandiDetailHeaderAction } from '@/components/mandis/MandiCardActions';
 import { MandiCommodityRowAction } from '@/components/mandis/MandiCommodityRowAction';
 import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
+
+export const dynamic = 'force-dynamic';
 
 export default async function MandiDetailPage({
   params,
@@ -13,22 +16,11 @@ export default async function MandiDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const mandi = await prisma.mandi.findUnique({
-    where: { slug, active: true },
-    include: {
-      rates: {
-        where: { active: true },
-        include: {
-          product: {
-            include: { category: true, brand: true },
-          },
-        },
-        orderBy: { updatedAt: 'desc' },
-      },
-    },
-  });
+  const mandi = await MandiService.getBySlug(slug);
 
   if (!mandi) return notFound();
+
+  const district = getMandiDistrict(mandi);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
@@ -50,10 +42,18 @@ export default async function MandiDetailPage({
             </div>
             <div>
               <h1 className="text-3xl font-black text-[#073B6F]">{mandi.name}</h1>
-              <div className="mt-1 flex items-center gap-2 text-xs font-semibold text-slate-500">
-                <MapPin className="h-3.5 w-3.5 text-[#39A9E8]" />
-                <span>{mandi.city}, {mandi.state} {mandi.pincode ? `• PIN: ${mandi.pincode}` : ''}</span>
-              </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-[#EAF5FC] px-2 py-0.5 text-[11px] font-bold text-[#073B6F]">
+                    <Building2 className="h-3 w-3 text-[#0B5FA5]" />
+                    District: <strong>{district}</strong>
+                  </span>
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-black text-slate-700">
+                    {mandi.state}
+                  </span>
+                  {mandi.pincode && (
+                    <span className="text-xs text-slate-400 font-medium">PIN: {mandi.pincode}</span>
+                  )}
+                </div>
             </div>
           </div>
           <div className="flex flex-col sm:items-end gap-3">

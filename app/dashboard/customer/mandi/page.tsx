@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { requireCustomer } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { MandiService } from '@/services/mandis.service';
+import { getMandiDistrict, matchMandiForLocation } from '@/context/MandiContext';
 import { MANDI_COMMODITY_CATEGORIES, RETAIL_ONLY_CATEGORIES } from '@/services/rates.service';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
 import {
@@ -30,11 +32,34 @@ export default async function CustomerKiranaMandiPage({
 
   const { mandiId, category } = await searchParams;
 
-  const [mandis, commodityCategories, rates] = await Promise.all([
-    prisma.mandi.findMany({
-      where: { active: true },
-      orderBy: { displayOrder: 'asc' },
-    }),
+  // 1. Check user profile for registered city/district
+  const userWithProfile = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: { customerProfile: true },
+  });
+
+  // 2. Fetch mandis via MandiService
+  const mandis = (await MandiService.getAll(true)).map((m: any) => ({
+    ...m,
+    district: m.district || getMandiDistrict(m),
+  }));
+
+  // 3. Auto-match mandi if not explicitly specified in URL query
+  let effectiveMandiId = mandiId;
+  if (!effectiveMandiId && userWithProfile?.customerProfile?.city) {
+    const matched = matchMandiForLocation(userWithProfile.customerProfile.city, undefined, mandis);
+    if (matched) {
+      effectiveMandiId = matched.id;
+    }
+  }
+
+  // 4. Default to Ghaziabad Mandi if still unset
+  if (!effectiveMandiId) {
+    const gzb = mandis.find((m) => m.slug === 'ghaziabad-mandi');
+    if (gzb) effectiveMandiId = gzb.id;
+  }
+
+  const [commodityCategories, rates] = await Promise.all([
     prisma.category.findMany({
       where: {
         active: true,
@@ -48,7 +73,7 @@ export default async function CustomerKiranaMandiPage({
     prisma.mandiRate.findMany({
       where: {
         active: true,
-        ...(mandiId ? { mandiId } : {}),
+        ...(effectiveMandiId ? { mandiId: effectiveMandiId } : {}),
         product: {
           category: {
             slug: {
@@ -72,7 +97,7 @@ export default async function CustomerKiranaMandiPage({
     }),
   ]);
 
-  const activeMandi = mandiId ? mandis.find((m) => m.id === mandiId) : null;
+  const activeMandi = effectiveMandiId ? mandis.find((m) => m.id === effectiveMandiId) : null;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
@@ -169,14 +194,17 @@ export default async function CustomerKiranaMandiPage({
             All Mandis
           </Link>
           {mandis.map((m) => {
-            const isMandiActive = mandiId === m.id;
+            const isMandiActive = (mandiId || effectiveMandiId) === m.id;
+            const isGhaziabad = m.slug === 'ghaziabad-mandi';
             return (
               <Link
                 key={m.id}
                 href={`/dashboard/customer/mandi?mandiId=${m.id}${category ? `&category=${category}` : ''}`}
                 className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold transition ${
                   isMandiActive
-                    ? 'bg-emerald-700 text-white shadow-2xs'
+                    ? 'bg-emerald-700 text-white shadow-2xs font-black'
+                    : isGhaziabad
+                    ? 'border-2 border-[#39A9E8] bg-[#EAF5FC] text-[#073B6F] hover:bg-[#073B6F] hover:text-white'
                     : 'border border-slate-200 bg-white text-slate-700 hover:border-emerald-500 hover:bg-emerald-50'
                 }`}
               >

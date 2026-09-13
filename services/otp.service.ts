@@ -182,7 +182,7 @@ export class OtpService {
           data: {
             userId: user.id,
             address: reg.address || '',
-            city: reg.city || 'Delhi',
+            city: reg.city || 'Ghaziabad',
             pinCode: reg.pinCode || '',
           },
         });
@@ -197,8 +197,8 @@ export class OtpService {
             userId: user.id,
             shopName: reg.shopName || `${reg.fullName}'s Kirana`,
             shopAddress: reg.shopAddress || '',
-            city: reg.city || 'Delhi',
-            state: reg.state || 'Delhi',
+            city: reg.city || 'Ghaziabad',
+            state: reg.state || 'Uttar Pradesh',
             pinCode: reg.pinCode || '',
             gstNumber: reg.gstNumber || null,
             status: 'APPROVED',
@@ -211,7 +211,22 @@ export class OtpService {
         where: { id: verificationId },
       });
 
-      return user;
+      // Return user with customerProfile / shopkeeperProfile populated
+      const userWithProfile = await tx.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          mobile: true,
+          role: true,
+          active: true,
+          customerProfile: true,
+          shopkeeperProfile: true,
+        },
+      });
+
+      return userWithProfile || user;
     });
 
     console.log(`✅ [USER CREATED AFTER OTP VERIFICATION] ID: ${newUser.id} | Email: ${newUser.email} | Mobile: ${newUser.mobile} | Role: ${newUser.role}`);

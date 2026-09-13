@@ -49,6 +49,7 @@ export default function MandiRatesPage() {
 
   // Filters
   const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [selectedMandiId, setSelectedMandiId] = useState<string>('');
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -56,6 +57,16 @@ export default function MandiRatesPage() {
   const [direction, setDirection] = useState('');
   const [sortBy, setSortBy] = useState<'updatedAt' | 'rate' | 'change' | 'changePercent' | 'name'>('updatedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Auto-sync with global selectedMandi from user's registration / context
+  useEffect(() => {
+    if (selectedMandi && !selectedMandiId) {
+      setSelectedMandiId(selectedMandi.id);
+      if (selectedMandi.state) {
+        setSelectedState(selectedMandi.state);
+      }
+    }
+  }, [selectedMandi]);
 
   // Dynamically compute states from active mandis in database
   const availableStates = useMemo(() => {
@@ -74,23 +85,52 @@ export default function MandiRatesPage() {
     ];
   }, [mandis]);
 
-  // Filter mandis based on selected state
-  const stateFilteredMandis = useMemo(() => {
-    if (!selectedState) return mandis;
-    return mandis.filter(
-      (m) => m.state?.toLowerCase() === selectedState.toLowerCase()
-    );
+  // Dynamically compute districts for selected state
+  const availableDistricts = useMemo(() => {
+    const countsByDistrict: Record<string, number> = {};
+    for (const m of mandis) {
+      if (!selectedState || m.state?.toLowerCase() === selectedState.toLowerCase()) {
+        const d = (m as any).district || m.city || 'Delhi';
+        countsByDistrict[d] = (countsByDistrict[d] || 0) + 1;
+      }
+    }
+    return Object.entries(countsByDistrict).map(([d, cnt]) => ({
+      id: d,
+      label: `${d} (${cnt})`,
+    }));
   }, [mandis, selectedState]);
+
+  // Filter mandis based on selected state and district
+  const stateFilteredMandis = useMemo(() => {
+    return mandis.filter((m) => {
+      if (selectedState && m.state?.toLowerCase() !== selectedState.toLowerCase()) {
+        return false;
+      }
+      if (selectedDistrict) {
+        const dist = ((m as any).district || m.city || '').toLowerCase();
+        if (dist !== selectedDistrict.toLowerCase()) return false;
+      }
+      return true;
+    });
+  }, [mandis, selectedState, selectedDistrict]);
 
   // Handle state filter change
   const handleStateChange = (stateVal: string) => {
     setSelectedState(stateVal);
+    setSelectedDistrict('');
     // If current selected mandi is not in new state, reset it
     if (stateVal && selectedMandiId) {
       const match = mandis.find(
         (m) => m.id === selectedMandiId && m.state?.toLowerCase() === stateVal.toLowerCase()
       );
       if (!match) setSelectedMandiId('');
+    }
+  };
+
+  const handleMandiChange = (mandiId: string) => {
+    setSelectedMandiId(mandiId);
+    if (mandiId) {
+      selectMandiById(mandiId);
     }
   };
 
@@ -202,33 +242,66 @@ export default function MandiRatesPage() {
         </div>
       </div>
 
-      {/* Mandi Quick Selector */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 shadow-2xs">
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-[#0B5FA5]" />
-          <span className="text-xs font-bold text-slate-700">Filter by Specific Market:</span>
-          <select
-            value={selectedMandiId}
-            onChange={(e) => setSelectedMandiId(e.target.value)}
-            className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-[#073B6F] outline-none shadow-xs focus:border-[#39A9E8]"
-          >
-            <option value="">All Markets in {selectedState || 'Delhi-NCR'} ({stateFilteredMandis.length})</option>
-            {stateFilteredMandis.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name} ({m.city}, {m.state})
-              </option>
+      {/* Mandi & District Quick Selector */}
+      <div className="mt-4 space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 shadow-2xs">
+        {/* District Filter Row */}
+        {availableDistricts.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-slate-200">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">District:</span>
+            <button
+              onClick={() => setSelectedDistrict('')}
+              className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
+                !selectedDistrict
+                  ? 'bg-emerald-700 text-white shadow-xs'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              All Districts
+            </button>
+            {availableDistricts.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => setSelectedDistrict(d.id)}
+                className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
+                  selectedDistrict === d.id
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {d.label}
+              </button>
             ))}
-          </select>
-        </div>
-
-        {selectedMandiId && (
-          <button
-            onClick={() => setSelectedMandiId('')}
-            className="text-xs font-bold text-[#0B5FA5] hover:underline"
-          >
-            Show All Mandis in {selectedState || 'Region'} ✕
-          </button>
+          </div>
         )}
+
+        {/* Market Dropdown */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-[#0B5FA5]" />
+            <span className="text-xs font-bold text-slate-700">Specific Mandi Market:</span>
+            <select
+              value={selectedMandiId}
+              onChange={(e) => handleMandiChange(e.target.value)}
+              className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-[#073B6F] outline-none shadow-xs focus:border-[#39A9E8]"
+            >
+              <option value="">All Markets ({stateFilteredMandis.length})</option>
+              {stateFilteredMandis.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name} ({m.city}, {m.state})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedMandiId && (
+            <button
+              onClick={() => handleMandiChange('')}
+              className="text-xs font-bold text-[#0B5FA5] hover:underline"
+            >
+              Show All Mandis in {selectedState || 'Region'} ✕
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Market Summary Cards */}

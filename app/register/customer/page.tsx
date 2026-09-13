@@ -20,7 +20,9 @@ import {
   ShieldCheck,
   RotateCcw,
   CheckCircle2,
+  Store,
 } from 'lucide-react';
+import { useMandi, matchMandiForLocation } from '@/context/MandiContext';
 
 function CustomerRegisterForm() {
   const router = useRouter();
@@ -28,6 +30,7 @@ function CustomerRegisterForm() {
   const redirectUrl = searchParams.get('redirect') || '/dashboard/customer';
 
   const { loginUser } = useAuth();
+  const { selectMandi, selectMandiByLocation, mandis } = useMandi();
   const [step, setStep] = useState<'DETAILS' | 'OTP'>('DETAILS');
   const [formData, setFormData] = useState({
     fullName: '',
@@ -36,13 +39,16 @@ function CustomerRegisterForm() {
     password: '',
     confirmPassword: '',
     address: '',
-    city: '',
+    city: 'Ghaziabad',
+    state: 'Uttar Pradesh',
     pinCode: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const matchedMandi = matchMandiForLocation(formData.city, formData.state, mandis);
 
   // OTP State
   const [verificationId, setVerificationId] = useState('');
@@ -114,6 +120,7 @@ function CustomerRegisterForm() {
           confirmPassword: formData.confirmPassword,
           address: formData.address.trim(),
           city: formData.city.trim(),
+          state: formData.state.trim() || 'Uttar Pradesh',
           pinCode: cleanPin,
         }),
       });
@@ -160,6 +167,11 @@ function CustomerRegisterForm() {
 
       if (data.user) {
         loginUser(data.user);
+      }
+      if (matchedMandi) {
+        selectMandi(matchedMandi);
+      } else {
+        selectMandiByLocation(formData.city, formData.state);
       }
       router.replace(redirectUrl);
     } catch (err: any) {
@@ -316,37 +328,126 @@ function CustomerRegisterForm() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-bold text-slate-700">City *</label>
+              <label className="block text-xs font-bold text-slate-700">State *</label>
               <div className="relative mt-1">
-                <Building className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="e.g. Delhi"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
-                />
+                <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <select
+                  value={formData.state}
+                  onChange={(e) => {
+                    const nextState = e.target.value;
+                    let nextCity = formData.city;
+                    if (nextState === 'Uttar Pradesh' && !formData.city.toLowerCase().includes('ghaziabad') && !formData.city.toLowerCase().includes('noida')) {
+                      nextCity = 'Ghaziabad';
+                    } else if (nextState === 'Delhi') {
+                      nextCity = 'Delhi';
+                    } else if (nextState === 'Haryana') {
+                      nextCity = 'Gurugram';
+                    }
+                    setFormData({ ...formData, state: nextState, city: nextCity });
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white font-bold"
+                >
+                  <option value="Uttar Pradesh">Uttar Pradesh (Ghaziabad / Noida)</option>
+                  <option value="Delhi">Delhi (NCT APMC Markets)</option>
+                  <option value="Haryana">Haryana (Gurugram / Faridabad / Sonipat)</option>
+                </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700">PIN Code (6 digits) *</label>
+              <label className="block text-xs font-bold text-slate-700">District / City *</label>
               <div className="relative mt-1">
-                <Hash className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Building className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="e.g. 110006"
-                  pattern="[0-9]{6}"
-                  maxLength={6}
-                  value={formData.pinCode}
-                  onChange={(e) => setFormData({ ...formData, pinCode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                  placeholder="e.g. Ghaziabad, Sahibabad, Noida, Delhi"
+                  value={formData.city}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const autoState =
+                      val.toLowerCase().includes('ghaziabad') ||
+                      val.toLowerCase().includes('sahibabad') ||
+                      val.toLowerCase().includes('noida') ||
+                      val.toLowerCase().includes('dadri')
+                        ? 'Uttar Pradesh'
+                        : val.toLowerCase().includes('gurugram') ||
+                          val.toLowerCase().includes('faridabad') ||
+                          val.toLowerCase().includes('sonipat')
+                        ? 'Haryana'
+                        : formData.state;
+                    setFormData({ ...formData, city: val, state: autoState });
+                  }}
                   required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white font-semibold"
                 />
               </div>
             </div>
           </div>
+
+          {/* Quick Hub Selector Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Popular NCR Hubs:</span>
+            {[
+              { name: 'Ghaziabad (UP)', city: 'Ghaziabad', state: 'Uttar Pradesh' },
+              { name: 'Sahibabad (UP)', city: 'Sahibabad', state: 'Uttar Pradesh' },
+              { name: 'Noida (UP)', city: 'Noida', state: 'Uttar Pradesh' },
+              { name: 'Delhi APMC', city: 'Delhi', state: 'Delhi' },
+              { name: 'Gurugram (HR)', city: 'Gurugram', state: 'Haryana' },
+            ].map((loc) => (
+              <button
+                key={loc.name}
+                type="button"
+                onClick={() => setFormData({ ...formData, city: loc.city, state: loc.state })}
+                className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
+                  formData.city.toLowerCase() === loc.city.toLowerCase()
+                    ? 'bg-[#073B6F] text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {loc.name}
+              </button>
+            ))}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700">PIN Code (6 digits) *</label>
+            <div className="relative mt-1">
+              <Hash className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="e.g. 201005 (Ghaziabad) / 110006"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                value={formData.pinCode}
+                onChange={(e) =>
+                  setFormData({ ...formData, pinCode: e.target.value.replace(/\D/g, '').slice(0, 6) })
+                }
+                required
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+              />
+            </div>
+          </div>
+
+          {/* Live Auto-Matched Mandi Banner */}
+          {matchedMandi && (
+            <div className="rounded-2xl border-2 border-[#39A9E8]/40 bg-gradient-to-r from-[#EAF5FC] to-white p-3.5 text-xs text-[#073B6F] shadow-sm animate-in fade-in">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 font-black text-sm text-[#073B6F]">
+                  <Store className="h-4.5 w-4.5 text-[#0B5FA5] shrink-0" />
+                  <span>Assigned Wholesale Mandi: {matchedMandi.name}</span>
+                </div>
+                <span className="rounded-md bg-[#073B6F] px-2 py-0.5 text-[10px] font-black text-white">
+                  {matchedMandi.state}
+                </span>
+              </div>
+              <div className="mt-1 text-[11px] font-bold text-slate-700">
+                District: <span className="text-[#073B6F] underline">{matchedMandi.district || matchedMandi.city}</span> • {matchedMandi.address}
+              </div>
+              <p className="mt-1 text-[11px] text-slate-600">
+                Aapke district ({formData.city || matchedMandi.city}, {formData.state || matchedMandi.state}) ke according live wholesale mandi rates aur daily grocery orders <strong>{matchedMandi.name}</strong> se link ho gaye hain.
+              </p>
+            </div>
+          )}
 
           <button
             type="submit"

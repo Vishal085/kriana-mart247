@@ -1,17 +1,18 @@
 import Link from 'next/link';
-import { prisma } from '@/lib/prisma';
-import { Store, MapPin, ArrowRight, ChevronRight } from 'lucide-react';
-import { MandiCardActions } from '@/components/mandis/MandiCardActions';
-import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
+import { MandiService } from '@/services/mandis.service';
+import { ChevronRight } from 'lucide-react';
+import { MandiDirectoryView } from '@/components/mandis/MandiDirectoryView';
+
+export const dynamic = 'force-dynamic';
+
+export const metadata = {
+  title: 'Wholesale Mandi Directory • Ghaziabad, Delhi, Noida & NCR APMC Mandis | KiranaMart',
+  description:
+    'Explore registered wholesale mandis in Ghaziabad, Noida, Delhi, and Haryana. Filter by State, District, and Mandi name to track live wholesale grain, pulse, and edible oil auction rates.',
+};
 
 export default async function MandisPage() {
-  const mandis = await prisma.mandi.findMany({
-    where: { active: true },
-    include: {
-      _count: { select: { rates: { where: { active: true } } } },
-    },
-    orderBy: { displayOrder: 'asc' },
-  });
+  const mandis = await MandiService.getAll(true);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
@@ -26,45 +27,13 @@ export default async function MandisPage() {
         <div>
           <h1 className="text-3xl font-black text-[#073B6F]">Wholesale Mandi Directory</h1>
           <p className="mt-1 text-xs text-slate-500">
-            Explore {mandis.length} registered wholesale mandis across Delhi-NCR and track daily APMC market auction rates.
+            Explore registered wholesale mandis structured by State, District, and Name across Delhi-NCR. Link your account to your nearest mandi.
           </p>
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {mandis.map((mandi) => (
-          <div
-            key={mandi.id}
-            className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-[#39A9E8] hover:shadow-lg"
-          >
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#073B6F]">
-                  <Store className="h-6 w-6" />
-                </div>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                  {mandi._count.rates} Commodities Tracked
-                </span>
-              </div>
-
-              <h2 className="mt-4 text-xl font-black text-[#073B6F]">{mandi.name}</h2>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
-                <MapPin className="h-3.5 w-3.5 text-[#39A9E8]" />
-                <span>{mandi.city}, {mandi.state}</span>
-              </div>
-
-              {mandi.address && (
-                <p className="mt-3 text-xs text-slate-600 line-clamp-2">{mandi.address}</p>
-              )}
-            </div>
-
-            <MandiCardActions mandi={mandi} />
-          </div>
-        ))}
-      </div>
-
-      {/* Authoritative Sources & Methodology Disclaimer */}
-      <MandiSourcesDisclaimer />
+      {/* Interactive Directory with State, District, and Search Filters */}
+      <MandiDirectoryView initialMandis={mandis} />
     </main>
   );
 }

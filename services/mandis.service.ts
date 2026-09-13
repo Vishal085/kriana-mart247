@@ -251,7 +251,7 @@ export class MandiService {
   }
 
   static async getBySlug(slug: string) {
-    return prisma.mandi.findUnique({
+    let mandi = await prisma.mandi.findUnique({
       where: { slug },
       include: {
         rates: {
@@ -265,6 +265,38 @@ export class MandiService {
         },
       },
     });
+
+    if (!mandi) {
+      const template = ALL_NCR_MANDIS.find((m) => m.slug === slug);
+      if (template) {
+        try {
+          await prisma.mandi.upsert({
+            where: { slug: template.slug },
+            create: template,
+            update: template,
+          });
+
+          mandi = await prisma.mandi.findUnique({
+            where: { slug },
+            include: {
+              rates: {
+                where: { active: true },
+                include: {
+                  product: {
+                    include: { category: true, brand: true },
+                  },
+                },
+                orderBy: { updatedAt: 'desc' },
+              },
+            },
+          });
+        } catch (err) {
+          console.error('Failed to auto-create mandi in getBySlug:', err);
+        }
+      }
+    }
+
+    return mandi;
   }
 
   static async getById(id: string) {
