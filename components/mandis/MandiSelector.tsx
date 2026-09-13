@@ -230,23 +230,21 @@ export function MandiSelector({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-xl border border-slate-200/90 bg-[#F7FAFC] px-2.5 py-1 text-left transition hover:border-[#39A9E8] hover:bg-white shadow-2xs group"
+        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-1 text-left transition hover:border-[#39A9E8] hover:bg-white shadow-2xs group"
         title="Click to Change Wholesale Mandi"
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#EAF5FC] text-[#073B6F] group-hover:bg-[#073B6F] group-hover:text-white transition">
-          <MapPin className="h-3.5 w-3.5" />
-        </div>
-        <div>
-          <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Mandi: {selectedMandi?.state || 'UP'} • {selectedMandi?.city || 'Ghaziabad'}
+        <MapPin className="h-3.5 w-3.5 text-[#0B5FA5] shrink-0" />
+        <div className="flex flex-col">
+          <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1 leading-none">
+            <span className="h-1 w-1 rounded-full bg-emerald-500 shrink-0"></span>
+            <span>{selectedMandi?.city || 'Ghaziabad'} Mandi</span>
           </div>
-          <div className="max-w-[140px] truncate text-xs font-black text-[#073B6F]">
-            {selectedMandi ? selectedMandi.name : 'Ghaziabad Mandi'}
+          <div className="max-w-[115px] truncate text-[11px] font-bold text-[#073B6F] leading-tight mt-0.5">
+            {selectedMandi ? selectedMandi.name : 'Ghaziabad APMC'}
           </div>
         </div>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-slate-400 transition-transform ${
+          className={`h-3 w-3 text-slate-400 transition-transform ml-0.5 shrink-0 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />

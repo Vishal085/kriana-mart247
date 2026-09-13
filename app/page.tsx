@@ -115,7 +115,7 @@ export default async function HomePage() {
               </h1>
 
               <p className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base text-slate-600 leading-relaxed">
-                Order milk, atta, cooking oil, pulses, spices, and ₹5/₹10 pocket packs with same-day home delivery or track live wholesale market trends.
+                Order fresh milk, atta, cooking oil, pulses, and daily spices with same-day home delivery or track live wholesale market trends.
               </p>
 
               {/* Instant Kirana Grocery Search Bar */}

@@ -21,7 +21,7 @@ export default async function ShopPage({
     page?: string;
   }>;
 }) {
-  const { categoryId, category, brandId, mandiId, section, pack, search, minPrice, maxPrice, page } = await searchParams;
+  const { categoryId, category, brandId, mandiId, section, search, minPrice, maxPrice, page } = await searchParams;
   const currentPage = parseInt(page || '1', 10);
   const limit = 20;
   const skip = (currentPage - 1) * limit;
@@ -35,9 +35,7 @@ export default async function ShopPage({
           ...(minP !== undefined ? { gte: minP } : {}),
           ...(maxP !== undefined ? { lte: maxP } : {}),
         }
-      : pack === 'small'
-        ? { lte: 15 }
-        : undefined;
+      : undefined;
 
   // Resolve category by ID or slug
   const rawCat = category || categoryId;
@@ -67,7 +65,6 @@ export default async function ShopPage({
 
   const isMandiSection = section === 'mandi';
   const isRetailSection = section === 'retail';
-  const isSmallPack = pack === 'small';
 
   const categoryFilter = resolvedCategoryId
     ? { categoryId: resolvedCategoryId }
@@ -136,7 +133,7 @@ export default async function ShopPage({
   ]);
 
   const totalPages = Math.ceil(total / limit);
-  const hasActiveFilters = Boolean(categoryId || brandId || mandiId || search || minPrice || maxPrice || section || pack);
+  const hasActiveFilters = Boolean(categoryId || brandId || mandiId || search || minPrice || maxPrice || section);
 
   const pricePresets = [
     { label: 'All Prices', min: undefined, max: undefined },
@@ -149,7 +146,6 @@ export default async function ShopPage({
   const buildUrl = (updates: { [key: string]: string | undefined }) => {
     const params = new URLSearchParams();
     if (section) params.set('section', section);
-    if (pack) params.set('pack', pack);
     if (categoryId) params.set('categoryId', categoryId);
     if (brandId) params.set('brandId', brandId);
     if (mandiId) params.set('mandiId', mandiId);
@@ -186,25 +182,20 @@ export default async function ShopPage({
           <h1 className="text-2xl sm:text-3xl font-black text-[#073B6F] tracking-tight">
             {isMandiSection
               ? 'Wholesale Mandi Catalog'
-              : isSmallPack
-                ? '₹5 & ₹10 Pocket Packs'
-                : activeMandiName
-                  ? `${activeMandiName} Commodities`
-                  : 'Daily Kirana Grocery'}
+              : activeMandiName
+                ? `${activeMandiName} Commodities`
+                : 'Daily Kirana Grocery'}
           </h1>
           <p className="mt-1 text-xs text-slate-500">
             {isMandiSection
               ? 'Wholesale APMC auction commodities & bulk grain bags with live rates.'
-              : isSmallPack
-                ? 'Budget-friendly ₹5 and ₹10 daily grocery essentials and pocket packs.'
-                : 'Packaged grocery staples, pulses, cooking oil, and household essentials.'}
+              : 'Packaged grocery staples, pulses, cooking oil, and household essentials.'}
           </p>
         </div>
 
         {/* Search Input Bar */}
         <form method="GET" action="/shop" className="relative flex items-center w-full lg:w-80 rounded-full border border-slate-200 bg-white p-1 shadow-xs focus-within:border-[#39A9E8] transition">
           {section && <input type="hidden" name="section" value={section} />}
-          {pack && <input type="hidden" name="pack" value={pack} />}
           {categoryId && <input type="hidden" name="categoryId" value={categoryId} />}
           {brandId && <input type="hidden" name="brandId" value={brandId} />}
           {mandiId && <input type="hidden" name="mandiId" value={mandiId} />}
@@ -234,7 +225,7 @@ export default async function ShopPage({
           <Link
             href="/shop?section=retail"
             className={`rounded-lg px-3.5 py-1.5 transition ${
-              isRetailSection || (!section && !isSmallPack && !isMandiSection)
+              isRetailSection || (!section && !isMandiSection)
                 ? 'bg-white text-[#073B6F] shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
@@ -253,16 +244,6 @@ export default async function ShopPage({
             <span className="rounded-md bg-emerald-100 text-emerald-800 px-1 py-0.2 text-[9px] font-bold uppercase">
               Live
             </span>
-          </Link>
-          <Link
-            href="/shop?pack=small"
-            className={`rounded-lg px-3.5 py-1.5 transition ${
-              isSmallPack
-                ? 'bg-white text-amber-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            ₹5/₹10 Packs
           </Link>
         </div>
 

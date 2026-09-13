@@ -100,7 +100,6 @@ export function SiteHeader() {
   const navLinks = [
     { label: 'Mandi Rates', shortLabel: 'Mandi Rates', href: '/mandi-rates', badge: 'Live', icon: TrendingUp },
     { label: 'Daily Grocery', shortLabel: 'Grocery', href: '/shop', icon: ShoppingBag },
-    { label: '₹5 & ₹10 Packs', shortLabel: '₹5/₹10 Packs', href: '/shop?pack=small', icon: Sparkles },
   ];
 
   return (
@@ -119,7 +118,7 @@ export function SiteHeader() {
             </div>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden xl:flex items-center gap-1 text-xs font-bold text-slate-700">
+            <nav className="hidden lg:flex items-center gap-1 text-xs font-bold text-slate-700">
               {navLinks.map((item) => {
                 const isActive = pathname === item.href || (item.href === '/mandi-rates' && pathname === '/kirana-mandi');
                 return (
@@ -132,8 +131,7 @@ export function SiteHeader() {
                         : 'hover:text-[#0B5FA5] hover:bg-slate-100/80'
                     }`}
                   >
-                    <span className="hidden 2xl:inline">{item.label}</span>
-                    <span className="2xl:hidden">{item.shortLabel}</span>
+                    <span>{item.label}</span>
                     {item.badge && (
                       <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-black text-emerald-700 uppercase tracking-wider">
                         {item.badge}
@@ -383,7 +381,7 @@ export function SiteHeader() {
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open mobile menu"
-              className="xl:hidden flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 shrink-0"
+              className="lg:hidden flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 shrink-0"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -405,7 +403,7 @@ export function SiteHeader() {
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex justify-start xl:hidden">
+        <div className="fixed inset-0 z-50 flex justify-start lg:hidden">
           <div
             className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
             onClick={() => setMobileMenuOpen(false)}

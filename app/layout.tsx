@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s | KiranaMart",
   },
   description:
-    'Order fresh milk, cooking oil, atta, pulses, spices, and ₹5/₹10 grocery packs online with fast same-day delivery. Track live Delhi APMC mandi wholesale rates.',
+    'Order fresh milk, cooking oil, atta, pulses, and daily spices online with fast same-day delivery. Track live Delhi APMC mandi wholesale rates.',
   keywords: [
     'KiranaMart',
     'online grocery store',

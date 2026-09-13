@@ -156,15 +156,11 @@ export function ProductCard({
         {/* Badges & Wishlist Header */}
         <div className="flex items-start justify-between gap-1 mb-2">
           <div className="flex flex-wrap gap-1">
-            {isOutOfStock ? (
+            {isOutOfStock && (
               <span className="rounded-md bg-rose-50 border border-rose-200/60 px-2 py-0.5 text-[10px] font-bold text-rose-700 uppercase tracking-tight">
                 Out of Stock
               </span>
-            ) : isSmallPack ? (
-              <span className="rounded-md bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 tracking-tight">
-                Pocket Pack
-              </span>
-            ) : null}
+            )}
           </div>
 
           <button
