@@ -902,6 +902,20 @@ export const MOCK_BRANDS: MockBrand[] = [
 
 export const MOCK_MANDIS: MockMandi[] = [
   {
+    "id": "mandi-10",
+    "name": "Ghaziabad Mandi",
+    "slug": "ghaziabad-mandi",
+    "city": "Ghaziabad",
+    "state": "Uttar Pradesh",
+    "address": "Site 4, Sahibabad Industrial Area, Ghaziabad 201005",
+    "description": "Ghaziabad district primary wholesale foodgrain, pulse, and edible oil terminal market.",
+    "active": true,
+    "displayOrder": 1,
+    "_count": { "rates": 46 },
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
     "id": "mandi-1",
     "name": "Naya Bazar Mandi",
     "slug": "naya-bazar-mandi",
@@ -1027,20 +1041,7 @@ export const MOCK_MANDIS: MockMandi[] = [
     "createdAt": "2026-01-01T00:00:00.000Z",
     "updatedAt": "2026-01-01T00:00:00.000Z"
   },
-  {
-    "id": "mandi-10",
-    "name": "Ghaziabad Mandi",
-    "slug": "ghaziabad-mandi",
-    "city": "Ghaziabad",
-    "state": "Uttar Pradesh",
-    "address": "Site 4, Sahibabad Industrial Area, Ghaziabad 201005",
-    "description": "Ghaziabad district primary wholesale foodgrain, pulse, and edible oil terminal market.",
-    "active": true,
-    "displayOrder": 10,
-    "_count": { "rates": 46 },
-    "createdAt": "2026-01-01T00:00:00.000Z",
-    "updatedAt": "2026-01-01T00:00:00.000Z"
-  },
+  
   {
     "id": "mandi-11",
     "name": "Noida Sector 88 Krishi Mandi",

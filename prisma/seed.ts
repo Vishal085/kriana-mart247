@@ -207,6 +207,9 @@ async function seed() {
 
   // 5. Delhi-NCR Wholesale Mandis for Live Rates & AI updates
   const mandisData = [
+    { name: 'Ghaziabad Mandi', slug: 'ghaziabad-mandi', city: 'Ghaziabad', state: 'Uttar Pradesh', address: 'Site 4, Sahibabad Industrial Area, Ghaziabad 201005', description: 'Ghaziabad district primary wholesale foodgrain, pulse, and edible oil terminal market.' },
+    { name: 'Noida Sector 88 Krishi Mandi', slug: 'noida-sector-88-mandi', city: 'Noida', state: 'Uttar Pradesh', address: 'Sector 88, Phase 2, Noida, Gautam Buddha Nagar 201305', description: 'Gautam Buddha Nagar primary wholesale agricultural and grocery distribution center.' },
+    { name: 'Dadri Anaj & Kirana Mandi', slug: 'dadri-anaj-mandi', city: 'Greater Noida', state: 'Uttar Pradesh', address: 'Railway Road, Dadri, Greater Noida 203207', description: 'Greater Noida regional wholesale grain, pulse, and country jaggery exchange.' },
     { name: 'Naya Bazar Mandi', slug: 'naya-bazar-mandi', city: 'Delhi', state: 'Delhi', address: 'Naya Bazar, Chandni Chowk, Old Delhi 110006', description: 'Asia\'s premier wholesale foodgrain, basmati rice, pulses, and mustard oil terminal market.' },
     { name: 'Khari Baoli Spice Mandi', slug: 'khari-baoli-spice-mandi', city: 'Delhi', state: 'Delhi', address: 'Khari Baoli, Chandni Chowk, Delhi 110006', description: 'Asia\'s largest wholesale spice, dry fruits, herbs, and condiments trading market.' },
     { name: 'Azadpur APMC Mandi', slug: 'azadpur-apmc-mandi', city: 'Delhi', state: 'Delhi', address: 'GT Karnal Road, Azadpur, Delhi 110033', description: 'National capital\'s mega APMC terminal market regulating daily wholesale commodity auctions.' },
@@ -216,9 +219,6 @@ async function seed() {
     { name: 'Shahdara Anaj Mandi', slug: 'shahdara-grain-mandi', city: 'Delhi', state: 'Delhi', address: 'Old Shahdara, North East Delhi 110032', description: 'Trans-Yamuna wholesale grains, sugar, edible oils, and daily staples trading center.' },
     { name: 'Najafgarh Anaj Mandi', slug: 'najafgarh-grain-mandi', city: 'Delhi', state: 'Delhi', address: 'Najafgarh Main Road, South West Delhi 110043', description: 'South-West Delhi agro-wholesale hub and grain procurement market.' },
     { name: 'Narela Anaj Mandi', slug: 'narela-anaj-mandi', city: 'Delhi', state: 'Delhi', address: 'Narela Mandi, GT Karnal Road, North Delhi 110040', description: 'Delhi\'s largest specialized wheat, paddy, and grain APMC terminal.' },
-    { name: 'Ghaziabad Mandi', slug: 'ghaziabad-mandi', city: 'Ghaziabad', state: 'Uttar Pradesh', address: 'Site 4, Sahibabad Industrial Area, Ghaziabad 201005', description: 'Ghaziabad district primary wholesale foodgrain, pulse, and edible oil terminal market.' },
-    { name: 'Noida Sector 88 Krishi Mandi', slug: 'noida-sector-88-mandi', city: 'Noida', state: 'Uttar Pradesh', address: 'Sector 88, Phase 2, Noida, Gautam Buddha Nagar 201305', description: 'Gautam Buddha Nagar primary wholesale agricultural and grocery distribution center.' },
-    { name: 'Dadri Anaj & Kirana Mandi', slug: 'dadri-anaj-mandi', city: 'Greater Noida', state: 'Uttar Pradesh', address: 'Railway Road, Dadri, Greater Noida 203207', description: 'Greater Noida regional wholesale grain, pulse, and country jaggery exchange.' },
     { name: 'Gurugram Khandsa Anaj Mandi', slug: 'gurugram-khandsa-mandi', city: 'Gurugram', state: 'Haryana', address: 'Khandsa Road, Near Hero Honda Chowk, Gurugram 122001', description: 'Gurugram & South Haryana-NCR primary foodgrain and wholesale grocery exchange.' },
     { name: 'Faridabad NIT Old Anaj Mandi', slug: 'faridabad-nit-mandi', city: 'Faridabad', state: 'Haryana', address: 'Old Faridabad Railway Road, NIT, Faridabad 121001', description: 'Faridabad district central wholesale grain, oilseeds, and spice market.' },
     { name: 'Ballabhgarh Anaj Mandi', slug: 'ballabhgarh-anaj-mandi', city: 'Ballabhgarh', state: 'Haryana', address: 'Grain Market Road, Ballabhgarh, Faridabad 121004', description: 'South NCR gateway grain procurement center and essential groceries mandi.' },
@@ -226,8 +226,13 @@ async function seed() {
   ];
 
   const mandis = [];
-  for (const m of mandisData) {
-    const createdMandi = await prisma.mandi.create({ data: m });
+  for (let i = 0; i < mandisData.length; i++) {
+    const m = mandisData[i];
+    const createdMandi = await prisma.mandi.upsert({
+      where: { slug: m.slug },
+      update: { ...m, displayOrder: i + 1, active: true },
+      create: { ...m, displayOrder: i + 1, active: true },
+    });
     mandis.push(createdMandi);
   }
 
@@ -1553,8 +1558,8 @@ async function seed() {
   });
 
   for (const p of mandiTrackedProducts) {
-    // Connect to at least 4-8 mandis
-    const selectedMandis = mandis.slice(0, Math.floor(Math.random() * 4) + 4);
+    // Connect across all registered NCR mandis including Ghaziabad Mandi
+    const selectedMandis = mandis;
     for (let mi = 0; mi < selectedMandis.length; mi++) {
       const mandi = selectedMandis[mi];
       const variation = rateVariations[(mi + p.name.length) % rateVariations.length];
