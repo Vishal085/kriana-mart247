@@ -98,19 +98,20 @@ export function SiteHeader() {
   };
 
   const navLinks = [
-    { label: '🏪 Kirana Mandi', href: '/mandi-rates', badge: 'Live Bhav', icon: TrendingUp },
-    { label: '🛒 Retail Chhota Ration', href: '/shop?section=retail', icon: ShoppingBag },
-    { label: '⚡ ₹5 & ₹10 Packs', href: '/shop?pack=small', icon: Sparkles },
+    { label: '🏪 Kirana Mandi', shortLabel: 'Mandi Rates', href: '/mandi-rates', badge: 'Live', icon: TrendingUp },
+    { label: '🛒 Retail Chhota Ration', shortLabel: 'Retail Ration', href: '/shop?section=retail', icon: ShoppingBag },
+    { label: '⚡ ₹5 & ₹10 Packs', shortLabel: '₹5/₹10 Packs', href: '/shop?pack=small', icon: Sparkles },
   ];
 
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 lg:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 lg:px-6">
           {/* Left: Brand Logo + Mandi Selector + Desktop Nav */}
-          <div className="flex items-center gap-3 2xl:gap-5 shrink-0">
+          <div className="flex items-center gap-2.5 xl:gap-4 shrink-0">
             <Link href="/" className="shrink-0 flex items-center">
-              <BrandMark size="md" />
+              <BrandMark size="sm" className="sm:hidden" />
+              <BrandMark size="md" className="hidden sm:inline-flex" />
             </Link>
 
             {/* Desktop Mandi Selector */}
@@ -119,20 +120,21 @@ export function SiteHeader() {
             </div>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-700">
+            <nav className="hidden xl:flex items-center gap-1 text-xs font-bold text-slate-700">
               {navLinks.map((item) => {
                 const isActive = pathname === item.href || (item.href === '/mandi-rates' && pathname === '/kirana-mandi');
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`whitespace-nowrap transition py-1.5 px-3 rounded-xl flex items-center gap-1.5 ${
+                    className={`whitespace-nowrap transition py-1.5 px-2.5 rounded-xl flex items-center gap-1.5 ${
                       isActive
                         ? 'text-[#073B6F] bg-[#EAF5FC] font-black shadow-2xs border border-blue-200/50'
                         : 'hover:text-[#0B5FA5] hover:bg-slate-100/80'
                     }`}
                   >
-                    <span>{item.label}</span>
+                    <span className="hidden 2xl:inline">{item.label}</span>
+                    <span className="2xl:hidden">{item.shortLabel}</span>
                     {item.badge && (
                       <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-black text-emerald-700 uppercase tracking-wider">
                         {item.badge}
@@ -145,12 +147,7 @@ export function SiteHeader() {
           </div>
 
           {/* Right Section: Role CTA, Smart Search, Cart Drawer Button, Profile, Mobile Menu */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Mobile Mandi Selector */}
-            <div className="md:hidden flex items-center">
-              <MandiSelector variant="compact" />
-            </div>
-
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Admin shortcut if logged in */}
             {user?.role === 'ADMIN' && (
               <Link
@@ -166,9 +163,9 @@ export function SiteHeader() {
             <button
               onClick={() => setSearchModalOpen(true)}
               aria-label="Open Search (Cmd+K)"
-              className="flex h-9 w-9 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-2.5 sm:px-3 text-xs text-slate-500 hover:border-[#39A9E8] hover:bg-white transition shrink-0"
+              className="flex h-9 w-9 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-2 sm:px-3 text-xs text-slate-500 hover:border-[#39A9E8] hover:bg-white transition shrink-0"
             >
-              <Search className="h-3.5 w-3.5 text-slate-400" />
+              <Search className="h-3.5 w-3.5 text-slate-400 shrink-0" />
               <span className="hidden sm:inline 2xl:hidden font-medium">Search...</span>
               <span className="hidden 2xl:inline font-medium">Search mandis, commodities...</span>
               <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
@@ -180,9 +177,9 @@ export function SiteHeader() {
             <button
               onClick={openDrawer}
               aria-label="Open Cart Drawer"
-              className="relative flex h-9 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 sm:px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F]"
+              className="relative flex h-9 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 sm:px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F] shrink-0"
             >
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline text-xs font-bold font-heading">Cart</span>
               {itemCount > 0 && (
                 <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#073B6F] px-1 text-[10px] font-black text-white shadow-xs">
@@ -191,29 +188,29 @@ export function SiteHeader() {
               )}
             </button>
 
-            {/* Profile Dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            {/* Profile Dropdown - Desktop Only (Mobile uses Hamburger drawer) */}
+            <div className="relative hidden md:block" ref={dropdownRef}>
               <button
                 onClick={() => {
                   setProfileDropdownOpen(!profileDropdownOpen);
                   setActiveMenu('main');
                 }}
                 aria-label="User Account"
-                className="flex h-9 items-center gap-1.5 overflow-hidden rounded-full border border-slate-200 bg-[#EAF5FC] px-2 text-[#073B6F] transition hover:border-[#0B5FA5] focus:outline-hidden"
+                className="flex h-9 items-center gap-1.5 overflow-hidden rounded-full border border-slate-200 bg-[#EAF5FC] px-2 text-[#073B6F] transition hover:border-[#0B5FA5] focus:outline-hidden shrink-0"
               >
                 {user ? (
                   <>
                     <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-[#073B6F] text-[10px] font-black text-white">
                       {getInitials()}
                     </div>
-                    <span className="hidden md:inline text-xs font-bold max-w-[80px] truncate">
+                    <span className="text-xs font-bold max-w-[80px] truncate">
                       {user.fullName.split(' ')[0]}
                     </span>
                   </>
                 ) : (
                   <>
                     <User className="h-4 w-4 text-slate-600" />
-                    <span className="hidden md:inline text-xs font-bold text-slate-700">Account</span>
+                    <span className="text-xs font-bold text-slate-700">Account</span>
                   </>
                 )}
                 <ChevronDown className="h-3 w-3 text-slate-400" />
@@ -387,10 +384,19 @@ export function SiteHeader() {
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open mobile menu"
-              className="xl:hidden flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+              className="xl:hidden flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 shrink-0"
             >
               <Menu className="h-5 w-5" />
             </button>
+          </div>
+        </div>
+
+        {/* Mobile Mandi Location Strip (Row 2) */}
+        <div className="md:hidden border-t border-slate-100 bg-slate-50/90 px-3 py-1.5 flex items-center justify-between">
+          <MandiSelector variant="compact" />
+          <div className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-slate-600 font-semibold">Live APMC Mandi</span>
           </div>
         </div>
       </header>

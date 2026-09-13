@@ -97,7 +97,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${inter.variable}`}>
-      <body className="min-h-screen bg-[#F8FAFC] text-slate-900 antialiased selection:bg-[#39A9E8]/20 selection:text-[#073B6F]">
+      <body className="min-h-screen bg-[#F8FAFC] text-slate-900 antialiased selection:bg-[#39A9E8]/20 selection:text-[#073B6F] overflow-x-hidden">
         <ToastProvider>
           <AuthProvider>
             <MandiProvider>
