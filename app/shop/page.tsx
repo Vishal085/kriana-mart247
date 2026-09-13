@@ -346,8 +346,8 @@ export default async function ShopPage({
         </div>
 
         {/* Price Presets */}
-        <div className="flex items-center gap-1.5 overflow-x-auto">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">Price:</span>
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1 shrink-0">Price:</span>
           {pricePresets.map((preset) => {
             const isSelected =
               (preset.min === undefined && preset.max === undefined && !minPrice && !maxPrice) ||
@@ -356,7 +356,7 @@ export default async function ShopPage({
               <Link
                 key={preset.label}
                 href={buildUrl({ minPrice: preset.min, maxPrice: preset.max, page: undefined })}
-                className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                   isSelected
                     ? 'bg-[#073B6F] text-white font-bold'
                     : 'border border-slate-200 bg-white text-slate-600 hover:border-[#39A9E8]'
@@ -370,10 +370,10 @@ export default async function ShopPage({
       </div>
 
       {/* Horizontal Category Carousel */}
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
         <Link
           href={buildUrl({ categoryId: undefined, page: undefined })}
-          className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-xs ${
+          className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-xs ${
             !categoryId
               ? 'bg-[#073B6F] text-white'
               : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]'
@@ -385,7 +385,7 @@ export default async function ShopPage({
           <Link
             key={c.id}
             href={buildUrl({ categoryId: c.id, page: undefined })}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-xs ${
+            className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition shadow-xs ${
               categoryId === c.id
                 ? 'bg-[#073B6F] text-white'
                 : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]'
@@ -397,11 +397,11 @@ export default async function ShopPage({
       </div>
 
       {/* Brand Filters Bar */}
-      <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-2">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex-shrink-0">Brands:</span>
+      <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">Brands:</span>
         <Link
           href={buildUrl({ brandId: undefined, page: undefined })}
-          className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+          className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
             !brandId ? 'bg-[#EAF5FC] text-[#073B6F] font-bold' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -411,7 +411,7 @@ export default async function ShopPage({
           <Link
             key={b.id}
             href={buildUrl({ brandId: b.id, page: undefined })}
-            className={`whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+            className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
               brandId === b.id ? 'bg-[#EAF5FC] text-[#073B6F] font-bold' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
