@@ -141,11 +141,17 @@ async function runQA() {
         pageResult.clientWidth = overflowCheck.clientW;
         pageResult.overflowCulprit = overflowCheck.culprit;
 
-        // 2. Check Broken Images
+        // 2. Check Broken Images (only visible or non-lazy images)
         const brokenImgs = await page.evaluate(() => {
           const imgs = Array.from(document.querySelectorAll('img'));
           return imgs
-            .filter((img) => img.complete && img.naturalWidth === 0 && img.src && !img.src.startsWith('data:'))
+            .filter((img) => {
+              if (!img.src || img.src.startsWith('data:')) return false;
+              const isVisible = img.getBoundingClientRect().top < window.innerHeight;
+              const isLazy = img.getAttribute('loading') === 'lazy';
+              // If it's visible or not lazy, and complete with 0 naturalWidth, it failed to load
+              return img.complete && img.naturalWidth === 0 && (isVisible || !isLazy);
+            })
             .map((img) => ({ src: img.src, alt: img.alt || '' }));
         });
 
@@ -206,19 +212,36 @@ async function runQA() {
     await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle2' });
     await new Promise((r) => setTimeout(r, 1000));
     
-    // Try clicking Mandi Selector button
-    const mandiBtn = await page.$('button:has-text("Mandi"), [aria-label*="Mandi"], button:has-text("Ghaziabad Mandi")');
-    if (mandiBtn) {
-      await mandiBtn.click().catch(() => {});
+    const clickedMandi = await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button')).find((b) =>
+        b.textContent.includes('Mandi') || b.textContent.includes('Ghaziabad') || b.getAttribute('title')?.includes('Mandi')
+      );
+      if (btn) {
+        btn.click();
+        return true;
+      }
+      return false;
+    });
+
+    if (clickedMandi) {
       await new Promise((r) => setTimeout(r, 600));
       await page.screenshot({ path: path.join(SCREENSHOT_DIR, `${vp.name}_flow_mandi_modal.png`) });
       console.log(`  ✅ Mandi modal opened & captured`);
     }
 
     // 2. Open Cart Drawer
-    const cartBtn = await page.$('button:has-text("Cart"), [aria-label*="Cart"], button svg.lucide-shopping-cart, button svg.lucide-shopping-bag');
-    if (cartBtn) {
-      await cartBtn.click().catch(() => {});
+    const clickedCart = await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button')).find((b) =>
+        b.getAttribute('aria-label')?.includes('Cart') || b.textContent.includes('Cart')
+      );
+      if (btn) {
+        btn.click();
+        return true;
+      }
+      return false;
+    });
+
+    if (clickedCart) {
       await new Promise((r) => setTimeout(r, 600));
       await page.screenshot({ path: path.join(SCREENSHOT_DIR, `${vp.name}_flow_cart_drawer.png`) });
       console.log(`  ✅ Cart drawer opened & captured`);

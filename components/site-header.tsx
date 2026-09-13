@@ -110,8 +110,7 @@ export function SiteHeader() {
           {/* Left: Brand Logo + Mandi Selector + Desktop Nav */}
           <div className="flex items-center gap-2.5 xl:gap-4 shrink-0">
             <Link href="/" className="shrink-0 flex items-center">
-              <BrandMark size="sm" className="sm:hidden" />
-              <BrandMark size="md" className="hidden sm:inline-flex" />
+              <BrandMark />
             </Link>
 
             {/* Desktop Mandi Selector */}
