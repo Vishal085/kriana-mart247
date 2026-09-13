@@ -194,6 +194,8 @@ export function ProductCard({
             <img
               src={images[0]?.url || '/products/placeholder.svg'}
               alt={name}
+              width={200}
+              height={200}
               loading="lazy"
               onError={(e) => {
                 const target = e.currentTarget as HTMLImageElement;
@@ -203,6 +205,7 @@ export function ProductCard({
               }}
               className="h-full w-full object-contain mix-blend-multiply"
             />
+
             {discountPercent > 0 && (
               <span className="absolute top-2 left-2 rounded-md bg-[#073B6F] text-white text-[10px] font-black px-1.5 py-0.5 shadow-xs">
                 {discountPercent}% OFF

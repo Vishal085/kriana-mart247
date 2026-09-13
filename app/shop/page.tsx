@@ -280,7 +280,7 @@ export default async function ShopPage({
       </div>
 
       {/* Mandi Quick Selector Bar */}
-      <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" style={{scrollbarWidth:'none', msOverflowStyle:'none'}}>
         <span className="shrink-0 text-xs font-bold text-slate-500 flex items-center gap-1">
           <Store className="h-3.5 w-3.5 text-[#39A9E8]" /> Wholesale Mandi:
         </span>
@@ -457,19 +457,46 @@ export default async function ShopPage({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-12 flex items-center justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+          {currentPage > 1 && (
             <Link
-              key={p}
-              href={`/shop?${categoryId ? `categoryId=${categoryId}&` : ''}${brandId ? `brandId=${brandId}&` : ''}page=${p}`}
-              className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold transition ${
-                currentPage === p
-                  ? 'bg-[#073B6F] text-white shadow'
-                  : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]'
-              }`}
+              href={buildUrl({ page: String(currentPage - 1) })}
+              className="flex h-9 px-3 items-center justify-center rounded-xl text-xs font-bold transition border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]"
             >
-              {p}
+              ← Prev
             </Link>
-          ))}
+          )}
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+            .reduce<(number | 'ellipsis')[]>((acc, p, i, arr) => {
+              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('ellipsis');
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((p, idx) =>
+              p === 'ellipsis' ? (
+                <span key={`ell-${idx}`} className="px-1 text-slate-400">…</span>
+              ) : (
+                <Link
+                  key={p}
+                  href={buildUrl({ page: String(p) })}
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold transition ${
+                    currentPage === p
+                      ? 'bg-[#073B6F] text-white shadow'
+                      : 'border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]'
+                  }`}
+                >
+                  {p}
+                </Link>
+              )
+            )}
+          {currentPage < totalPages && (
+            <Link
+              href={buildUrl({ page: String(currentPage + 1) })}
+              className="flex h-9 px-3 items-center justify-center rounded-xl text-xs font-bold transition border border-slate-200 bg-white text-slate-700 hover:border-[#39A9E8]"
+            >
+              Next →
+            </Link>
+          )}
         </div>
       )}
 

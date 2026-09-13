@@ -183,11 +183,20 @@ export function SlideOverCartDrawer() {
                 {/* Product Thumbnail */}
                 <div className="h-16 w-16 shrink-0 rounded-xl bg-slate-50 p-1 flex items-center justify-center overflow-hidden border border-slate-100">
                   <img
-                    src={item.product.image}
+                    src={item.product.image || '/products/placeholder.svg'}
                     alt={item.product.name}
+                    width={64}
+                    height={64}
                     className="h-full w-full object-contain"
+                    onError={(e) => {
+                      const t = e.currentTarget as HTMLImageElement;
+                      if (!t.src.endsWith('/products/placeholder.svg')) {
+                        t.src = '/products/placeholder.svg';
+                      }
+                    }}
                   />
                 </div>
+
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">

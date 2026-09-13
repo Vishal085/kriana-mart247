@@ -228,8 +228,8 @@ export class MandiService {
           description: 'Ghaziabad district primary wholesale foodgrain, pulse, and edible oil terminal market.',
           active: true,
           displayOrder: 1,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         } as any;
 
         // Apply filters if present
