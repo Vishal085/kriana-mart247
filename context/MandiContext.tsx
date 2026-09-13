@@ -32,8 +32,20 @@ const MandiContext = createContext<MandiContextType>({
   refreshMandis: async () => {},
 });
 
+const GHAZIABAD_MANDI_DEFAULT: MandiItem = {
+  id: 'cmtzlm4sd000012n2ivvcrf8e',
+  name: 'Ghaziabad Mandi',
+  slug: 'ghaziabad-mandi',
+  city: 'Ghaziabad',
+  state: 'Uttar Pradesh',
+  address: 'Site 4, Sahibabad Industrial Area, Ghaziabad 201005',
+  pincode: '201005',
+  description: 'Ghaziabad district primary wholesale foodgrain, pulse, and edible oil terminal market.',
+  active: true,
+};
+
 export function MandiProvider({ children }: { children: React.ReactNode }) {
-  const [mandis, setMandis] = useState<MandiItem[]>([]);
+  const [mandis, setMandis] = useState<MandiItem[]>([GHAZIABAD_MANDI_DEFAULT]);
   const [selectedMandi, setSelectedMandi] = useState<MandiItem | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +54,10 @@ export function MandiProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch('/api/mandis');
       if (res.ok) {
         const data = await res.json();
-        const activeMandis: MandiItem[] = data.mandis || [];
+        let activeMandis: MandiItem[] = data.mandis || [];
+        if (!activeMandis.some((m) => m.slug === 'ghaziabad-mandi' || m.name.toLowerCase().includes('ghaziabad'))) {
+          activeMandis = [GHAZIABAD_MANDI_DEFAULT, ...activeMandis];
+        }
         setMandis(activeMandis);
 
         const savedId = typeof window !== 'undefined' ? localStorage.getItem('km247_selected_mandi_id') : null;
