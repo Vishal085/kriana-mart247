@@ -45,6 +45,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/images/products/:path*',
+        destination: '/products/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
