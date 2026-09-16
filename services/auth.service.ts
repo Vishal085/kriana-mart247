@@ -241,26 +241,59 @@ export class AuthService {
   static async loginUnified(input: { identifier: string; password: string; redirect?: string }) {
     const rawId = input.identifier.trim();
     const isEmail = rawId.includes('@');
+    const cleanId = isEmail ? rawId.toLowerCase() : rawId;
 
-    const user = isEmail
-      ? await prisma.user.findFirst({
-          where: {
-            email: { equals: rawId, mode: 'insensitive' },
-          },
-          include: {
+    // Use clean, direct queries for stable user lookup across both local and production databases
+    let user = isEmail
+      ? await prisma.user.findUnique({
+          where: { email: cleanId },
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            mobile: true,
+            role: true,
+            active: true,
+            passwordHash: true,
+            avatarUrl: true,
             customerProfile: true,
-            shopkeeperProfile: true,
             adminProfile: true,
           },
         })
       : await prisma.user.findFirst({
-          where: { mobile: rawId },
-          include: {
+          where: { mobile: cleanId },
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            mobile: true,
+            role: true,
+            active: true,
+            passwordHash: true,
+            avatarUrl: true,
             customerProfile: true,
-            shopkeeperProfile: true,
             adminProfile: true,
           },
         });
+
+    // Fallback: Case-insensitive search if exact email lookup didn't match
+    if (!user && isEmail) {
+      user = await prisma.user.findFirst({
+        where: { email: { equals: cleanId, mode: 'insensitive' } },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          mobile: true,
+          role: true,
+          active: true,
+          passwordHash: true,
+          avatarUrl: true,
+          customerProfile: true,
+          adminProfile: true,
+        },
+      });
+    }
 
     if (!user) {
       throw new Error('Invalid mobile/email or password');
@@ -273,6 +306,18 @@ export class AuthService {
     const isValid = await bcrypt.compare(input.password, user.passwordHash);
     if (!isValid) {
       throw new Error('Invalid mobile/email or password');
+    }
+
+    // Safely load shopkeeperProfile only if needed without breaking authentication if table/relation is missing
+    let shopkeeperProfile = null;
+    if (user.role === Role.SHOPKEEPER) {
+      try {
+        shopkeeperProfile = await prisma.shopkeeperProfile.findUnique({
+          where: { userId: user.id },
+        });
+      } catch {
+        shopkeeperProfile = null;
+      }
     }
 
     // Role-based destination determination
@@ -318,7 +363,7 @@ export class AuthService {
         active: user.active,
         avatarUrl: user.avatarUrl,
         customerProfile: user.customerProfile,
-        shopkeeperProfile: user.shopkeeperProfile,
+        shopkeeperProfile,
         adminProfile: user.adminProfile,
       },
       redirectTo,

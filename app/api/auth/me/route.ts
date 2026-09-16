@@ -9,23 +9,30 @@ export async function GET() {
       return NextResponse.json({ user: null });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.id },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        mobile: true,
-        avatarUrl: true,
-        role: true,
-        active: true,
-        customerProfile: true,
-        shopkeeperProfile: true,
-        adminProfile: true,
-      },
-    });
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.id },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          mobile: true,
+          avatarUrl: true,
+          role: true,
+          active: true,
+          customerProfile: true,
+          adminProfile: true,
+        },
+      });
 
-    return NextResponse.json({ user });
+      if (user && user.active) {
+        return NextResponse.json({ user });
+      }
+    } catch (dbError) {
+      console.warn('Session user profile enrichment warning:', dbError);
+    }
+
+    return NextResponse.json({ user: session });
   } catch (error) {
     return NextResponse.json({ user: null });
   }

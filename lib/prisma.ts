@@ -376,17 +376,23 @@ function handleMockQuery(model: string, action: string, args: any[]): any {
         return 120 + store.users.length;
       }
       if (action === 'findUnique' || action === 'findFirst') {
-        if (arg.where?.id) return SellerStore.getUserById(arg.where.id);
-        if (arg.where?.email) return SellerStore.getUserByEmailOrMobile(arg.where.email);
-        if (arg.where?.mobile) return SellerStore.getUserByEmailOrMobile(arg.where.mobile);
+        const idVal = typeof arg.where?.id === 'string' ? arg.where.id : arg.where?.id?.equals;
+        const emailVal = typeof arg.where?.email === 'string' ? arg.where.email : arg.where?.email?.equals;
+        const mobileVal = typeof arg.where?.mobile === 'string' ? arg.where.mobile : arg.where?.mobile?.equals;
+
+        if (idVal) return SellerStore.getUserById(idVal);
+        if (emailVal) return SellerStore.getUserByEmailOrMobile(emailVal);
+        if (mobileVal) return SellerStore.getUserByEmailOrMobile(mobileVal);
         if (arg.where?.OR && Array.isArray(arg.where.OR)) {
           for (const cond of arg.where.OR) {
-            if (cond.email) {
-              const u = SellerStore.getUserByEmailOrMobile(cond.email);
+            const e = typeof cond.email === 'string' ? cond.email : cond.email?.equals;
+            const m = typeof cond.mobile === 'string' ? cond.mobile : cond.mobile?.equals;
+            if (e) {
+              const u = SellerStore.getUserByEmailOrMobile(e);
               if (u) return u;
             }
-            if (cond.mobile) {
-              const u = SellerStore.getUserByEmailOrMobile(cond.mobile);
+            if (m) {
+              const u = SellerStore.getUserByEmailOrMobile(m);
               if (u) return u;
             }
           }

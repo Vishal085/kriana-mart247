@@ -391,13 +391,14 @@ export class SellerStore {
   }
 
   static getUserByEmailOrMobile(identifier: string): CustomUserRecord | null {
-    const store = ensureDataFile();
+    if (!identifier || typeof identifier !== 'string') return null;
     const trimmed = identifier.trim().toLowerCase();
+    const store = this.getStore();
     return (
       store.users.find(
         (u) =>
           (u.email && u.email.toLowerCase() === trimmed) ||
-          (u.mobile && u.mobile.replace(/\s+/g, '') === trimmed)
+          (u.mobile && u.mobile.replace(/\D/g, '') === trimmed.replace(/\D/g, ''))
       ) || null
     );
   }
