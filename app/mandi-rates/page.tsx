@@ -68,15 +68,18 @@ export default function MandiRatesPage() {
   const [sortBy, setSortBy] = useState<'updatedAt' | 'rate' | 'change' | 'changePercent' | 'name'>('updatedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Auto-sync with global selectedMandi from user's registration / context
+  // Auto-sync with global selectedMandi only once mandis are loaded and verified
   useEffect(() => {
-    if (selectedMandi && !selectedMandiId) {
-      setSelectedMandiId(selectedMandi.id);
-      if (selectedMandi.state) {
-        setSelectedState(selectedMandi.state);
+    if (selectedMandi && !selectedMandiId && mandis.length > 0) {
+      const match = mandis.find((m) => m.id === selectedMandi.id || m.slug === selectedMandi.slug);
+      if (match) {
+        setSelectedMandiId(match.id);
+        if (match.state) {
+          setSelectedState(match.state);
+        }
       }
     }
-  }, [selectedMandi]);
+  }, [selectedMandi, mandis]);
 
   // Dynamically compute states from active mandis in database
   const availableStates = useMemo(() => {

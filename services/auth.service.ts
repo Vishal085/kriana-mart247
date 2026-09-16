@@ -317,38 +317,6 @@ export class AuthService {
           },
         });
       }
-
-      if (cleanId === 'admin@kiranamart247.com' || cleanId === '8510083082') {
-        const hash = await bcrypt.hash('Admin@123', 10);
-        return await prisma.user.upsert({
-          where: { email: 'admin@kiranamart247.com' },
-          update: { active: true },
-          create: {
-            fullName: 'Vishal Gupta (Admin)',
-            email: 'admin@kiranamart247.com',
-            mobile: '8510083082',
-            passwordHash: hash,
-            role: Role.ADMIN,
-            active: true,
-            whatsappOptIn: true,
-            adminProfile: {
-              create: {},
-            },
-          },
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            mobile: true,
-            role: true,
-            active: true,
-            passwordHash: true,
-            avatarUrl: true,
-            customerProfile: true,
-            adminProfile: true,
-          },
-        });
-      }
     } catch (err) {
       console.warn('[AUTH] ensureDemoUser fallback warning:', err);
     }
@@ -432,8 +400,6 @@ export class AuthService {
       if (user.email === 'customer@kiranamart247.com' && (input.password === 'Test@123' || input.password === 'customer123')) {
         isValid = true;
       } else if (user.email === 'shopkeeper@kiranamart247.com' && (input.password === 'shopkeeper123' || input.password === 'Shopkeeper@123')) {
-        isValid = true;
-      } else if (user.email === 'admin@kiranamart247.com' && (input.password === 'Admin@123' || input.password === 'admin123')) {
         isValid = true;
       }
     }

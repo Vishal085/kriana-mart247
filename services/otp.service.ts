@@ -55,6 +55,7 @@ export class OtpService {
 
     // 2. Generate 6-digit OTP code
     const otp = this.generateOtpCode();
+    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // 3. Remove any previous unverified OTP drafts for this email or mobile
@@ -72,7 +73,7 @@ export class OtpService {
       data: {
         email: cleanEmail,
         mobile: cleanMobile,
-        otp,
+        otp: otpHash,
         role: payload.role,
         registrationData: {
           ...payload,
@@ -103,15 +104,11 @@ export class OtpService {
       console.error('[OTP DISPATCH WARNING]', err.message);
     }
 
-    const hasLiveEmail = Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD);
-
     return {
       verificationId: verification.id,
       email: cleanEmail,
       mobile: cleanMobile,
       expiresAt: verification.expiresAt,
-      // Provide OTP fallback directly when live email credentials are not configured or in dev
-      devOtp: !hasLiveEmail || process.env.NODE_ENV !== 'production' ? otp : undefined,
     };
   }
 
@@ -143,7 +140,10 @@ export class OtpService {
       throw new Error('Too many incorrect attempts. Please submit your registration again.');
     }
 
-    if (verification.otp !== cleanOtp) {
+    const submittedHash = crypto.createHash('sha256').update(cleanOtp).digest('hex');
+    const isMatch = verification.otp === submittedHash || verification.otp === cleanOtp;
+
+    if (!isMatch) {
       // Increment attempt counter
       await prisma.otpVerification.update({
         where: { id: verificationId },

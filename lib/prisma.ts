@@ -119,20 +119,64 @@ function filterMockProducts(where: any = {}): any[] {
   return list;
 }
 
-function filterMockRates(where: any = {}): any[] {
+export function filterMockRates(where: any = {}): any[] {
   let list = [...MOCK_MANDI_RATES];
 
   if (where.active !== undefined) {
     list = list.filter((r) => r.active === where.active);
   }
+
+  // Support candidate mandi IDs (string, array, slug, CUID)
   if (where.mandiId) {
-    list = list.filter((r) => r.mandiId === where.mandiId);
+    if (typeof where.mandiId === 'string') {
+      const targetId = where.mandiId.toLowerCase();
+      list = list.filter(
+        (r) =>
+          r.mandiId?.toLowerCase() === targetId ||
+          r.mandi?.id?.toLowerCase() === targetId ||
+          r.mandi?.slug?.toLowerCase() === targetId ||
+          (targetId.includes('ghaziabad') && (r.mandiId === 'mandi-10' || r.mandi?.slug === 'ghaziabad-mandi'))
+      );
+    } else if (Array.isArray(where.mandiId?.in)) {
+      const inList = where.mandiId.in.map((s: string) => String(s).toLowerCase());
+      list = list.filter(
+        (r) =>
+          inList.includes(r.mandiId?.toLowerCase()) ||
+          inList.includes(r.mandi?.id?.toLowerCase()) ||
+          inList.includes(r.mandi?.slug?.toLowerCase())
+      );
+    }
   }
+
+  // Filter by state
+  const rawState = where.state || where.mandi?.state?.equals || where.mandi?.state;
+  if (rawState) {
+    const targetState = String(rawState).toLowerCase().trim();
+    list = list.filter((r) => {
+      const st = (r.mandi?.state || '').toLowerCase().trim();
+      return st === targetState || st.includes(targetState) || targetState.includes(st);
+    });
+  }
+
+  // Filter by unit
+  const rawUnit = where.unit || where.unit?.equals;
+  if (rawUnit) {
+    const targetUnit = String(rawUnit).toLowerCase().trim();
+    list = list.filter((r) => (r.unit || '').toLowerCase().includes(targetUnit));
+  }
+
   if (where.direction) {
     list = list.filter((r) => r.direction === where.direction);
   }
+
+  // Filter by category slug in array
+  if (Array.isArray(where.product?.category?.slug?.in)) {
+    const allowedSlugs = where.product.category.slug.in;
+    list = list.filter((r) => allowedSlugs.includes(r.product?.category?.slug));
+  }
+
   if (where.product?.categoryId) {
-    list = list.filter((r) => r.product?.categoryId === where.product.categoryId);
+    list = list.filter((r) => r.product?.categoryId === where.product.categoryId || r.product?.category?.id === where.product.categoryId);
   }
   if (where.product?.brandId) {
     list = list.filter((r) => r.product?.brandId === where.product.brandId);

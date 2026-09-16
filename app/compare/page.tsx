@@ -60,29 +60,39 @@ interface RateItem {
 export default function CompareMandiPricesPage() {
   const [rates, setRates] = useState<RateItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [selectedState, setSelectedState] = useState<string>('All States');
 
+  const loadRates = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch('/api/rates?limit=150', { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        const items: RateItem[] = data.items || [];
+        setRates(items);
+        if (items.length > 0 && !selectedProductId) {
+          setSelectedProductId(items[0].productId);
+        }
+      } else {
+        throw new Error('Failed to load mandi rate data');
+      }
+    } catch (err: any) {
+      console.error('Failed to load rates for comparison:', err);
+      setError(err.name === 'AbortError' ? 'Rate data request timed out. Please try again.' : (err.message || 'Unable to load rates'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch real rates from API
   useEffect(() => {
-    async function loadRates() {
-      setLoading(true);
-      try {
-        const res = await fetch('/api/rates?limit=100');
-        if (res.ok) {
-          const data = await res.json();
-          const items: RateItem[] = data.items || [];
-          setRates(items);
-          if (items.length > 0 && !selectedProductId) {
-            setSelectedProductId(items[0].productId);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load rates for comparison:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadRates();
   }, []);
 
@@ -256,8 +266,22 @@ export default function CompareMandiPricesPage() {
       </div>
 
       {loading ? (
-        <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-12 text-center text-slate-400">
-          Loading verified mandi rate data...
+        <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#073B6F] mb-3"></div>
+          <div className="text-sm font-bold text-slate-700">Loading verified mandi rates...</div>
+          <div className="text-xs text-slate-400 mt-1">Fetching live APMC auctions and price spreads across NCR mandis</div>
+        </div>
+      ) : error ? (
+        <div className="mt-8 rounded-3xl border border-rose-200 bg-rose-50/60 p-8 text-center">
+          <AlertTriangle className="mx-auto h-8 w-8 text-rose-600 mb-2" />
+          <h3 className="text-sm font-black text-rose-900">{error}</h3>
+          <p className="mt-1 text-xs text-rose-700">Unable to retrieve current market session data.</p>
+          <button
+            onClick={() => loadRates()}
+            className="mt-4 rounded-xl bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5]"
+          >
+            Retry Loading
+          </button>
         </div>
       ) : comparisonData.length === 0 ? (
         <div className="mt-8 rounded-3xl border border-amber-200 bg-amber-50/50 p-8 text-center">
@@ -268,12 +292,20 @@ export default function CompareMandiPricesPage() {
           <p className="mt-1 text-xs text-amber-700 max-w-md mx-auto">
             KiranaMart247 does not synthesize or estimate rates when a market has no verified session. Choose another commodity or reset the region filter.
           </p>
-          <button
-            onClick={() => setSelectedState('All States')}
-            className="mt-4 rounded-xl bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5]"
-          >
-            Show All Mandis
-          </button>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <button
+              onClick={() => setSelectedState('All States')}
+              className="rounded-xl bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5]"
+            >
+              Show All Mandis
+            </button>
+            <button
+              onClick={() => loadRates()}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+            >
+              Refresh Data
+            </button>
+          </div>
         </div>
       ) : (
         <>

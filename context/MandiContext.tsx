@@ -17,7 +17,7 @@ export interface MandiItem {
 }
 
 export const GHAZIABAD_MANDI_DEFAULT: MandiItem = {
-  id: 'cmtzlm4sd000012n2ivvcrf8e',
+  id: 'mandi-10',
   name: 'Ghaziabad Mandi',
   slug: 'ghaziabad-mandi',
   city: 'Ghaziabad',
@@ -29,59 +29,8 @@ export const GHAZIABAD_MANDI_DEFAULT: MandiItem = {
   active: true,
 };
 
-/**
- * Derives the canonical administrative District for any NCR wholesale Mandi.
- */
-export function getMandiDistrict(mandi: { city?: string; state?: string; slug?: string; name?: string }): string {
-  const name = (mandi.name || '').toLowerCase();
-  const slug = (mandi.slug || '').toLowerCase();
-  const city = (mandi.city || '').toLowerCase();
-
-  // Ghaziabad District
-  if (slug.includes('ghaziabad') || name.includes('ghaziabad') || city.includes('ghaziabad')) {
-    return 'Ghaziabad';
-  }
-  // Gautam Buddha Nagar (Noida / Greater Noida / Dadri)
-  if (slug.includes('noida') || slug.includes('dadri') || city.includes('noida')) {
-    return 'Gautam Buddha Nagar';
-  }
-  // Gurugram District
-  if (slug.includes('gurugram') || city.includes('gurugram') || city.includes('gurgaon') || name.includes('gurugram')) {
-    return 'Gurugram';
-  }
-  // Faridabad District
-  if (slug.includes('faridabad') || slug.includes('ballabhgarh') || city.includes('faridabad') || city.includes('ballabhgarh')) {
-    return 'Faridabad';
-  }
-  // Sonipat District
-  if (slug.includes('sonipat') || city.includes('sonipat') || name.includes('sonipat')) {
-    return 'Sonipat';
-  }
-  // Delhi Districts
-  if (slug.includes('azadpur') || slug.includes('narela')) {
-    return 'North Delhi';
-  }
-  if (slug.includes('naya-bazar') || slug.includes('khari-baoli')) {
-    return 'Central Delhi';
-  }
-  if (slug.includes('ghazipur')) {
-    return 'East Delhi';
-  }
-  if (slug.includes('shahdara')) {
-    return 'North East Delhi';
-  }
-  if (slug.includes('okhla')) {
-    return 'South Delhi';
-  }
-  if (slug.includes('keshopur')) {
-    return 'West Delhi';
-  }
-  if (slug.includes('najafgarh')) {
-    return 'South West Delhi';
-  }
-
-  return mandi.city || 'Delhi';
-}
+import { getMandiDistrict } from '@/lib/rates';
+export { getMandiDistrict };
 
 /**
  * Maps a user's entered city, district, or address to the nearest authentic registered APMC Mandi.
@@ -227,10 +176,12 @@ export function MandiProvider({ children }: { children: React.ReactNode }) {
 
         const savedId = typeof window !== 'undefined' ? localStorage.getItem('km247_selected_mandi_id') : null;
         if (savedId) {
-          const matched = activeMandis.find((m) => m.id === savedId && m.active);
+          const matched = activeMandis.find((m) => (m.id === savedId || m.slug === savedId) && m.active);
           if (matched) {
             setSelectedMandi(matched);
             return;
+          } else if (typeof window !== 'undefined') {
+            localStorage.removeItem('km247_selected_mandi_id');
           }
         }
 
@@ -294,7 +245,14 @@ export function MandiProvider({ children }: { children: React.ReactNode }) {
   };
 
   const selectMandiById = (id: string) => {
-    const matched = mandis.find((m) => m.id === id);
+    if (!id) {
+      selectMandi(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('km247_selected_mandi_id');
+      }
+      return;
+    }
+    const matched = mandis.find((m) => m.id === id || m.slug === id);
     if (matched) {
       selectMandi(matched);
     }

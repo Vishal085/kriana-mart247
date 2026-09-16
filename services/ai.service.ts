@@ -141,7 +141,7 @@ ${topRates
       lower.includes('baat karni')
     ) {
       return {
-        reply: `📞 **KiranaMart.com Customer Support & Helpline**:\n\n• **Official WhatsApp Support**: [+91 8510083082](https://wa.me/918510083082) *(Fastest response)*\n• **Direct Call / Help**: +91 8510083082\n• **Email Support**: [support@kiranamart.com](mailto:support@kiranamart.com)\n• **Contact Page**: [Contact KiranaMart Team](/contact)\n• **Working Hours**: Monday to Saturday (9:00 AM - 8:00 PM)\n\nAap WhatsApp par message bhejkar order status, delivery, bulk wholesale order, ya store ke baare me pooch sakte hain!`,
+        reply: `📞 **KiranaMart247 Customer Support & Helpline**:\n\n• **Official WhatsApp Support**: [+91 8510083082](https://wa.me/918510083082) *(Fastest response)*\n• **Direct Call / Help**: +91 8510083082\n• **Email Support**: [support@kiranamart247.com](mailto:support@kiranamart247.com)\n• **Contact Page**: [Contact KiranaMart247 Team](/contact)\n• **Working Hours**: Monday to Saturday (9:00 AM - 8:00 PM)\n\nAap WhatsApp par message bhejkar order status, delivery, bulk wholesale order, ya store ke baare me pooch sakte hain!`,
       };
     }
 

@@ -115,7 +115,7 @@
       "images": [
         {
           "id": "img-1",
-          "url": "/images/products/india_gate_classic_5kg.svg",
+          "url": "/products/km-rice-basmati-classic-5kg.svg",
           "name": "Pack.svg",
           "isPrimary": true
         }
@@ -232,7 +232,7 @@
     },
     {
       "id": "admin-demo-1",
-      "fullName": "Super Admin",
+      "fullName": "Vishal Gupta",
       "email": "admin@kiranamart247.com",
       "mobile": "9999999999",
       "passwordHash": "$2b$10$8tSWqxXd3SlEQ5yRmSbttOrG7Y.BOPz96RxNg9qqfq100diGLBy8K",

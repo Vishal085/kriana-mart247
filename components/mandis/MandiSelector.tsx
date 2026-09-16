@@ -46,15 +46,15 @@ export function MandiSelector({
   });
 
   const stateTabs = (
-    <div className="flex items-center gap-1 mb-2.5 pb-1 border-b border-slate-100 overflow-x-auto">
+    <div className="flex items-center gap-1 mb-1.5 pb-1 border-b border-slate-100 overflow-x-auto no-scrollbar">
       {(['ALL', 'Uttar Pradesh', 'Delhi', 'Haryana'] as const).map((st) => (
         <button
           key={st}
           type="button"
           onClick={() => setStateFilter(st)}
-          className={`rounded-lg px-2 py-1 text-[10px] font-bold whitespace-nowrap transition ${
+          className={`rounded px-1.5 py-0.5 text-[8.5px] font-medium whitespace-nowrap transition ${
             stateFilter === st
-              ? 'bg-[#073B6F] text-white shadow-xs'
+              ? 'bg-[#073B6F] text-white shadow-2xs font-semibold'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
         >
@@ -76,17 +76,17 @@ export function MandiSelector({
           selectMandi(m);
           setIsOpen(false);
         }}
-        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs transition ${
+        className={`flex w-full items-center justify-between rounded-md px-2 py-1 text-left transition ${
           isSelected
-            ? 'bg-[#EAF5FC] font-black text-[#073B6F] border border-[#39A9E8]/40 shadow-xs'
+            ? 'bg-[#EAF5FC] font-bold text-[#073B6F] border border-[#39A9E8]/40 shadow-2xs'
             : 'text-slate-700 hover:bg-slate-50 border border-transparent'
         }`}
       >
-        <div className="truncate pr-2">
-          <div className="font-black text-slate-800 flex items-center gap-1.5 truncate">
-            <span>{m.name}</span>
+        <div className="truncate pr-1.5">
+          <div className="font-bold text-slate-800 flex items-center gap-1 truncate">
+            <span className="text-[10.5px]">{m.name}</span>
             <span
-              className={`rounded-md px-1.5 py-0.5 text-[9px] font-black shrink-0 ${
+              className={`rounded px-1 py-0.2 text-[7.5px] font-semibold shrink-0 ${
                 isUP
                   ? 'bg-amber-100 text-amber-900 border border-amber-200'
                   : isDelhi
@@ -97,18 +97,18 @@ export function MandiSelector({
               {m.state}
             </span>
           </div>
-          <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+          <div className="text-[8.5px] text-slate-500 flex items-center gap-1 mt-0.5">
             <MapPin className="h-2.5 w-2.5 text-[#39A9E8] shrink-0" />
-            <span className="font-bold text-slate-600">{m.city} District</span>
-            {m.address && <span className="truncate opacity-75">• {m.address.slice(0, 35)}</span>}
+            <span className="font-semibold text-slate-600">{m.city} District</span>
+            {m.address && <span className="truncate opacity-70 text-[8px]">• {m.address.slice(0, 32)}</span>}
           </div>
         </div>
         {isSelected ? (
-          <span className="flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[#0B5FA5] shadow-2xs shrink-0">
-            <Check className="h-3 w-3" /> Selected
+          <span className="flex items-center gap-1 rounded bg-white px-1.5 py-0.5 text-[8px] font-bold text-[#0B5FA5] shadow-2xs shrink-0 border border-[#39A9E8]/30">
+            <Check className="h-2 w-2" /> Selected
           </span>
         ) : (
-          <span className="text-[10px] font-semibold text-slate-400 hover:text-[#0B5FA5] shrink-0">
+          <span className="text-[8.5px] font-medium text-slate-400 hover:text-[#0B5FA5] shrink-0">
             Select →
           </span>
         )}
@@ -132,7 +132,7 @@ export function MandiSelector({
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Selected Mandi Hub
               </div>
-              <div className="text-xs font-black text-[#073B6F]">
+              <div className="text-xs font-bold text-[#073B6F]">
                 {loading
                   ? 'Loading Mandis...'
                   : selectedMandi
@@ -149,23 +149,23 @@ export function MandiSelector({
         </div>
 
         {isOpen && (
-          <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
-            <div className="relative mb-2">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+          <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+            <div className="relative mb-1.5">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search by Mandi, City (Ghaziabad), or State..."
+                placeholder="Search by Mandi, City, or State..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#39A9E8]"
+                className="h-7 w-full rounded-md border border-slate-200 bg-slate-50 pl-6.5 pr-2 text-[10px] text-slate-800 outline-none focus:border-[#39A9E8] focus:bg-white placeholder:text-[10px] placeholder:text-slate-400 transition"
                 autoFocus
               />
             </div>
             {stateTabs}
-            <div className="max-h-60 overflow-y-auto space-y-1">
+            <div className="max-h-60 overflow-y-auto space-y-0.5">
               {filtered.map(renderMandiItem)}
               {filtered.length === 0 && (
-                <div className="p-3 text-center text-xs text-slate-400">
+                <div className="p-3 text-center text-[10px] text-slate-400">
                   No mandis found matching &quot;{search}&quot;
                 </div>
               )}
@@ -197,26 +197,26 @@ export function MandiSelector({
         </button>
 
         {isOpen && (
-          <div className="fixed inset-x-4 top-14 z-50 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl sm:absolute sm:inset-x-auto sm:left-0 sm:top-full sm:mt-2 sm:w-80">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          <div className="fixed inset-x-4 top-14 z-50 rounded-xl border border-slate-200 bg-white p-2 shadow-xl sm:absolute sm:inset-x-auto sm:left-0 sm:top-full sm:mt-1.5 sm:w-76">
+            <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-slate-100">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
                 Select Wholesale Mandi
               </span>
-              <span className="text-[10px] text-emerald-600 font-bold">● Live APMC</span>
+              <span className="text-[8.5px] text-emerald-600 font-bold">● Live APMC</span>
             </div>
-            <div className="relative mb-2">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <div className="relative mb-1.5">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search city (Ghaziabad, Noida) or state..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-2.5 text-xs text-slate-800 outline-none focus:border-[#39A9E8]"
+                className="h-7 w-full rounded-md border border-slate-200 bg-slate-50 pl-6.5 pr-2 text-[10px] text-slate-800 outline-none focus:border-[#39A9E8] focus:bg-white placeholder:text-[10px] placeholder:text-slate-400 transition"
                 autoFocus
               />
             </div>
             {stateTabs}
-            <div className="max-h-64 overflow-y-auto space-y-1">
+            <div className="max-h-60 overflow-y-auto space-y-0.5">
               {filtered.map(renderMandiItem)}
             </div>
           </div>
@@ -251,35 +251,35 @@ export function MandiSelector({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-88 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl animate-in fade-in zoom-in-95 duration-100">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+        <div className="absolute left-0 top-full z-50 mt-1.5 w-72 sm:w-76 rounded-xl border border-slate-200 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-100">
+          <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-slate-100">
             <div>
-              <span className="text-xs font-black text-[#073B6F]">Wholesale Mandi Hubs</span>
-              <p className="text-[10px] text-slate-500">Filter by State, District &amp; APMC hub</p>
+              <span className="text-[10.5px] font-bold text-[#073B6F]">Wholesale Mandi Hubs</span>
+              <p className="text-[8.5px] text-slate-400">Filter by State, District &amp; APMC hub</p>
             </div>
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-700 border border-emerald-200">
+            <span className="rounded-full bg-emerald-50 px-1.5 py-0.2 text-[8px] font-semibold text-emerald-700 border border-emerald-200">
               Live Mandi
             </span>
           </div>
 
-          <div className="relative mb-2">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+          <div className="relative mb-1.5">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search Ghaziabad, Noida, Delhi, Haryana..."
+              placeholder="Search Ghaziabad, Noida, Delhi..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-2.5 text-xs text-slate-800 outline-none focus:border-[#39A9E8]"
+              className="h-7 w-full rounded-md border border-slate-200 bg-slate-50 pl-6.5 pr-2 text-[10px] text-slate-800 outline-none focus:border-[#39A9E8] focus:bg-white placeholder:text-[10px] placeholder:text-slate-400 transition"
               autoFocus
             />
           </div>
 
           {stateTabs}
 
-          <div className="max-h-72 overflow-y-auto space-y-1">
+          <div className="max-h-60 overflow-y-auto space-y-0.5">
             {filtered.map(renderMandiItem)}
             {filtered.length === 0 && (
-              <div className="p-4 text-center text-xs text-slate-400">
+              <div className="p-3 text-center text-[10px] text-slate-400">
                 No mandis found matching &quot;{search}&quot;
               </div>
             )}

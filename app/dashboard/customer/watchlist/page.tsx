@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { requireCustomer } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { ChevronRight, Store, MapPin, ArrowRight } from 'lucide-react';
+import UnpinMandiButton from '@/components/UnpinMandiButton';
 
 export default async function CustomerWatchlistPage() {
   let user;
@@ -67,6 +68,7 @@ export default async function CustomerWatchlistPage() {
               >
                 View Today&apos;s Rates <ArrowRight className="h-3.5 w-3.5" />
               </Link>
+              <UnpinMandiButton mandiId={item.mandi.id} mandiName={item.mandi.name} />
             </div>
           </div>
         ))}

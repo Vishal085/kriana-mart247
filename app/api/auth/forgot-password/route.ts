@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
+import { EmailService } from '@/services/email.service';
 
 const SESSION_SECRET = process.env.AUTH_SECRET || 'kiranamart247-secure-dev-session-key';
 
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     if (!user) {
       // Return safe success message to prevent user enumeration
       return NextResponse.json({
-        message: 'If an account exists with this detail, password reset instructions have been generated.',
+        message: 'If an account exists with this detail, password reset instructions have been sent.',
       });
     }
 
@@ -42,10 +43,16 @@ export async function POST(request: Request) {
 
     console.log(`[PASSWORD RESET] For user ${user.fullName} (${user.email || user.mobile}): ${resetUrl}`);
 
+    if (user.email) {
+      try {
+        await EmailService.sendPasswordResetEmail(user.email, resetUrl, user.fullName);
+      } catch (err: any) {
+        console.error('[PASSWORD RESET EMAIL ERROR]', err.message);
+      }
+    }
+
     return NextResponse.json({
-      message: 'Password reset link generated successfully.',
-      // In development or testing, expose link directly for immediate verification
-      resetUrl: process.env.NODE_ENV !== 'production' ? resetUrl : undefined,
+      message: 'Password reset link sent to your registered email address.',
     });
   } catch (error: any) {
     return NextResponse.json(

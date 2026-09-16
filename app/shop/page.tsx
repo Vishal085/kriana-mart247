@@ -18,10 +18,11 @@ export default async function ShopPage({
     search?: string;
     minPrice?: string;
     maxPrice?: string;
+    deals?: string;
     page?: string;
   }>;
 }) {
-  const { categoryId, category, brandId, mandiId, section, search, minPrice, maxPrice, page } = await searchParams;
+  const { categoryId, category, brandId, mandiId, section, search, minPrice, maxPrice, deals, page } = await searchParams;
   const currentPage = parseInt(page || '1', 10);
   const limit = 20;
   const skip = (currentPage - 1) * limit;
@@ -56,8 +57,14 @@ export default async function ShopPage({
   let activeMandiName: string | null = null;
   if (mandiId) {
     const [mandiRates, mObj] = await Promise.all([
-      prisma.mandiRate.findMany({ where: { mandiId, active: true }, take: 100 }),
-      prisma.mandi.findUnique({ where: { id: mandiId } }),
+      prisma.mandiRate.findMany({
+        where: {
+          OR: [{ mandiId }, { mandi: { slug: mandiId } }],
+          active: true,
+        },
+        take: 100,
+      }),
+      prisma.mandi.findFirst({ where: { OR: [{ id: mandiId }, { slug: mandiId }] } }),
     ]);
     if (mObj) activeMandiName = mObj.name;
     mandiProductIds = mandiRates.map((r: any) => r.productId);
@@ -65,6 +72,7 @@ export default async function ShopPage({
 
   const isMandiSection = section === 'mandi';
   const isRetailSection = section === 'retail';
+  const isDeals = deals === 'true' || deals === '1';
 
   const categoryFilter = resolvedCategoryId
     ? { categoryId: resolvedCategoryId }
@@ -93,6 +101,7 @@ export default async function ShopPage({
     ...(brandId ? { brandId } : {}),
     ...(mandiProductIds ? { id: { in: mandiProductIds } } : {}),
     ...(priceFilter ? { retailPrice: priceFilter } : {}),
+    ...(isDeals ? { baseRate: { not: null, gt: 0 } } : {}),
     ...(search
       ? {
           OR: [
@@ -133,7 +142,7 @@ export default async function ShopPage({
   ]);
 
   const totalPages = Math.ceil(total / limit);
-  const hasActiveFilters = Boolean(categoryId || brandId || mandiId || search || minPrice || maxPrice || section);
+  const hasActiveFilters = Boolean(categoryId || category || brandId || mandiId || search || minPrice || maxPrice || section || isDeals);
 
   const pricePresets = [
     { label: 'All Prices', min: undefined, max: undefined },
@@ -147,8 +156,10 @@ export default async function ShopPage({
     const params = new URLSearchParams();
     if (section) params.set('section', section);
     if (categoryId) params.set('categoryId', categoryId);
+    if (category) params.set('category', category);
     if (brandId) params.set('brandId', brandId);
     if (mandiId) params.set('mandiId', mandiId);
+    if (deals) params.set('deals', deals);
     if (search) params.set('search', search);
     if (minPrice) params.set('minPrice', minPrice);
     if (maxPrice) params.set('maxPrice', maxPrice);

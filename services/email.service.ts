@@ -80,4 +80,57 @@ export class EmailService {
       return { success: false, error: err.message };
     }
   }
+
+  static async sendPasswordResetEmail(
+    toEmail: string,
+    resetUrl: string,
+    recipientName: string = 'User'
+  ): Promise<{ success: boolean; error?: string; devMode?: boolean }> {
+    const transporter = this.getTransporter();
+
+    const subject = `Reset Your KiranaMart247 Password`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h2 style="color: #073B6F; margin: 0; font-size: 24px;">KiranaMart<span style="color: #39A9E8;">247</span></h2>
+          <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Direct Mandi Wholesale & Retail Grocery Platform</p>
+        </div>
+        <div style="background-color: #F8FAFC; border-radius: 12px; padding: 20px; text-align: center; margin: 20px 0;">
+          <p style="color: #334155; font-size: 14px; margin-top: 0;">Hello <strong>${recipientName}</strong>,</p>
+          <p style="color: #475569; font-size: 13px; margin: 8px 0 16px;">We received a request to reset your KiranaMart247 password. Click the button below to set a new password:</p>
+          <div style="margin: 20px 0;">
+            <a href="${resetUrl}" style="background-color: #0B5FA5; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">Reset Password</a>
+          </div>
+          <p style="color: #64748b; font-size: 11px; margin-top: 14px; margin-bottom: 0;">This password reset link is valid for 1 hour. If you did not request this, you can safely ignore this email.</p>
+        </div>
+        <div style="border-top: 1px solid #f1f5f9; padding-top: 16px; text-align: center; color: #94a3b8; font-size: 11px;">
+          © ${new Date().getFullYear()} KiranaMart247. All rights reserved.
+        </div>
+      </div>
+    `;
+
+    if (!transporter) {
+      console.log(`\n========================================`);
+      console.log(`[PASSWORD RESET - EMAIL] To: ${toEmail}`);
+      console.log(`[PASSWORD RESET - LINK] ${resetUrl}`);
+      console.log(`========================================\n`);
+      return { success: true, devMode: true };
+    }
+
+    try {
+      const from = process.env.SMTP_FROM || `"KiranaMart247" <${process.env.GMAIL_USER || process.env.SMTP_USER}>`;
+      await transporter.sendMail({
+        from,
+        to: toEmail,
+        subject,
+        html,
+        text: `Reset your KiranaMart247 password: ${resetUrl}. Valid for 1 hour.`,
+      });
+      console.log(`[EMAIL SENT] Password reset link dispatched to ${toEmail}`);
+      return { success: true };
+    } catch (err: any) {
+      console.error(`[EMAIL ERROR] Failed to send reset email to ${toEmail}:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
 }

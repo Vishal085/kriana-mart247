@@ -138,18 +138,6 @@ function ensureDataFile(): StoreData {
               updatedAt: '2026-01-01T00:00:00.000Z',
             },
           },
-          // Pre-seeded demo admin for approval portal testing
-          {
-            id: 'admin-demo-1',
-            fullName: 'Super Admin',
-            email: 'admin@kiranamart247.com',
-            mobile: '9999999999',
-            passwordHash: '$2b$10$8tSWqxXd3SlEQ5yRmSbttOrG7Y.BOPz96RxNg9qqfq100diGLBy8K', // bcrypt for 'admin123'
-            role: 'ADMIN',
-            active: true,
-            createdAt: '2026-01-01T00:00:00.000Z',
-            updatedAt: '2026-01-01T00:00:00.000Z',
-          },
           // Pre-seeded demo customer for testing
           {
             id: 'customer-demo-1',

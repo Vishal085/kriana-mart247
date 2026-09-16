@@ -4,28 +4,95 @@ import { productSchema } from '@/validators';
 
 export class ProductService {
   static async getAll({
+    category,
     categoryId,
     subCategoryId,
     brandId,
+    mandiId,
+    deals,
+    minPrice,
+    maxPrice,
     search,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
     activeOnly = true,
     page = 1,
     limit = 20,
   }: {
+    category?: string;
     categoryId?: string;
     subCategoryId?: string;
     brandId?: string;
+    mandiId?: string;
+    deals?: boolean | string;
+    minPrice?: number;
+    maxPrice?: number;
     search?: string;
+    sortBy?: 'retailPrice' | 'name' | 'createdAt';
+    sortOrder?: 'asc' | 'desc';
     activeOnly?: boolean;
     page?: number;
     limit?: number;
   }) {
     const skip = (page - 1) * limit;
-    const where = {
+
+    // Resolve category slug or ID
+    const rawCat = category || categoryId;
+    let resolvedCategoryId: string | undefined;
+    if (rawCat) {
+      try {
+        const matched = await prisma.category.findFirst({
+          where: {
+            OR: [
+              { id: rawCat },
+              { slug: rawCat },
+            ],
+          },
+          select: { id: true },
+        });
+        if (matched) {
+          resolvedCategoryId = matched.id;
+        }
+      } catch {
+        resolvedCategoryId = rawCat;
+      }
+    }
+
+    // Resolve mandi products if mandiId is supplied
+    let mandiProductIds: string[] | undefined;
+    if (mandiId) {
+      try {
+        const rates = await prisma.mandiRate.findMany({
+          where: {
+            OR: [
+              { mandiId },
+              { mandi: { slug: mandiId } },
+            ],
+            active: true,
+          },
+          select: { productId: true },
+          take: 150,
+        });
+        mandiProductIds = rates.map((r: any) => r.productId);
+      } catch {
+        mandiProductIds = undefined;
+      }
+    }
+
+    const priceFilter: any = {};
+    if (minPrice !== undefined) priceFilter.gte = minPrice;
+    if (maxPrice !== undefined) priceFilter.lte = maxPrice;
+
+    const isDeals = deals === true || deals === 'true' || deals === '1';
+
+    const where: any = {
       ...(activeOnly ? { active: true } : {}),
-      ...(categoryId ? { categoryId } : {}),
+      ...(resolvedCategoryId ? { categoryId: resolvedCategoryId } : {}),
       ...(subCategoryId ? { subCategoryId } : {}),
       ...(brandId ? { brandId } : {}),
+      ...(mandiProductIds ? { id: { in: mandiProductIds } } : {}),
+      ...(Object.keys(priceFilter).length > 0 ? { retailPrice: priceFilter } : {}),
+      ...(isDeals ? { baseRate: { not: null, gt: 0 } } : {}),
       ...(search
         ? {
             OR: [
@@ -37,6 +104,15 @@ export class ProductService {
         : {}),
     };
 
+    let orderBy: any = { createdAt: 'desc' };
+    if (sortBy === 'retailPrice') {
+      orderBy = { retailPrice: sortOrder };
+    } else if (sortBy === 'name') {
+      orderBy = { name: sortOrder };
+    } else if (sortBy === 'createdAt') {
+      orderBy = { createdAt: sortOrder };
+    }
+
     const [items, total] = await Promise.all([
       prisma.product.findMany({
         where,
@@ -46,7 +122,7 @@ export class ProductService {
           subCategory: true,
           images: { where: { active: true }, orderBy: { sortOrder: 'asc' } },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         skip,
         take: limit,
       }),

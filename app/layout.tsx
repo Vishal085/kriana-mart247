@@ -26,28 +26,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://kiranamart.com'),
+  metadataBase: new URL('https://www.kiranamart247.com'),
   title: {
-    default: "KiranaMart | Online Kirana & Grocery Store • Daily Mandi Rates",
-    template: "%s | KiranaMart",
+    default: 'KiranaMart247 | Direct Mandi Wholesale & Retail Grocery Platform',
+    template: '%s | KiranaMart247',
   },
   description:
-    'Order fresh milk, cooking oil, atta, pulses, and daily spices online with fast same-day delivery. Track live Delhi APMC mandi wholesale rates.',
+    'Order groceries, FMCG staples, atta, pulses, and spices online with fast delivery. Track real-time APMC mandi wholesale rates across Delhi NCR & UP.',
   keywords: [
+    'KiranaMart247',
     'KiranaMart',
     'online grocery store',
-    'kirana delivery',
-    'wholesale mandi rates',
-    'atta',
-    'mustard oil',
-    'parle g',
-    'amul milk',
-    'sugar',
-    'delhi mandi bhav',
+    'mandi rates today',
+    'apmc mandi bhav',
+    'wholesale grocery platform',
+    'ghaziabad mandi',
+    'delhi mandi rates',
   ],
-  authors: [{ name: 'KiranaMart' }],
-  creator: 'KiranaMart',
-  publisher: 'KiranaMart',
+  authors: [{ name: 'KiranaMart247' }],
+  creator: 'KiranaMart247',
+  publisher: 'KiranaMart247',
   robots: {
     index: true,
     follow: true,
@@ -62,9 +60,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://kiranamart.com',
-    siteName: 'KiranaMart',
-    title: 'KiranaMart | Online Kirana & Grocery Store • Daily Mandi Rates',
+    url: 'https://www.kiranamart247.com',
+    siteName: 'KiranaMart247',
+    title: 'KiranaMart247 | Direct Mandi Wholesale & Retail Grocery Platform',
     description:
       'Buy groceries, FMCG staples, and track live mandi wholesale rates. Fast home delivery and Cash on Delivery available.',
     images: [
@@ -72,13 +70,13 @@ export const metadata: Metadata = {
         url: '/icon.png',
         width: 512,
         height: 512,
-        alt: 'KiranaMart Logo',
+        alt: 'KiranaMart247 Logo',
       },
     ],
   },
   twitter: {
     card: 'summary',
-    title: 'KiranaMart | Online Kirana & Grocery Store',
+    title: 'KiranaMart247 | Direct Mandi Rates & Wholesale Grocery Platform',
     description:
       'Order groceries online with fast delivery. Track live wholesale mandi prices across APMC markets.',
     images: ['/icon.png'],

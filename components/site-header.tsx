@@ -13,8 +13,6 @@ import {
   LogOut,
   TrendingUp,
   Store,
-  ShoppingBag,
-  Scale,
   Sparkles,
   Package,
   Settings,
@@ -24,7 +22,6 @@ import {
   ArrowLeft,
   ChevronDown,
   BarChart3,
-  Bookmark,
 } from 'lucide-react';
 import { BrandMark } from './brand-mark';
 import { useAuth } from '@/context/AuthContext';
@@ -91,6 +88,7 @@ export function SiteHeader() {
 
   // Initials for avatar
   const getInitials = () => {
+    if (user?.role === 'ADMIN') return 'VG';
     if (!user || !user.fullName) return 'U';
     const parts = user.fullName.trim().split(' ');
     if (parts.length >= 2) {
@@ -103,9 +101,6 @@ export function SiteHeader() {
     { label: 'Mandi Rates', shortLabel: 'Mandi Rates', href: '/mandi-rates', badge: 'Live', icon: TrendingUp },
     { label: 'Markets', shortLabel: 'Markets', href: '/mandis', icon: Store },
     { label: 'Trends', shortLabel: 'Trends', href: '/trends', icon: BarChart3 },
-    { label: 'Compare', shortLabel: 'Compare', href: '/compare', icon: Scale },
-    { label: 'Watchlist', shortLabel: 'Watchlist', href: '/watchlist', icon: Bookmark },
-    { label: 'Grocery', shortLabel: 'Grocery', href: '/shop', icon: ShoppingBag },
   ];
 
   return (
@@ -151,16 +146,7 @@ export function SiteHeader() {
 
           {/* Right Section: Role CTA, Smart Search, Cart Drawer Button, Profile, Mobile Menu */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Admin shortcut if logged in */}
-            {user?.role === 'ADMIN' && (
-              <Link
-                href="/dashboard/admin"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#073B6F] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-[#0B5FA5] transition"
-              >
-                <Shield className="h-3.5 w-3.5" />
-                <span>Admin Console</span>
-              </Link>
-            )}
+
 
             {/* Search Trigger Button with Cmd+K */}
             <button
@@ -176,8 +162,8 @@ export function SiteHeader() {
               </kbd>
             </button>
 
-            {/* Cart Drawer Trigger Button - Hidden on Admin Dashboard pages */}
-            {!pathname.startsWith('/dashboard/admin') && (
+            {/* Cart Drawer Trigger Button - Hidden for Admin */}
+            {user?.role !== 'ADMIN' && !pathname.startsWith('/dashboard/admin') && (
               <button
                 onClick={openDrawer}
                 aria-label="Open Cart Drawer"
@@ -201,24 +187,31 @@ export function SiteHeader() {
                   setActiveMenu('main');
                 }}
                 aria-label="User Account"
-                className="flex h-9 items-center gap-1.5 overflow-hidden rounded-full border border-slate-200 bg-[#EAF5FC] px-2 text-[#073B6F] transition hover:border-[#0B5FA5] focus:outline-hidden shrink-0"
+                className={
+                  user?.role === 'ADMIN'
+                    ? "flex h-8 w-8 items-center justify-center rounded-full bg-[#073B6F] text-white text-[10px] font-bold leading-none shadow-xs border border-white/20 transition hover:bg-[#0B5FA5] hover:ring-2 hover:ring-[#0B5FA5]/30 focus:outline-hidden shrink-0 cursor-pointer"
+                    : "flex h-9 items-center gap-1.5 overflow-hidden rounded-full border border-slate-200 bg-[#EAF5FC] px-2.5 text-[#073B6F] transition hover:border-[#0B5FA5] focus:outline-hidden shrink-0 cursor-pointer"
+                }
               >
-                {user ? (
+                {user?.role === 'ADMIN' ? (
+                  <span className="leading-none select-none font-bold">VG</span>
+                ) : user ? (
                   <>
-                    <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-[#073B6F] text-[10px] font-black text-white">
+                    <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-[#073B6F] text-[10px] font-bold text-white shrink-0">
                       {getInitials()}
                     </div>
-                    <span className="text-xs font-bold max-w-[80px] truncate">
+                    <span className="text-xs font-bold max-w-[80px] truncate text-slate-800">
                       {user.fullName.split(' ')[0]}
                     </span>
+                    <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
                   </>
                 ) : (
                   <>
                     <User className="h-4 w-4 text-slate-600" />
                     <span className="text-xs font-bold text-slate-700">Account</span>
+                    <ChevronDown className="h-3 w-3 text-slate-400" />
                   </>
                 )}
-                <ChevronDown className="h-3 w-3 text-slate-400" />
               </button>
 
               {/* Dropdown Menu */}
@@ -233,7 +226,9 @@ export function SiteHeader() {
                               {getInitials()}
                             </div>
                             <div className="flex-1 overflow-hidden">
-                              <p className="truncate text-xs font-bold text-slate-800">{user.fullName}</p>
+                              <p className="truncate text-xs font-bold text-slate-800">
+                                {user.role === 'ADMIN' ? 'Vishal Gupta' : user.fullName}
+                              </p>
                               <p className="truncate text-[10px] text-slate-400">{user.email || user.mobile}</p>
                             </div>
                           </div>
@@ -304,14 +299,16 @@ export function SiteHeader() {
                           </Link>
                         )}
 
-                        <Link
-                          href="/dashboard/customer/orders"
-                          onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50 transition"
-                        >
-                          <Package className="h-4 w-4 text-slate-500" />
-                          <span>My Orders</span>
-                        </Link>
+                        {user && user.role !== 'ADMIN' && (
+                          <Link
+                            href="/dashboard/customer/orders"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50 transition"
+                          >
+                            <Package className="h-4 w-4 text-slate-500" />
+                            <span>My Orders</span>
+                          </Link>
+                        )}
 
                         <button
                           onClick={() => setActiveMenu('language')}

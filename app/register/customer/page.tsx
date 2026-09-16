@@ -56,7 +56,6 @@ function CustomerRegisterForm() {
   // OTP State
   const [verificationId, setVerificationId] = useState('');
   const [otp, setOtp] = useState('');
-  const [devOtp, setDevOtp] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(60);
 
   useEffect(() => {
@@ -153,12 +152,7 @@ function CustomerRegisterForm() {
       }
 
       setVerificationId(data.verificationId);
-      if (data.devOtp) {
-        setDevOtp(data.devOtp);
-        setOtp(data.devOtp);
-      } else {
-        setOtp('');
-      }
+      setOtp('');
       setCurrentStep(3);
       setCountdown(60);
     } catch (err: any) {
@@ -508,21 +502,7 @@ function CustomerRegisterForm() {
             </p>
           </div>
 
-          {devOtp && (
-            <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs text-emerald-900 shadow-sm">
-              <span>⚡ Verification OTP: <strong className="text-base font-black text-emerald-800 tracking-wider ml-1">{devOtp}</strong></span>
-              <button
-                type="button"
-                onClick={() => {
-                  setOtp(devOtp);
-                  handleVerifyOtp(devOtp);
-                }}
-                className="font-bold text-emerald-950 bg-emerald-200/80 hover:bg-emerald-300 px-2.5 py-1 rounded transition cursor-pointer"
-              >
-                Auto-Fill &amp; Verify
-              </button>
-            </div>
-          )}
+
 
           <div>
             <label className="block text-center text-xs font-bold text-slate-700 mb-1.5">

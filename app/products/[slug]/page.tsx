@@ -23,23 +23,23 @@ export async function generateMetadata({
     return { title: 'Product Not Found | KiranaMart' };
   }
 
-  const brandName = product.brand?.name || 'KiranaMart';
+  const brandName = product.brand?.name || 'KiranaMart247';
   const price = Number(product.retailPrice).toFixed(2);
-  const imageUrl = product.images[0]?.url || 'https://kiranamart.com/brand/logo.png';
+  const imageUrl = product.images[0]?.url || 'https://www.kiranamart247.com/icon.png';
 
   return {
-    title: `${product.name} (${product.unit}) - ₹${price} | KiranaMart`,
+    title: `${product.name} (${product.unit}) - ₹${price} | KiranaMart247`,
     description:
       product.description ||
-      `Buy ${product.name} (${product.unit}) online at best price ₹${price} on KiranaMart. Genuine quality FMCG groceries delivered to your door.`,
+      `Buy ${product.name} (${product.unit}) online at best price ₹${price} on KiranaMart247. Genuine quality FMCG groceries delivered to your door.`,
     alternates: {
-      canonical: `https://kiranamart.com/products/${product.slug}`,
+      canonical: `https://www.kiranamart247.com/products/${product.slug}`,
     },
     openGraph: {
-      title: `${product.name} - ₹${price} | KiranaMart`,
+      title: `${product.name} - ₹${price} | KiranaMart247`,
       description: `Shop authentic ${product.name} from ${brandName}. Fresh kirana stock, same day delivery.`,
-      url: `https://kiranamart.com/products/${product.slug}`,
-      siteName: 'KiranaMart',
+      url: `https://www.kiranamart247.com/products/${product.slug}`,
+      siteName: 'KiranaMart247',
       images: [
         {
           url: imageUrl,
@@ -90,16 +90,16 @@ export default async function ProductDetailPage({
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: [mainImage.startsWith('http') ? mainImage : `https://kiranamart.com${mainImage}`],
-    description: product.description || `${product.name} available at KiranaMart`,
+    image: [mainImage.startsWith('http') ? mainImage : `https://www.kiranamart247.com${mainImage}`],
+    description: product.description || `${product.name} available at KiranaMart247`,
     sku: product.sku,
     brand: {
       '@type': 'Brand',
-      name: product.brand?.name || 'KiranaMart',
+      name: product.brand?.name || 'KiranaMart247',
     },
     offers: {
       '@type': 'Offer',
-      url: `https://kiranamart.com/products/${product.slug}`,
+      url: `https://www.kiranamart247.com/products/${product.slug}`,
       priceCurrency: 'INR',
       price: Number(product.retailPrice).toFixed(2),
       availability: (product.stockQuantity ?? 100) > 0

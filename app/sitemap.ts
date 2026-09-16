@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://kiranamart.com';
+  const baseUrl = 'https://www.kiranamart247.com';
 
   const [products, categories, mandis] = await Promise.all([
     prisma.product.findMany({

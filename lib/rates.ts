@@ -253,3 +253,58 @@ export function getRateSourceMeta(rate: {
     freshnessLabel,
   };
 }
+
+/**
+ * Derives the canonical administrative District for any NCR wholesale Mandi.
+ */
+export function getMandiDistrict(mandi: { city?: string; state?: string; slug?: string; name?: string }): string {
+  const name = (mandi.name || '').toLowerCase();
+  const slug = (mandi.slug || '').toLowerCase();
+  const city = (mandi.city || '').toLowerCase();
+
+  // Ghaziabad District
+  if (slug.includes('ghaziabad') || name.includes('ghaziabad') || city.includes('ghaziabad')) {
+    return 'Ghaziabad';
+  }
+  // Gautam Buddha Nagar (Noida / Greater Noida / Dadri)
+  if (slug.includes('noida') || slug.includes('dadri') || city.includes('noida')) {
+    return 'Gautam Buddha Nagar';
+  }
+  // Gurugram District
+  if (slug.includes('gurugram') || city.includes('gurugram') || city.includes('gurgaon') || name.includes('gurugram')) {
+    return 'Gurugram';
+  }
+  // Faridabad District
+  if (slug.includes('faridabad') || slug.includes('ballabhgarh') || city.includes('faridabad') || city.includes('ballabhgarh')) {
+    return 'Faridabad';
+  }
+  // Sonipat District
+  if (slug.includes('sonipat') || city.includes('sonipat') || name.includes('sonipat')) {
+    return 'Sonipat';
+  }
+  // Delhi Districts
+  if (slug.includes('azadpur') || slug.includes('narela')) {
+    return 'North Delhi';
+  }
+  if (slug.includes('naya-bazar') || slug.includes('khari-baoli')) {
+    return 'Central Delhi';
+  }
+  if (slug.includes('ghazipur')) {
+    return 'East Delhi';
+  }
+  if (slug.includes('shahdara')) {
+    return 'North East Delhi';
+  }
+  if (slug.includes('okhla')) {
+    return 'South Delhi';
+  }
+  if (slug.includes('keshopur')) {
+    return 'West Delhi';
+  }
+  if (slug.includes('najafgarh')) {
+    return 'South West Delhi';
+  }
+
+  return mandi.city || 'Delhi';
+}
+
