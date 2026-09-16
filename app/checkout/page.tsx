@@ -100,7 +100,7 @@ export default function CheckoutPage() {
           </p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <Link
-              href="/login/customer?redirect=/checkout"
+              href="/login?redirect=/checkout"
               className="flex-1 rounded-xl bg-[#073B6F] py-3 text-xs font-bold text-white shadow-md transition hover:bg-[#0B5FA5]"
             >
               Sign In to Account

@@ -94,7 +94,7 @@ export default async function MandiDetailPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {mandi.rates.map((row) => (
+                {mandi.rates.map((row: any) => (
                   <tr key={row.id} className="hover:bg-slate-50 transition">
                     <td className="px-4 py-3.5 font-bold text-[#073B6F]">
                       <Link href={`/products/${row.product.slug}`} className="hover:underline">

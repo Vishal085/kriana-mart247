@@ -148,7 +148,7 @@ export default async function ProductDetailPage({
           </div>
           {product.images.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-              {product.images.map((img) => (
+              {product.images.map((img: any) => (
                 <div
                   key={img.id}
                   className="flex h-16 w-16 items-center justify-center rounded-xl border border-slate-200 bg-[#F7FAFC] p-2"
@@ -276,7 +276,7 @@ export default async function ProductDetailPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {product.rates.map((rate) => (
+                {product.rates.map((rate: any) => (
                   <tr key={rate.id} className="hover:bg-slate-50 transition">
                     <td className="px-4 py-3.5 font-bold text-[#073B6F]">
                       <Link href={`/mandis/${rate.mandi.slug}`} className="hover:underline">

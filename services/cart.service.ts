@@ -41,7 +41,7 @@ export class CartService {
     }
 
     let subtotal = 0;
-    const formattedItems = cart.items.map((item) => {
+    const formattedItems = cart.items.map((item: any) => {
       const price = Number(item.product.retailPrice);
       const itemSubtotal = price * item.quantity;
       subtotal += itemSubtotal;
@@ -75,7 +75,7 @@ export class CartService {
     return {
       id: cart.id,
       items: formattedItems,
-      totalItems: cart.items.reduce((acc, curr) => acc + curr.quantity, 0),
+      totalItems: cart.items.reduce((acc: any, curr: any) => acc + curr.quantity, 0),
       subtotal,
       tax,
       deliveryCharge,

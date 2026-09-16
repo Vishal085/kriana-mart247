@@ -102,7 +102,7 @@ export class OrderService {
     const orderNumber = `KIR-${dateStr}-${randomSuffix}`;
 
     // Execute atomic transaction to create order
-    const order = await prisma.$transaction(async (tx) => {
+    const order = await prisma.$transaction(async (tx: any) => {
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
@@ -315,7 +315,7 @@ export class OrderService {
       throw new Error('Order not found');
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx: any) => {
       const res = await tx.order.update({
         where: { id: orderId },
         data: { status },

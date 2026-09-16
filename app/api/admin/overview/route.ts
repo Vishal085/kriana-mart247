@@ -43,9 +43,9 @@ export async function GET() {
       }),
     ]);
 
-    const rising = rateDirections.find((r) => r.direction === Direction.RISING)?._count.direction ?? 0;
-    const falling = rateDirections.find((r) => r.direction === Direction.FALLING)?._count.direction ?? 0;
-    const stable = rateDirections.find((r) => r.direction === Direction.STABLE)?._count.direction ?? 0;
+    const rising = rateDirections.find((r: any) => r.direction === Direction.RISING)?._count.direction ?? 0;
+    const falling = rateDirections.find((r: any) => r.direction === Direction.FALLING)?._count.direction ?? 0;
+    const stable = rateDirections.find((r: any) => r.direction === Direction.STABLE)?._count.direction ?? 0;
 
     return NextResponse.json({
       metrics: {

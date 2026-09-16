@@ -154,7 +154,7 @@ export class OtpService {
     const reg = verification.registrationData as any;
     const passwordHash = await bcrypt.hash(reg.password, 10);
 
-    const newUser = await prisma.$transaction(async (tx) => {
+    const newUser = await prisma.$transaction(async (tx: any) => {
       // Create user
       const user = await tx.user.create({
         data: {

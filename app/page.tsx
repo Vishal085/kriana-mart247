@@ -15,10 +15,17 @@ import {
   CreditCard,
   Layers,
   Bot,
+  Scale,
+  Activity,
+  Bookmark,
+  Building2,
+  MapPin,
 } from 'lucide-react';
 import { MandiSelector } from '@/components/mandis/MandiSelector';
 import { ProductCard } from '@/components/ProductCard';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
+import { MandiSourcesDisclaimer } from '@/components/mandis/MandiSourcesDisclaimer';
+import { normalizeRate, getRateSourceMeta } from '@/lib/rates';
 import { MANDI_COMMODITY_CATEGORIES, RETAIL_ONLY_CATEGORIES } from '@/services/rates.service';
 
 export const revalidate = 60; // Refresh cache every minute
@@ -68,7 +75,7 @@ export default async function HomePage() {
           mandi: true,
         },
         orderBy: { updatedAt: 'desc' },
-        take: 8,
+        take: 10,
       }),
       prisma.mandiRate.groupBy({
         by: ['direction'],
@@ -79,73 +86,98 @@ export default async function HomePage() {
         where: { ...mandiCommodityWhere, direction: Direction.RISING },
         include: { product: true, mandi: true },
         orderBy: { percentageChange: 'desc' },
-        take: 4,
+        take: 5,
       }),
       prisma.mandiRate.findMany({
         where: { ...mandiCommodityWhere, direction: Direction.FALLING },
         include: { product: true, mandi: true },
         orderBy: { percentageChange: 'asc' },
-        take: 4,
+        take: 5,
       }),
     ]);
 
   const summary = {
-    rising: rateSummary.find((item) => item.direction === Direction.RISING)?._count.direction ?? 0,
-    falling: rateSummary.find((item) => item.direction === Direction.FALLING)?._count.direction ?? 0,
-    stable: rateSummary.find((item) => item.direction === Direction.STABLE)?._count.direction ?? 0,
+    rising: rateSummary.find((item: any) => item.direction === Direction.RISING)?._count.direction ?? 0,
+    falling: rateSummary.find((item: any) => item.direction === Direction.FALLING)?._count.direction ?? 0,
+    stable: rateSummary.find((item: any) => item.direction === Direction.STABLE)?._count.direction ?? 0,
   };
   const totalTracked = summary.rising + summary.falling + summary.stable;
 
   return (
     <main className="min-h-screen bg-[#F7FAFC] text-slate-800">
-      {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#EAF5FC]/60 via-[#F7FAFC] to-[#F7FAFC] py-10 lg:py-16">
+      {/* 1. HERO SECTION — WHOLESALE MANDI INTELLIGENCE TERMINAL */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#EAF5FC]/80 via-[#F7FAFC] to-[#F7FAFC] py-10 lg:py-14 border-b border-slate-200/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-6">
-          <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
-              {/* Brand Tagline Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#39A9E8]/30 bg-[#EAF5FC] px-3.5 py-1 text-xs font-semibold text-[#0B5FA5]">
-                <Sparkles className="h-3.5 w-3.5 text-[#39A9E8]" />
-                Daily Kirana Essentials & Mandi Rates
+              {/* Primary Identity Badge */}
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#0B5FA5]/30 bg-[#EAF5FC] px-3.5 py-1 text-xs font-bold text-[#073B6F] shadow-2xs">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Wholesale Mandi Spot Rate & Price Intelligence Terminal</span>
               </div>
 
+              {/* Primary Headline & Supporting Subtitle */}
               <h1 className="hero-heading mt-4 text-3xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
-                Aapki Apni Online Kirana Dukan.{' '}
-                <span className="block text-[#0B5FA5]">Daily Grocery at Mandi Rates.</span>
+                Live Wholesale Mandi Rates.{' '}
+                <span className="block text-[#0B5FA5]">Spot Intelligence & Spreads.</span>
               </h1>
 
-              <p className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base text-slate-600 leading-relaxed">
-                Order fresh milk, atta, cooking oil, pulses, and daily spices with same-day home delivery or track live wholesale market trends.
+              <p className="mt-4 max-w-2xl text-sm sm:text-base text-slate-600 leading-relaxed">
+                Track physical mandi spot prices, APMC auction movements, inter-mandi spreads, and verified market intelligence across Delhi-NCR, Uttar Pradesh, and Haryana.
               </p>
 
-              {/* Instant Kirana Grocery Search Bar */}
-              <div className="mt-6 max-w-xl">
-                <form action="/shop" method="GET" className="hero-search-form relative flex items-center shadow-sm rounded-2xl bg-white border border-slate-200 p-1.5 focus-within:border-[#39A9E8] transition">
+              {/* Priority 2 & 3: State & Market/Mandi Selection Bar */}
+              <div className="mt-5 flex flex-wrap items-center gap-2 text-xs">
+                <span className="font-bold text-slate-500 text-[11px] uppercase mr-1">Region:</span>
+                {[
+                  { name: 'All Mandis', href: '/mandi-rates' },
+                  { name: 'Delhi APMC', href: '/mandi-rates?state=Delhi' },
+                  { name: 'Uttar Pradesh', href: '/mandi-rates?state=Uttar+Pradesh' },
+                  { name: 'Haryana', href: '/mandi-rates?state=Haryana' },
+                ].map((st) => (
+                  <Link
+                    key={st.name}
+                    href={st.href}
+                    className="rounded-full bg-white border border-slate-200 px-3 py-1 font-bold text-slate-700 hover:border-[#39A9E8] hover:text-[#073B6F] transition shadow-2xs"
+                  >
+                    {st.name}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Priority 4: Commodity Search Form */}
+              <div className="mt-5 max-w-xl">
+                <form
+                  action="/mandi-rates"
+                  method="GET"
+                  className="relative flex items-center shadow-xs rounded-2xl bg-white border border-slate-300 p-1.5 focus-within:border-[#0B5FA5] transition"
+                >
                   <Search className="h-5 w-5 text-slate-400 ml-3 shrink-0" />
                   <input
                     type="text"
                     name="search"
-                    placeholder="Search 'Atta', 'Fortune Oil', 'Parle-G', 'Sugar'..."
-                    className="w-full bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none"
+                    placeholder="Search wholesale commodity: 'Basmati Rice', 'Mustard Oil', 'Wheat'..."
+                    className="w-full bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none font-medium"
                   />
                   <button
                     type="submit"
                     className="rounded-xl bg-[#073B6F] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#0B5FA5] transition shrink-0"
                   >
-                    Search Grocery
+                    Track Rate
                   </button>
                 </form>
               </div>
 
-              {/* Quick Grocery Category Shortcuts */}
+              {/* Priority 5: Major Mandi Category Filter Chips */}
               <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
-                <span className="font-semibold text-slate-400 text-[11px] uppercase mr-1">Popular:</span>
+                <span className="font-bold text-slate-400 text-[11px] uppercase mr-1">Wholesale:</span>
                 {[
-                  { name: 'Milk & Dairy', href: '/shop?category=milk-dairy' },
-                  { name: 'Atta & Flours', href: '/shop?category=atta-maida-suji' },
-                  { name: 'Cooking Oil', href: '/shop?category=cooking-oil' },
-                  { name: 'Basmati Rice', href: '/shop?category=rice' },
-                  { name: 'Spices', href: '/shop?category=masala-spices' },
+                  { name: 'Wheat & Grains', href: '/mandi-rates?category=atta-maida-suji' },
+                  { name: 'Basmati Rice', href: '/mandi-rates?category=rice' },
+                  { name: 'Mustard & Edible Oil', href: '/mandi-rates?category=cooking-oil' },
+                  { name: 'Dal & Pulses', href: '/mandi-rates?category=dal-pulses' },
+                  { name: 'Sugar & Salt', href: '/mandi-rates?category=sugar-salt-jaggery' },
+                  { name: 'Spices', href: '/mandi-rates?category=masala-spices' },
                 ].map((pill) => (
                   <Link
                     key={pill.name}
@@ -157,75 +189,69 @@ export default async function HomePage() {
                 ))}
               </div>
 
-              {/* Action Buttons */}
-              <div className="hero-action-buttons mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/shop"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#073B6F] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#0B5FA5]"
-                >
-                  <ShoppingBag className="h-4 w-4" />
-                  Shop All Products
-                </Link>
+              {/* Terminal Quick CTAs */}
+              <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/mandi-rates"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#073B6F] shadow-xs transition hover:border-[#39A9E8]"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#073B6F] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#0B5FA5]"
                 >
-                  <TrendingUp className="h-4 w-4 text-[#0B5FA5]" />
-                  Live Mandi Rates
+                  <TrendingUp className="h-4 w-4 text-[#39A9E8]" />
+                  Open Live Rate Board
                 </Link>
-              </div>
-
-              {/* Trust Reassurance Chips */}
-              <div className="trust-chips mt-6 flex flex-wrap gap-5 text-xs text-slate-500 border-t border-slate-200/60 pt-4">
-                <div className="flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>Free delivery over ₹500</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-[#0B5FA5] shrink-0" />
-                  <span>Cash on Delivery & UPI</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-amber-600 shrink-0" />
-                  <span>100% Genuine Brands</span>
-                </div>
+                <Link
+                  href="/compare"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#073B6F] shadow-2xs transition hover:border-[#39A9E8]"
+                >
+                  <Scale className="h-4 w-4 text-[#0B5FA5]" />
+                  Compare Mandis
+                </Link>
+                <Link
+                  href="/trends"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs transition hover:border-[#39A9E8]"
+                >
+                  <BarChart3 className="h-4 w-4 text-[#0B5FA5]" />
+                  Price Trends
+                </Link>
               </div>
             </div>
 
-            {/* Market Snapshot Card */}
+            {/* Market Snapshot Terminal Card (Right Column) */}
             <div className="market-card rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-lg">
               <div className="market-card-header flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Live Session
+                    Live Session Metrics
                   </span>
-                  <h2 className="text-xl font-black text-[#073B6F]">Today&apos;s Mandi Overview</h2>
+                  <h2 className="text-xl font-black text-[#073B6F]">APMC Market Pulse</h2>
                 </div>
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF5FC] text-[#0B5FA5]">
                   <BarChart3 className="h-5 w-5" />
                 </div>
               </div>
 
-              {/* Mandi Selector directly in Hero Market Card */}
+              {/* Mandi Selector directly inside Hero Snapshot */}
               <div className="mt-4">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Active Mandi Hub:
+                </div>
                 <MandiSelector variant="hero" />
               </div>
 
-              {/* Metric Counters */}
+              {/* Priority 6: Rising / Falling / Stable Counters */}
               <div className="market-card-stats mt-4 grid grid-cols-3 gap-2.5 text-center">
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-2.5">
                   <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tracked</div>
                   <div className="stat-number mt-0.5 text-xl font-black text-[#073B6F]">{totalTracked}</div>
                 </div>
-                <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-2.5">
-                  <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Rising</div>
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-2.5">
+                  <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Rising (Bull)</div>
                   <div className="stat-number mt-0.5 text-xl font-black text-emerald-600">
                     {summary.rising}
                   </div>
                 </div>
-                <div className="rounded-xl border border-red-100 bg-red-50/60 p-2.5">
-                  <div className="text-[10px] font-bold text-red-700 uppercase tracking-wider">Falling</div>
-                  <div className="stat-number mt-0.5 text-xl font-black text-red-600">
+                <div className="rounded-xl border border-rose-100 bg-rose-50/70 p-2.5">
+                  <div className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Falling (Bear)</div>
+                  <div className="stat-number mt-0.5 text-xl font-black text-rose-600">
                     {summary.falling}
                   </div>
                 </div>
@@ -246,10 +272,10 @@ export default async function HomePage() {
                 </div>
                 <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs">
                   <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                    <TrendingDown className="h-3.5 w-3.5 text-red-600 shrink-0" />
-                    <span>Top Loser</span>
+                    <TrendingDown className="h-3.5 w-3.5 text-rose-600 shrink-0" />
+                    <span>Top Discount</span>
                   </div>
-                  <div className="font-bold text-red-600 truncate max-w-[170px] text-right">
+                  <div className="font-bold text-rose-600 truncate max-w-[170px] text-right">
                     {topLosers[0]
                       ? `${topLosers[0].product.name} (${Number(topLosers[0].percentageChange).toFixed(1)}%)`
                       : 'None'}
@@ -257,12 +283,21 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="market-card-footer mt-5 pt-3.5 border-t border-slate-100">
+              {/* Priority 7: Watchlist and Full Board Links */}
+              <div className="market-card-footer mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
+                <Link
+                  href="/watchlist"
+                  className="flex items-center gap-1 text-slate-600 hover:text-[#0B5FA5]"
+                >
+                  <Bookmark className="h-3.5 w-3.5 text-[#0B5FA5]" />
+                  <span>Mandi Watchlist</span>
+                </Link>
                 <Link
                   href="/mandi-rates"
-                  className="flex items-center justify-center gap-1.5 text-xs font-semibold text-[#0B5FA5] hover:underline"
+                  className="flex items-center gap-1 text-[#0B5FA5] hover:underline font-bold"
                 >
-                  View full 30+ commodity rate board <ArrowRight className="h-3.5 w-3.5" />
+                  <span>Full 30+ Board</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             </div>
@@ -270,9 +305,106 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 2. TOP GAINERS & TOP LOSERS DUAL SECTION */}
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
-        <div className="grid gap-8 md:grid-cols-2">
+      {/* 2. PRIORITY 1 & 10: TODAY'S MANDI RATES BOARD (PRIMARY TERMINAL VIEW) */}
+      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-5">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">
+                  Physical Mandi Terminal
+                </span>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                  Verified APMC Data
+                </span>
+              </div>
+              <h2 className="text-2xl font-black text-[#073B6F] mt-1">
+                Latest Mandi Wholesale Rates
+              </h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/mandi-rates"
+                className="inline-flex items-center gap-2 rounded-full bg-[#073B6F] px-5 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5] transition shadow-xs"
+              >
+                Open Full Rate Board <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-full text-left text-xs">
+              <thead className="bg-[#EAF5FC] text-[#073B6F] font-black uppercase tracking-wider">
+                <tr>
+                  <th className="px-4 py-3 rounded-l-xl">Commodity & Variety</th>
+                  <th className="px-4 py-3">Category</th>
+                  <th className="px-4 py-3">Mandi / Yard</th>
+                  <th className="px-4 py-3">Unit</th>
+                  <th className="px-4 py-3">Wholesale Rate</th>
+                  <th className="px-4 py-3">Normalized (Kg)</th>
+                  <th className="px-4 py-3">Previous</th>
+                  <th className="px-4 py-3">Change</th>
+                  <th className="px-4 py-3 rounded-r-xl">Trend</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {rates.map((row: any) => {
+                  const norm = normalizeRate(row.currentRate, row.unit);
+                  return (
+                    <tr key={row.id} className="hover:bg-slate-50 transition">
+                      <td className="px-4 py-3.5 font-bold text-[#073B6F]">
+                        <Link href={`/products/${row.product.slug}`} className="hover:underline">
+                          {row.product.name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-600">{row.product.category?.name || 'Staples'}</td>
+                      <td className="px-4 py-3.5 font-medium text-slate-700">
+                        <div>{row.mandi.name}</div>
+                        <div className="text-[10px] text-slate-400">{row.mandi.city}</div>
+                      </td>
+                      <td className="px-4 py-3.5 font-medium text-slate-600">{row.unit}</td>
+                      <td className="px-4 py-3.5 font-black text-slate-900 text-sm">
+                        ₹{Number(row.currentRate).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        {norm.displayText ? (
+                          <span className="inline-flex rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-bold text-sky-800">
+                            {norm.displayText}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-500">
+                        ₹{Number(row.previousRate).toFixed(2)}
+                      </td>
+                      <td
+                        className={`px-4 py-3.5 font-bold ${
+                          row.direction === Direction.RISING
+                            ? 'text-emerald-600'
+                            : row.direction === Direction.FALLING
+                            ? 'text-rose-600'
+                            : 'text-slate-500'
+                        }`}
+                      >
+                        ₹{Number(row.absoluteChange).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <RateTrendBadge direction={row.direction} percentage={Number(row.percentageChange)} size="sm" />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. PRIORITY 6 & 8: TOP GAINERS & TOP LOSERS DUAL TERMINAL SECTION */}
+      <section className="mx-auto max-w-7xl px-4 py-6 lg:px-6">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Top Gainers */}
           <div className="rounded-3xl border border-emerald-100 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between pb-4 border-b border-emerald-50">
@@ -280,14 +412,17 @@ export default async function HomePage() {
                 <div className="rounded-xl bg-emerald-100 p-2 text-emerald-700">
                   <TrendingUp className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-black text-slate-800">Today&apos;s Top Gainers</h3>
+                <div>
+                  <h3 className="text-lg font-black text-slate-800">Today&apos;s Top Bullish Movers</h3>
+                  <p className="text-[11px] text-slate-400">Upward auction price momentum</p>
+                </div>
               </div>
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-                Bullish Rates
+                Rising
               </span>
             </div>
             <div className="mt-4 divide-y divide-slate-100">
-              {topGainers.map((r) => (
+              {topGainers.map((r: any) => (
                 <div key={r.id} className="flex items-center justify-between py-3">
                   <div>
                     <Link href={`/products/${r.product.slug}`} className="font-bold text-[#073B6F] hover:underline text-sm">
@@ -310,20 +445,23 @@ export default async function HomePage() {
           </div>
 
           {/* Top Losers */}
-          <div className="rounded-3xl border border-red-100 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between pb-4 border-b border-red-50">
+          <div className="rounded-3xl border border-rose-100 bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between pb-4 border-b border-rose-50">
               <div className="flex items-center gap-2">
-                <div className="rounded-xl bg-red-100 p-2 text-red-700">
+                <div className="rounded-xl bg-rose-100 p-2 text-rose-700">
                   <TrendingDown className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-black text-slate-800">Today&apos;s Top Losers</h3>
+                <div>
+                  <h3 className="text-lg font-black text-slate-800">Today&apos;s Discount Movers</h3>
+                  <p className="text-[11px] text-slate-400">Cost reduction / procurement savings</p>
+                </div>
               </div>
-              <span className="text-xs font-bold text-red-700 bg-red-50 px-2.5 py-1 rounded-full">
-                Discount Movement
+              <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full">
+                Falling
               </span>
             </div>
             <div className="mt-4 divide-y divide-slate-100">
-              {topLosers.map((r) => (
+              {topLosers.map((r: any) => (
                 <div key={r.id} className="flex items-center justify-between py-3">
                   <div>
                     <Link href={`/products/${r.product.slug}`} className="font-bold text-[#073B6F] hover:underline text-sm">
@@ -333,7 +471,7 @@ export default async function HomePage() {
                   </div>
                   <div className="text-right">
                     <div className="font-black text-slate-900 text-sm">₹{Number(r.currentRate).toFixed(2)}/{r.unit}</div>
-                    <div className="text-xs font-bold text-red-600">
+                    <div className="text-xs font-bold text-rose-600">
                       {Number(r.percentageChange).toFixed(2)}%
                     </div>
                   </div>
@@ -347,136 +485,60 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 3. POPULAR CATEGORIES */}
-      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Browse Catalog</span>
-            <h2 className="text-2xl font-black text-[#073B6F]">Popular Categories</h2>
-          </div>
-          <Link href="/shop" className="text-xs font-bold text-[#0B5FA5] hover:underline">
-            All Categories →
-          </Link>
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/shop?categoryId=${cat.id}`}
-              className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm transition hover:border-[#39A9E8] hover:shadow-md"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#073B6F]">
-                <Layers className="h-6 w-6" />
-              </div>
-              <span className="mt-3 text-xs font-bold text-slate-800 line-clamp-2">
-                {cat.name}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. TODAY'S MANDI RATES BOARD PREVIEW */}
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-6">
+      {/* 4. PRIORITY 8 & 9: PRICE TRENDS & COMPARISON TOOLS CALLOUT */}
+      <section className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
+        <div className="grid gap-6 sm:grid-cols-2">
+          {/* Card 1: Mandi Price Trends */}
+          <div className="rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-6 text-white shadow-md flex flex-col justify-between">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">Market Board</span>
-              <h2 className="text-2xl font-black text-[#073B6F]">Latest Mandi Rates</h2>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#39A9E8]">
+                <Activity className="h-3.5 w-3.5" />
+                Historical Analytics
+              </div>
+              <h3 className="mt-3 text-xl font-black">Commodity Price Trends & Volatility</h3>
+              <p className="mt-2 text-xs text-slate-200 leading-relaxed">
+                Inspect 30-day moving averages, price trajectory charts, and high/low auction spreads for all wholesale staples.
+              </p>
             </div>
-            <Link
-              href="/mandi-rates"
-              className="inline-flex items-center gap-2 rounded-full bg-[#EAF5FC] px-5 py-2.5 text-xs font-bold text-[#073B6F] hover:bg-[#073B6F] hover:text-white transition"
-            >
-              Open Full Rate Board <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            <div className="mt-6">
+              <Link
+                href="/trends"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-black text-[#073B6F] hover:bg-[#EAF5FC] transition shadow-sm"
+              >
+                <span>Open Price Trends Terminal →</span>
+              </Link>
+            </div>
           </div>
 
-          <div className="mt-6 overflow-x-auto">
-            <table className="min-w-full text-left text-xs">
-              <thead className="bg-[#F7FAFC] text-slate-500 font-bold uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3 rounded-l-xl">Commodity</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Mandi</th>
-                  <th className="px-4 py-3">Unit</th>
-                  <th className="px-4 py-3">Today&apos;s Rate</th>
-                  <th className="px-4 py-3">Previous</th>
-                  <th className="px-4 py-3">Change</th>
-                  <th className="px-4 py-3 rounded-r-xl">Trend</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {rates.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50 transition">
-                    <td className="px-4 py-3.5 font-bold text-[#073B6F]">
-                      <Link href={`/products/${row.product.slug}`} className="hover:underline">
-                        {row.product.name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-600">{row.product.category.name}</td>
-                    <td className="px-4 py-3.5 font-medium text-slate-700">{row.mandi.name}</td>
-                    <td className="px-4 py-3.5">{row.unit}</td>
-                    <td className="px-4 py-3.5 font-black text-slate-900 text-sm">
-                      ₹{Number(row.currentRate).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-500">
-                      ₹{Number(row.previousRate).toFixed(2)}
-                    </td>
-                    <td className={`px-4 py-3.5 font-bold ${row.direction === Direction.RISING ? 'text-emerald-600' : row.direction === Direction.FALLING ? 'text-red-600' : 'text-slate-500'}`}>
-                      ₹{Number(row.absoluteChange).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <RateTrendBadge direction={row.direction} percentage={Number(row.percentageChange)} size="sm" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Card 2: Cross-Mandi Price Comparison */}
+          <div className="rounded-3xl border border-indigo-200 bg-white p-6 shadow-md flex flex-col justify-between">
+            <div>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-bold text-indigo-700">
+                <Scale className="h-3.5 w-3.5" />
+                Cross-Market Spread
+              </div>
+              <h3 className="mt-3 text-xl font-black text-[#073B6F]">Mandi Price Comparison Tool</h3>
+              <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                Compare wholesale rates across Delhi, UP, and Haryana mandis side-by-side to identify the best procurement prices.
+              </p>
+            </div>
+            <div className="mt-6">
+              <Link
+                href="/compare"
+                className="inline-flex items-center gap-2 rounded-full bg-[#073B6F] px-5 py-2.5 text-xs font-black text-white hover:bg-[#0B5FA5] transition shadow-sm"
+              >
+                <span>Launch Compare Tool →</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 5. POPULAR KIRANA SHOP PRODUCTS */}
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
+      {/* 5. PRIORITY 3 & 7: REGISTERED WHOLESALE MANDIS DIRECTORY */}
+      <section className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">Online Shopping</span>
-            <h2 className="text-2xl font-black text-[#073B6F]">Featured Kirana Products</h2>
-          </div>
-          <Link href="/shop" className="text-xs font-bold text-[#0B5FA5] hover:underline">
-            View All Products →
-          </Link>
-        </div>
-
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {popularProducts.map((p) => (
-            <ProductCard
-              key={p.id}
-              id={p.id}
-              name={p.name}
-              slug={p.slug}
-              brand={p.brand}
-              category={p.category}
-              unit={p.unit}
-              retailPrice={Number(p.retailPrice)}
-              mrp={p.mrp ? Number(p.mrp) : null}
-              stockQuantity={p.stockQuantity ?? 100}
-              weight={p.weight}
-              minimumQuantity={p.minimumQuantity}
-              maximumQuantity={p.maximumQuantity}
-              images={p.images}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* 5.5 WHOLESALE MANDIS DIRECTORY PREVIEW */}
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">APMC Market Hubs</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">APMC Hubs</span>
             <h2 className="text-2xl font-black text-[#073B6F]">Registered Wholesale Mandis</h2>
           </div>
           <Link href="/mandis" className="text-xs font-bold text-[#0B5FA5] hover:underline flex items-center gap-1">
@@ -484,8 +546,8 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {mandis.map((m) => (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {mandis.map((m: any) => (
             <div
               key={m.id}
               className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#39A9E8] hover:shadow-md flex flex-col justify-between"
@@ -508,13 +570,13 @@ export default async function HomePage() {
                   href={`/mandis/${m.slug}`}
                   className="font-bold text-[#0B5FA5] hover:underline flex items-center gap-1"
                 >
-                  Mandi Rates <ArrowRight className="h-3 w-3" />
+                  Spot Rates <ArrowRight className="h-3 w-3" />
                 </Link>
                 <Link
-                  href={`/shop?mandiId=${m.id}`}
+                  href={`/mandi-rates?mandiId=${m.id}`}
                   className="rounded-full bg-[#EAF5FC] px-3 py-1 font-bold text-[#073B6F] hover:bg-[#073B6F] hover:text-white transition"
                 >
-                  Shop Goods →
+                  View Quotes →
                 </Link>
               </div>
             </div>
@@ -522,24 +584,67 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. XYON AI ASSISTANT PROMO */}
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
-        <div className="rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-8 sm:p-12 text-white shadow-xl">
+      {/* 6. PRIORITY 10: DATA SOURCES & VERIFICATION DISCLAIMER */}
+      <div className="mx-auto max-w-7xl px-4 py-4 lg:px-6">
+        <MandiSourcesDisclaimer />
+      </div>
+
+      {/* 7. PRIORITY 11: OPTIONAL COMMERCE / FEATURED KIRANA PRODUCTS */}
+      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6 border-t border-slate-200/60 mt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-0.5 text-[10px] font-bold text-amber-800 mb-1">
+              <ShoppingBag className="h-3 w-3" />
+              Optional Grocery Procurement
+            </div>
+            <h2 className="text-2xl font-black text-[#073B6F]">Featured Kirana Products</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Order retail & wholesale packaged grocery items directly for home or store delivery.</p>
+          </div>
+          <Link href="/shop" className="text-xs font-bold text-[#0B5FA5] hover:underline">
+            View All Products →
+          </Link>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {popularProducts.map((p: any) => (
+            <ProductCard
+              key={p.id}
+              id={p.id}
+              name={p.name}
+              slug={p.slug}
+              brand={p.brand}
+              category={p.category}
+              unit={p.unit}
+              retailPrice={Number(p.retailPrice)}
+              mrp={p.mrp ? Number(p.mrp) : null}
+              stockQuantity={p.stockQuantity ?? 100}
+              weight={p.weight}
+              minimumQuantity={p.minimumQuantity}
+              maximumQuantity={p.maximumQuantity}
+              images={p.images}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* 8. XYON AI ASSISTANT PROMO */}
+      <section className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
+        <div className="rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-8 sm:p-10 text-white shadow-xl">
           <div className="ai-promo-grid grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-[#39A9E8]">
                 <Bot className="h-4 w-4 text-[#72B82A]" /> Meet Xyon
               </div>
-              <h2 className="mt-4 text-3xl font-black sm:text-4xl">
+              <h2 className="mt-4 text-2xl sm:text-3xl font-black">
                 Instant Mandi Rate Intelligence at your Fingertips
               </h2>
-              <p className="mt-4 text-sm text-slate-200 leading-relaxed max-w-xl">
+              <p className="mt-3 text-sm text-slate-200 leading-relaxed max-w-xl">
                 Ask questions in Hindi, English, or Hinglish like &quot;What is today&apos;s Basmati rice rate in Delhi?&quot; or &quot;Which mandi has cheapest mustard oil?&quot; — powered by live verified PostgreSQL market data.
               </p>
-              <div className="mt-6 flex flex-wrap gap-2 text-xs">
+              <div className="mt-5 flex flex-wrap gap-2 text-xs">
                 <span className="rounded-full bg-white/10 px-3 py-1 text-slate-200">🔍 Real-time Rate Verification</span>
                 <span className="rounded-full bg-white/10 px-3 py-1 text-slate-200">📊 Mandi Comparisons</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-slate-200">🛒 Cart & Order Assistant</span>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-slate-200">🛒 Optional Grocery Orders</span>
               </div>
             </div>
             <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-md border border-white/20">
@@ -547,46 +652,46 @@ export default async function HomePage() {
               <div className="mt-3 space-y-2 text-xs">
                 <div className="rounded-xl bg-white/10 p-2.5">💬 &quot;What is today&apos;s wheat rate in Azadpur?&quot;</div>
                 <div className="rounded-xl bg-white/10 p-2.5">💬 &quot;Which commodities are rising today?&quot;</div>
-                <div className="rounded-xl bg-white/10 p-2.5">💬 &quot;Show me Amul products&quot;</div>
+                <div className="rounded-xl bg-white/10 p-2.5">💬 &quot;Show me Mustard oil quotes in Naya Bazar&quot;</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 7. HOW IT WORKS */}
-      <section className="mx-auto max-w-7xl px-4 py-16 lg:px-6">
+      {/* 9. HOW KIRANAMART WORKS */}
+      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
         <div className="text-center max-w-2xl mx-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">Seamless Workflow</span>
-          <h2 className="mt-2 text-3xl font-black text-[#073B6F]">How KiranaMart Works</h2>
+          <span className="text-xs font-bold uppercase tracking-wider text-[#0B5FA5]">Transparent Architecture</span>
+          <h2 className="mt-2 text-3xl font-black text-[#073B6F]">How KiranaMart Operates</h2>
         </div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#073B6F] font-black text-xl">
+        <div className="mt-10 grid gap-6 sm:grid-cols-3">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#073B6F] font-black text-lg">
               1
             </div>
-            <h3 className="mt-6 text-lg font-bold text-slate-800">Track Daily Rates</h3>
+            <h3 className="mt-4 text-base font-bold text-slate-800">Track Daily Rates</h3>
             <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-              Select your local wholesale mandi to view live auction rates, price spreads, and daily market movements.
+              Select your local wholesale APMC mandi to view live auction rates, price spreads, and daily market movements.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#0B5FA5] font-black text-xl">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#0B5FA5] font-black text-lg">
               2
             </div>
-            <h3 className="mt-6 text-lg font-bold text-slate-800">Analyze Market Trends</h3>
+            <h3 className="mt-4 text-base font-bold text-slate-800">Analyze Market Trends</h3>
             <p className="mt-2 text-xs text-slate-500 leading-relaxed">
               Examine historical price charts and set price alerts to receive immediate notifications when rates meet your target.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#39A9E8] font-black text-xl">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#39A9E8] font-black text-lg">
               3
             </div>
-            <h3 className="mt-6 text-lg font-bold text-slate-800">Shop Kirana Essentials</h3>
+            <h3 className="mt-4 text-base font-bold text-slate-800">Procure Wholesale Staples</h3>
             <p className="mt-2 text-xs text-slate-500 leading-relaxed">
               Order wholesale staples, dairy, and grocery items directly with automated WhatsApp order status tracking.
             </p>

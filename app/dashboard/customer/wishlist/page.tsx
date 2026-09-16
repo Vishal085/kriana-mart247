@@ -10,7 +10,7 @@ export default async function CustomerWishlistPage() {
   try {
     user = await requireCustomer();
   } catch {
-    redirect('/login/customer');
+    redirect('/login?redirect=/dashboard/customer/wishlist');
   }
 
   const items = await prisma.wishlistItem.findMany({
@@ -41,7 +41,7 @@ export default async function CustomerWishlistPage() {
       </p>
 
       <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-        {items.map((item) => (
+        {items.map((item: any) => (
           <ProductCard
             key={item.id}
             id={item.product.id}

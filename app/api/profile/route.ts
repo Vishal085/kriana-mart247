@@ -104,7 +104,7 @@ export async function PUT(request: Request) {
       passwordHashUpdate = await bcrypt.hash(newPassword, 10);
     }
 
-    const updatedUser = await prisma.$transaction(async (tx) => {
+    const updatedUser = await prisma.$transaction(async (tx: any) => {
       const u = await tx.user.update({
         where: { id: sessionUser.id },
         data: {

@@ -57,7 +57,7 @@ export class WhatsAppService {
       // Format order item summary
       const itemsSummary = order.items
         .slice(0, 3)
-        .map((i) => `• ${i.productNameSnapshot} (${i.quantity} ${i.unit})`)
+        .map((i: any) => `• ${i.productNameSnapshot} (${i.quantity} ${i.unit})`)
         .join('\n') + (order.items.length > 3 ? `\n• +${order.items.length - 3} more items` : '');
 
       const notificationData = {
@@ -66,7 +66,7 @@ export class WhatsAppService {
         total: Number(order.total),
         subtotal: Number(order.subtotal),
         deliveryCharge: Number(order.deliveryCharge),
-        itemCount: order.items.reduce((acc, curr) => acc + curr.quantity, 0),
+        itemCount: order.items.reduce((acc: number, curr: any) => acc + curr.quantity, 0),
         address: order.deliveryAddress,
         city: order.city,
         pincode: order.pincode,
@@ -229,7 +229,7 @@ export class WhatsAppService {
         customerName: order.deliveryName || order.user.fullName || 'Valued Customer',
         customerPhone: order.deliveryPhone || order.user.mobile || undefined,
         orderDate: order.createdAt,
-        items: order.items.map((i) => ({
+        items: order.items.map((i: any) => ({
           name: i.productNameSnapshot,
           quantity: i.quantity,
           unit: i.unit,

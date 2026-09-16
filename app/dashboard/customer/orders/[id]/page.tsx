@@ -16,7 +16,7 @@ export default async function CustomerOrderDetailPage({
   try {
     user = await requireCustomer();
   } catch {
-    redirect('/login/customer');
+    redirect('/login');
   }
 
   const { id } = await params;
@@ -37,7 +37,7 @@ export default async function CustomerOrderDetailPage({
     customerName: order.deliveryName || user.fullName || 'Valued Customer',
     customerPhone: order.deliveryPhone || user.mobile || undefined,
     orderDate: order.createdAt,
-    items: order.items.map((i) => ({
+    items: order.items.map((i: any) => ({
       name: i.productNameSnapshot,
       quantity: i.quantity,
       unit: i.unit,
@@ -152,8 +152,8 @@ export default async function CustomerOrderDetailPage({
                 </div>
                 <div className="mt-3 text-xs font-bold text-slate-800">{s}</div>
                 <div className="text-[10px] text-slate-400">
-                  {order.statusHistory.find((h) => h.status === s)
-                    ? new Date(order.statusHistory.find((h) => h.status === s)!.createdAt).toLocaleDateString()
+                  {order.statusHistory.find((h: any) => h.status === s)
+                    ? new Date(order.statusHistory.find((h: any) => h.status === s)!.createdAt).toLocaleDateString()
                     : 'Pending'}
                 </div>
               </div>
@@ -175,7 +175,7 @@ export default async function CustomerOrderDetailPage({
           <h2 className="text-lg font-black text-[#073B6F]">Items in this Order</h2>
 
           <div className="mt-4 divide-y divide-slate-100">
-            {order.items.map((item) => (
+            {order.items.map((item: any) => (
               <div key={item.id} className="flex items-center justify-between py-3 text-xs">
                 <div>
                   <span className="text-[10px] font-bold uppercase text-[#0B5FA5]">{item.brandSnapshot}</span>

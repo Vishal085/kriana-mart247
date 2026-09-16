@@ -114,7 +114,7 @@ export class ProductService {
   static async create(data: z.infer<typeof productSchema>) {
     const { images, ...productData } = data;
 
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: any) => {
       const created = await tx.product.create({
         data: {
           ...productData,
@@ -145,7 +145,7 @@ export class ProductService {
   static async update(id: string, data: Partial<z.infer<typeof productSchema>>) {
     const { images, ...productData } = data;
 
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: any) => {
       if (images) {
         await tx.productImage.deleteMany({ where: { productId: id } });
         await tx.productImage.createMany({

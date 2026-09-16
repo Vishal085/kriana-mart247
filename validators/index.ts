@@ -92,6 +92,12 @@ export const customerLoginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const unifiedLoginSchema = z.object({
+  identifier: z.string().min(1, 'Email or Mobile number is required'),
+  password: z.string().min(1, 'Password is required'),
+  redirect: z.string().optional(),
+});
+
 export const adminLoginSchema = z.object({
   email: z.string().email('Valid admin email is required'),
   password: z.string().min(1, 'Password is required'),

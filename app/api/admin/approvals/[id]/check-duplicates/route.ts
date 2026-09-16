@@ -110,7 +110,7 @@ export async function GET(
       const otherImages = Array.isArray(other.images)
         ? other.images.map((img: any) => (typeof img === 'string' ? img : img.url))
         : [];
-      const hasSharedImage = currentImages.some((img) => otherImages.includes(img));
+      const hasSharedImage = currentImages.some((img: any) => otherImages.includes(img));
       if (hasSharedImage) {
         reasons.push('Shared packaging image asset detected');
         score += 30;

@@ -219,7 +219,7 @@ ${topRates
     ) {
       if (!userId) {
         return {
-          reply: `📦 Apne active orders ka status dekhne ke liye kripya [Login Karen](/login/customer). Login ke baad aap apne sabhi orders ko [My Orders](/orders) page par live track kar sakte hain!`,
+          reply: `📦 Apne active orders ka status dekhne ke liye kripya [Login Karen](/login). Login ke baad aap apne sabhi orders ko [My Orders](/orders) page par live track kar sakte hain!`,
         };
       }
 
@@ -265,7 +265,7 @@ ${topRates
     ) {
       if (!userId) {
         return {
-          reply: `🛒 Aapka cart dekhne ke liye [Customer Login](/login/customer) karein ya direct [Cart Page](/cart) par jaakar items check karein.`,
+          reply: `🛒 Aapka cart dekhne ke liye [Login karein](/login) ya direct [Cart Page](/cart) par jaakar items check karein.`,
         };
       }
 

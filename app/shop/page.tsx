@@ -269,7 +269,7 @@ export default async function ShopPage({
         >
           All Categories
         </Link>
-        {categories.map((c) => (
+        {categories.map((c: any) => (
           <Link
             key={c.id}
             href={buildUrl({ categoryId: c.id, page: undefined })}
@@ -296,7 +296,7 @@ export default async function ShopPage({
           >
             All Mandis
           </Link>
-          {mandis.map((m) => (
+          {mandis.map((m: any) => (
             <Link
               key={m.id}
               href={buildUrl({ mandiId: m.id, page: undefined })}
@@ -341,7 +341,7 @@ export default async function ShopPage({
 
       {/* Product Grid: 4 columns desktop, 3 columns tablet, 2 columns mobile */}
       <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-        {products.map((product) => (
+        {products.map((product: any) => (
           <ProductCard
             key={product.id}
             id={product.id}

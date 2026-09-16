@@ -52,8 +52,8 @@ export default async function AdminProductImagesPage({
   ]);
 
   // Image audit metrics
-  const verifiedCount = products.filter((p) => p.images.length > 0 && p.images[0].url.startsWith('/products/')).length;
-  const missingCount = products.filter((p) => p.images.length === 0).length;
+  const verifiedCount = products.filter((p: any) => p.images.length > 0 && p.images[0].url.startsWith('/products/')).length;
+  const missingCount = products.filter((p: any) => p.images.length === 0).length;
   const pendingCount = products.length - verifiedCount - missingCount;
 
   return (
@@ -134,7 +134,7 @@ export default async function AdminProductImagesPage({
           >
             All Categories ({totalCount})
           </Link>
-          {categories.slice(0, 8).map((c) => (
+          {categories.slice(0, 8).map((c: any) => (
             <Link
               key={c.id}
               href={`/dashboard/admin/products/images?categoryId=${c.id}`}
@@ -170,7 +170,7 @@ export default async function AdminProductImagesPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {products.map((p) => {
+              {products.map((p: any) => {
                 const img = p.images[0]?.url || '/products/placeholder.svg';
                 const isVerified = Boolean(p.images[0]?.url);
 

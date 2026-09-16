@@ -23,7 +23,7 @@ export default async function CustomerDashboardPage() {
   try {
     user = await requireCustomer();
   } catch {
-    redirect('/login/customer');
+    redirect('/login?redirect=/dashboard/customer');
   }
 
   const [orders, wishlistCount, watchlistCount, alertsCount, unreadNotifications, mandiRates] =
@@ -227,7 +227,7 @@ export default async function CustomerDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {mandiRates.map((r) => (
+              {mandiRates.map((r: any) => (
                 <tr key={r.id} className="hover:bg-slate-50 transition">
                   <td className="px-4 py-3 font-bold text-[#073B6F]">
                     <Link href={`/products/${r.product.slug}`} className="hover:underline">
@@ -275,7 +275,7 @@ export default async function CustomerDashboardPage() {
         </div>
 
         <div className="mt-4 space-y-3">
-          {orders.map((order) => (
+          {orders.map((order: any) => (
             <div
               key={order.id}
               className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between"

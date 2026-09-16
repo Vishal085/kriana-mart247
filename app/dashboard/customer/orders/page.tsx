@@ -9,7 +9,7 @@ export default async function CustomerOrdersPage() {
   try {
     user = await requireCustomer();
   } catch {
-    redirect('/login/customer');
+    redirect('/login?redirect=/dashboard/customer/orders');
   }
 
   const orders = await prisma.order.findMany({
@@ -36,7 +36,7 @@ export default async function CustomerOrdersPage() {
       </div>
 
       <div className="mt-8 space-y-4">
-        {orders.map((order) => (
+        {orders.map((order: any) => (
           <div
             key={order.id}
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
@@ -79,7 +79,7 @@ export default async function CustomerOrdersPage() {
               <div>
                 <div className="text-[11px] font-bold uppercase text-slate-400">Items Ordered</div>
                 <div className="mt-1 text-xs font-semibold text-slate-800">
-                  {order.items.map((i) => `${i.productNameSnapshot} (${i.quantity} ${i.unit})`).join(', ')}
+                  {order.items.map((i: any) => `${i.productNameSnapshot} (${i.quantity} ${i.unit})`).join(', ')}
                 </div>
               </div>
 

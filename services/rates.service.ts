@@ -172,9 +172,9 @@ export class RateService {
       prisma.mandiRate.count({ where }),
     ]);
 
-    const rising = grouped.find((g) => g.direction === Direction.RISING)?._count.direction ?? 0;
-    const falling = grouped.find((g) => g.direction === Direction.FALLING)?._count.direction ?? 0;
-    const stable = grouped.find((g) => g.direction === Direction.STABLE)?._count.direction ?? 0;
+    const rising = grouped.find((g: any) => g.direction === Direction.RISING)?._count.direction ?? 0;
+    const falling = grouped.find((g: any) => g.direction === Direction.FALLING)?._count.direction ?? 0;
+    const stable = grouped.find((g: any) => g.direction === Direction.STABLE)?._count.direction ?? 0;
 
     return {
       total,
@@ -273,7 +273,7 @@ export class RateService {
     const rateDate = new Date(data.date);
     const normalizedDate = new Date(rateDate.getFullYear(), rateDate.getMonth(), rateDate.getDate());
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // 1. Upsert MandiRate
       const current = await tx.mandiRate.upsert({
         where: {

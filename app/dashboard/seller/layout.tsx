@@ -26,7 +26,13 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
   const { user, loading, logout } = useAuth();
 
-  if (loading) {
+  React.useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = '/login?redirect=/dashboard/seller';
+    }
+  }, [loading, user]);
+
+  if (loading || !user) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#073B6F] border-t-transparent" />
@@ -34,8 +40,8 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     );
   }
 
-  // Enforce frontend role boundary: redirect non-shopkeepers
-  if (!user || user.role !== 'SHOPKEEPER') {
+  // Enforce frontend role boundary: if logged in but not shopkeeper or admin
+  if (user.role !== 'SHOPKEEPER' && user.role !== 'ADMIN') {
     return (
       <main className="flex min-h-[75vh] items-center justify-center px-4 py-12">
         <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-lg">
@@ -48,10 +54,10 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           </p>
           <div className="mt-6 flex flex-col gap-2">
             <Link
-              href="/login/seller"
+              href="/login?redirect=/dashboard/seller"
               className="rounded-xl bg-[#073B6F] py-2.5 text-xs font-bold text-white shadow-xs hover:bg-[#0B5FA5]"
             >
-              Log in as Shopkeeper
+              Sign In to Account
             </Link>
             <Link
               href="/register/seller"

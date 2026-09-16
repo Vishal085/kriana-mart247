@@ -24,7 +24,7 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(input.password, 10);
 
-    return await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx: any) => {
       const user = await tx.user.create({
         data: {
           fullName: input.fullName,
@@ -235,6 +235,93 @@ export class AuthService {
       role: user.role,
       active: user.active,
       shopkeeperProfile: user.shopkeeperProfile,
+    };
+  }
+
+  static async loginUnified(input: { identifier: string; password: string; redirect?: string }) {
+    const rawId = input.identifier.trim();
+    const isEmail = rawId.includes('@');
+
+    const user = isEmail
+      ? await prisma.user.findFirst({
+          where: {
+            email: { equals: rawId, mode: 'insensitive' },
+          },
+          include: {
+            customerProfile: true,
+            shopkeeperProfile: true,
+            adminProfile: true,
+          },
+        })
+      : await prisma.user.findFirst({
+          where: { mobile: rawId },
+          include: {
+            customerProfile: true,
+            shopkeeperProfile: true,
+            adminProfile: true,
+          },
+        });
+
+    if (!user) {
+      throw new Error('Invalid mobile/email or password');
+    }
+
+    if (!user.active) {
+      throw new Error('Your account has been deactivated. Please contact support.');
+    }
+
+    const isValid = await bcrypt.compare(input.password, user.passwordHash);
+    if (!isValid) {
+      throw new Error('Invalid mobile/email or password');
+    }
+
+    // Role-based destination determination
+    let defaultRedirect = '/shop';
+    if (user.role === Role.ADMIN) {
+      defaultRedirect = '/dashboard/admin';
+    } else if (user.role === Role.SHOPKEEPER) {
+      defaultRedirect = '/dashboard/seller';
+    } else {
+      defaultRedirect = '/shop';
+    }
+
+    let redirectTo = defaultRedirect;
+    if (input.redirect && input.redirect.startsWith('/')) {
+      const target = input.redirect;
+      if (user.role === Role.ADMIN) {
+        // Admin can access any requested route
+        redirectTo = target;
+      } else if (user.role === Role.SHOPKEEPER) {
+        // Shopkeeper cannot access admin routes
+        if (target.startsWith('/dashboard/admin')) {
+          redirectTo = defaultRedirect;
+        } else {
+          redirectTo = target;
+        }
+      } else {
+        // Customer cannot access admin or seller dashboards
+        if (target.startsWith('/dashboard/admin') || target.startsWith('/dashboard/seller')) {
+          redirectTo = defaultRedirect;
+        } else {
+          redirectTo = target;
+        }
+      }
+    }
+
+    return {
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        mobile: user.mobile,
+        role: user.role,
+        active: user.active,
+        avatarUrl: user.avatarUrl,
+        customerProfile: user.customerProfile,
+        shopkeeperProfile: user.shopkeeperProfile,
+        adminProfile: user.adminProfile,
+      },
+      redirectTo,
     };
   }
 }

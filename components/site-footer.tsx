@@ -108,8 +108,8 @@ export function SiteFooter() {
             </h4>
             <ul className="space-y-2.5 text-xs font-medium text-slate-600">
               <li>
-                <Link href="/login/customer" className="transition hover:text-[#0B5FA5]">
-                  Customer Login
+                <Link href="/login" className="transition hover:text-[#0B5FA5]">
+                  Sign In (All Accounts)
                 </Link>
               </li>
               <li>
@@ -123,7 +123,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/login/admin" className="text-slate-500 transition hover:text-[#073B6F]">
+                <Link href="/login?redirect=/dashboard/admin" className="text-slate-500 transition hover:text-[#073B6F]">
                   Admin Portal Login
                 </Link>
               </li>

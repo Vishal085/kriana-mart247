@@ -11,27 +11,29 @@ import {
   Mail,
   Lock,
   MapPin,
-  Building,
-  Hash,
   ArrowRight,
+  ArrowLeft,
   AlertCircle,
   Eye,
   EyeOff,
   ShieldCheck,
   RotateCcw,
   CheckCircle2,
-  Store,
+  Loader2,
+  ShoppingBag,
 } from 'lucide-react';
 import { useMandi, matchMandiForLocation } from '@/context/MandiContext';
 
 function CustomerRegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect') || '/dashboard/customer';
+  const redirectUrl = searchParams.get('redirect') || '/shop';
 
   const { loginUser } = useAuth();
   const { selectMandi, selectMandiByLocation, mandis } = useMandi();
-  const [step, setStep] = useState<'DETAILS' | 'OTP'>('DETAILS');
+
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+
   const [formData, setFormData] = useState({
     fullName: '',
     mobile: '',
@@ -39,10 +41,11 @@ function CustomerRegisterForm() {
     password: '',
     confirmPassword: '',
     address: '',
-    city: 'Ghaziabad',
-    state: 'Uttar Pradesh',
+    city: 'Delhi',
+    state: 'Delhi',
     pinCode: '',
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,19 +63,55 @@ function CustomerRegisterForm() {
     router.prefetch(redirectUrl);
   }, [router, redirectUrl]);
 
-  // Countdown timer for OTP resend
   useEffect(() => {
     let timer: any;
-    if (step === 'OTP' && countdown > 0) {
+    if (currentStep === 3 && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => prev - 1);
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [step, countdown]);
+  }, [currentStep, countdown]);
 
-  const handleSendOtp = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    if (error) setError(null);
+  };
+
+  const handleStep1Next = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const cleanName = formData.fullName.trim();
+    const cleanMobile = formData.mobile.replace(/\D/g, '').trim();
+    const cleanEmail = formData.email.trim();
+
+    if (cleanName.length < 2) {
+      setError('Please enter your full name');
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
+      setError('Please enter a valid 10-digit Indian mobile number');
+      return;
+    }
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setError('Please enter a valid Email address');
+      return;
+    }
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords don't match. Please check and retype.");
+      return;
+    }
+
+    setCurrentStep(2);
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (loading) return;
     setError(null);
 
@@ -80,28 +119,12 @@ function CustomerRegisterForm() {
     const cleanPin = formData.pinCode.replace(/\D/g, '').trim();
     const cleanEmail = formData.email.trim();
 
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setError('Please enter a valid Gmail / Email address');
+    if (formData.address.trim().length < 3) {
+      setError('Please enter your delivery address');
       return;
     }
-
-    if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
-      setError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9');
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords don't match");
-      return;
-    }
-
-    if (!/^\d{6}$/.test(cleanPin)) {
-      setError('PIN Code must be exactly 6 digits (e.g. 110006)');
+    if (cleanPin && !/^\d{6}$/.test(cleanPin)) {
+      setError('PIN Code must be exactly 6 digits');
       return;
     }
 
@@ -119,9 +142,8 @@ function CustomerRegisterForm() {
           password: formData.password,
           confirmPassword: formData.confirmPassword,
           address: formData.address.trim(),
-          city: formData.city.trim(),
-          state: formData.state.trim() || 'Uttar Pradesh',
-          pinCode: cleanPin,
+          city: formData.city.trim() || 'Delhi',
+          pinCode: cleanPin || '110001',
         }),
       });
 
@@ -134,7 +156,7 @@ function CustomerRegisterForm() {
       if (data.devOtp) {
         setDevOtp(data.devOtp);
       }
-      setStep('OTP');
+      setCurrentStep(3);
       setCountdown(60);
       setOtp('');
     } catch (err: any) {
@@ -181,319 +203,327 @@ function CustomerRegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-7 sm:p-8 shadow-xl">
+    <div className="w-full max-w-md rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xl shadow-slate-100">
+      {/* Brand Header */}
       <div className="text-center">
         <div className="flex justify-center">
           <BrandMark size="md" />
         </div>
-        <h1 className="mt-3 text-2xl font-black text-[#073B6F]">
-          {step === 'DETAILS' ? 'Customer Registration' : 'Verify Your Identity'}
+        <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-[#073B6F] border border-blue-100">
+          <ShoppingBag className="h-3 w-3 text-[#39A9E8]" />
+          <span>Customer Registration</span>
+        </div>
+        <h1 className="mt-2 text-xl sm:text-2xl font-black text-[#073B6F]">
+          {currentStep === 1 && 'Create Account'}
+          {currentStep === 2 && 'Delivery Address'}
+          {currentStep === 3 && 'Verify Mobile / Email'}
         </h1>
         <p className="mt-1 text-xs text-slate-500">
-          {step === 'DETAILS'
-            ? 'Create an account to compare wholesale mandi rates & place orders'
-            : 'Enter the 6-digit OTP code sent to your Gmail and Mobile number'}
+          {currentStep === 1 && 'Step 1 of 2 • Enter your contact details'}
+          {currentStep === 2 && 'Step 2 of 2 • Where should we deliver?'}
+          {currentStep === 3 && `Enter the 6-digit code sent to ${formData.mobile}`}
         </p>
       </div>
 
+      {/* Stepper Progress Bar */}
+      <div className="mt-5 flex items-center justify-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition ${
+              currentStep >= 1
+                ? 'bg-[#073B6F] text-white'
+                : 'bg-slate-100 text-slate-400'
+            }`}
+          >
+            1
+          </span>
+          <span className={`text-xs font-bold ${currentStep === 1 ? 'text-[#073B6F]' : 'text-slate-400'}`}>
+            Account
+          </span>
+        </div>
+
+        <div className={`h-0.5 w-8 rounded-full ${currentStep >= 2 ? 'bg-[#073B6F]' : 'bg-slate-200'}`} />
+
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition ${
+              currentStep >= 2
+                ? 'bg-[#073B6F] text-white'
+                : 'bg-slate-100 text-slate-400'
+            }`}
+          >
+            2
+          </span>
+          <span className={`text-xs font-bold ${currentStep === 2 ? 'text-[#073B6F]' : 'text-slate-400'}`}>
+            Address
+          </span>
+        </div>
+
+        <div className={`h-0.5 w-8 rounded-full ${currentStep === 3 ? 'bg-[#073B6F]' : 'bg-slate-200'}`} />
+
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition ${
+              currentStep === 3
+                ? 'bg-[#073B6F] text-white'
+                : 'bg-slate-100 text-slate-400'
+            }`}
+          >
+            3
+          </span>
+          <span className={`text-xs font-bold ${currentStep === 3 ? 'text-[#073B6F]' : 'text-slate-400'}`}>
+            OTP
+          </span>
+        </div>
+      </div>
+
+      {/* Error Alert */}
       {error && (
-        <div className="mt-5 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
-          <AlertCircle className="h-4 w-4 shrink-0" />
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs font-semibold text-red-600 animate-in fade-in">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
-      {step === 'DETAILS' ? (
-        <form onSubmit={handleSendOtp} className="mt-6 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-xs font-bold text-slate-700">Full Name *</label>
-              <div className="relative mt-1">
-                <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="e.g. Ramesh Kumar"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700">Mobile Number (10 digits) *</label>
-              <div className="relative mt-1">
-                <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="tel"
-                  placeholder="e.g. 9876543210"
-                  pattern="[6-9][0-9]{9}"
-                  maxLength={10}
-                  value={formData.mobile}
-                  onChange={(e) =>
-                    setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })
-                  }
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
-                />
-              </div>
-            </div>
-          </div>
-
+      {/* ================= STEP 1: ACCOUNT DETAILS ================= */}
+      {currentStep === 1 && (
+        <form onSubmit={handleStep1Next} className="mt-4 space-y-3">
           <div>
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-slate-700">Gmail / Email Address *</label>
-              <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
-                OTP Sent Here
-              </span>
-            </div>
-            <div className="relative mt-1">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Full Name *
+            </label>
+            <div className="relative">
+              <User className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
               <input
-                type="email"
-                placeholder="e.g. yourname@gmail.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                type="text"
+                name="fullName"
                 required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="e.g. Rahul Sharma"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#073B6F] focus:bg-white"
               />
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700">Password (Min. 8 chars) *</label>
-              <div className="relative mt-1">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Mobile Number *
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="tel"
+                  name="mobile"
+                  required
+                  maxLength={10}
+                  value={formData.mobile}
+                  onChange={handleChange}
+                  placeholder="10-digit mobile"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#073B6F] focus:bg-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Email Address *
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="your@email.com"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#073B6F] focus:bg-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Password *
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Min. 8 characters"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  name="password"
                   required
                   minLength={8}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-10 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Min 8 chars"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pl-9 pr-9 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#073B6F] focus:bg-white"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700">Confirm Password *</label>
-              <div className="relative mt-1">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Confirm Password *
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  name="confirmPassword"
                   required
                   minLength={8}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-10 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Re-type password"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pl-9 pr-9 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#073B6F] focus:bg-white"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  tabIndex={-1}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700">Delivery Address *</label>
-            <div className="relative mt-1">
-              <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="House / Shop No., Street, Landmark"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-xs font-bold text-slate-700">State *</label>
-              <div className="relative mt-1">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <select
-                  value={formData.state}
-                  onChange={(e) => {
-                    const nextState = e.target.value;
-                    let nextCity = formData.city;
-                    if (nextState === 'Uttar Pradesh' && !formData.city.toLowerCase().includes('ghaziabad') && !formData.city.toLowerCase().includes('noida')) {
-                      nextCity = 'Ghaziabad';
-                    } else if (nextState === 'Delhi') {
-                      nextCity = 'Delhi';
-                    } else if (nextState === 'Haryana') {
-                      nextCity = 'Gurugram';
-                    }
-                    setFormData({ ...formData, state: nextState, city: nextCity });
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white font-bold"
-                >
-                  <option value="Uttar Pradesh">Uttar Pradesh (Ghaziabad / Noida)</option>
-                  <option value="Delhi">Delhi (NCT APMC Markets)</option>
-                  <option value="Haryana">Haryana (Gurugram / Faridabad / Sonipat)</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700">District / City *</label>
-              <div className="relative mt-1">
-                <Building className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="e.g. Ghaziabad, Sahibabad, Noida, Delhi"
-                  value={formData.city}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    const autoState =
-                      val.toLowerCase().includes('ghaziabad') ||
-                      val.toLowerCase().includes('sahibabad') ||
-                      val.toLowerCase().includes('noida') ||
-                      val.toLowerCase().includes('dadri')
-                        ? 'Uttar Pradesh'
-                        : val.toLowerCase().includes('gurugram') ||
-                          val.toLowerCase().includes('faridabad') ||
-                          val.toLowerCase().includes('sonipat')
-                        ? 'Haryana'
-                        : formData.state;
-                    setFormData({ ...formData, city: val, state: autoState });
-                  }}
-                  required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white font-semibold"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Hub Selector Pills */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Popular NCR Hubs:</span>
-            {[
-              { name: 'Ghaziabad (UP)', city: 'Ghaziabad', state: 'Uttar Pradesh' },
-              { name: 'Sahibabad (UP)', city: 'Sahibabad', state: 'Uttar Pradesh' },
-              { name: 'Noida (UP)', city: 'Noida', state: 'Uttar Pradesh' },
-              { name: 'Delhi APMC', city: 'Delhi', state: 'Delhi' },
-              { name: 'Gurugram (HR)', city: 'Gurugram', state: 'Haryana' },
-            ].map((loc) => (
-              <button
-                key={loc.name}
-                type="button"
-                onClick={() => setFormData({ ...formData, city: loc.city, state: loc.state })}
-                className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition ${
-                  formData.city.toLowerCase() === loc.city.toLowerCase()
-                    ? 'bg-[#073B6F] text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {loc.name}
-              </button>
-            ))}
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700">PIN Code (6 digits) *</label>
-            <div className="relative mt-1">
-              <Hash className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="e.g. 201005 (Ghaziabad) / 110006"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                value={formData.pinCode}
-                onChange={(e) =>
-                  setFormData({ ...formData, pinCode: e.target.value.replace(/\D/g, '').slice(0, 6) })
-                }
-                required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#0B5FA5] focus:bg-white"
-              />
-            </div>
-          </div>
-
-          {/* Live Auto-Matched Mandi Banner */}
-          {matchedMandi && (
-            <div className="rounded-2xl border-2 border-[#39A9E8]/40 bg-gradient-to-r from-[#EAF5FC] to-white p-3.5 text-xs text-[#073B6F] shadow-sm animate-in fade-in">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 font-black text-sm text-[#073B6F]">
-                  <Store className="h-4.5 w-4.5 text-[#0B5FA5] shrink-0" />
-                  <span>Assigned Wholesale Mandi: {matchedMandi.name}</span>
-                </div>
-                <span className="rounded-md bg-[#073B6F] px-2 py-0.5 text-[10px] font-black text-white">
-                  {matchedMandi.state}
-                </span>
-              </div>
-              <div className="mt-1 text-[11px] font-bold text-slate-700">
-                District: <span className="text-[#073B6F] underline">{matchedMandi.district || matchedMandi.city}</span> • {matchedMandi.address}
-              </div>
-              <p className="mt-1 text-[11px] text-slate-600">
-                Aapke district ({formData.city || matchedMandi.city}, {formData.state || matchedMandi.state}) ke according live wholesale mandi rates aur daily grocery orders <strong>{matchedMandi.name}</strong> se link ho gaye hain.
-              </p>
-            </div>
-          )}
-
           <button
             type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#0B5FA5] disabled:opacity-50"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#0B5FA5] cursor-pointer"
           >
-            {loading ? 'Sending OTP to Gmail & Mobile...' : 'Send Verification OTP'}
-            <ShieldCheck className="h-4 w-4" />
+            <span>Continue to Delivery Address</span>
+            <ArrowRight className="h-4 w-4" />
           </button>
         </form>
-      ) : (
-        /* ================= STEP 2: FAST OTP VERIFICATION ================= */
-        <div className="mt-6">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-[#073B6F]">
-              <ShieldCheck className="h-6 w-6 text-[#0B5FA5]" />
+      )}
+
+      {/* ================= STEP 2: ADDRESS DETAILS ================= */}
+      {currentStep === 2 && (
+        <form onSubmit={handleSendOtp} className="mt-4 space-y-3">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Flat, House No., Street Address *
+            </label>
+            <div className="relative">
+              <MapPin className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                name="address"
+                required
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="e.g. H.No 124, Sector 15"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#073B6F] focus:bg-white"
+              />
             </div>
-            <p className="mt-2 text-xs text-slate-500 font-medium">OTP has been sent simultaneously to:</p>
-            <div className="mt-2 flex flex-col items-center gap-1 text-xs font-semibold text-slate-800">
-              <span className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5 text-blue-600" /> {formData.email}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Phone className="h-3.5 w-3.5 text-emerald-600" /> +91 {formData.mobile}
-              </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                City / District *
+              </label>
+              <input
+                type="text"
+                name="city"
+                required
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="e.g. Delhi / Noida"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 px-3 text-sm text-slate-800 outline-none transition focus:border-[#073B6F] focus:bg-white"
+              />
             </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Pin Code *
+              </label>
+              <input
+                type="text"
+                name="pinCode"
+                required
+                maxLength={6}
+                value={formData.pinCode}
+                onChange={handleChange}
+                placeholder="e.g. 110006"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2.5 px-3 text-sm text-slate-800 outline-none transition focus:border-[#073B6F] focus:bg-white"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setCurrentStep(1);
+              }}
+              className="flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back</span>
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#0B5FA5] disabled:opacity-60 cursor-pointer"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                  <span>Sending OTP...</span>
+                </>
+              ) : (
+                <>
+                  <span>Send Verification OTP</span>
+                  <ShieldCheck className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* ================= STEP 3: OTP VERIFICATION ================= */}
+      {currentStep === 3 && (
+        <div className="mt-4 space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 text-center">
+            <ShieldCheck className="mx-auto h-7 w-7 text-emerald-600" />
+            <p className="mt-1.5 text-xs text-slate-600">
+              OTP sent to <strong>+91 {formData.mobile}</strong> &amp; <strong>{formData.email}</strong>
+            </p>
           </div>
 
           {devOtp && (
-            <div className="mt-3 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-xs text-amber-900">
-              <span>⚡ Dev OTP Code: <strong>{devOtp}</strong></span>
+            <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              <span>⚡ Dev Code: <strong>{devOtp}</strong></span>
               <button
                 type="button"
                 onClick={() => {
                   setOtp(devOtp);
                   handleVerifyOtp(devOtp);
                 }}
-                className="font-bold underline text-[#073B6F] hover:text-[#0B5FA5]"
+                className="font-bold underline text-[#073B6F]"
               >
-                Auto-Fill &amp; Verify
+                Auto-Fill
               </button>
             </div>
           )}
 
-          <div className="mt-5">
-            <label className="block text-center text-xs font-bold text-slate-700 mb-2">
+          <div>
+            <label className="block text-center text-xs font-bold text-slate-700 mb-1.5">
               Enter 6-Digit OTP Code
             </label>
             <input
@@ -511,35 +541,30 @@ function CustomerRegisterForm() {
                 }
               }}
               placeholder="000000"
-              className="w-full text-center tracking-[0.6em] text-2xl font-black rounded-xl border-2 border-slate-300 bg-white py-3.5 text-[#073B6F] outline-none focus:border-[#073B6F] shadow-sm transition"
+              className="w-full text-center tracking-[0.5em] text-2xl font-black rounded-xl border-2 border-slate-200 bg-white py-2.5 text-[#073B6F] outline-none focus:border-[#073B6F]"
             />
-            <p className="mt-1.5 text-center text-[11px] text-slate-400">
-              ID will be generated immediately once OTP is verified.
-            </p>
           </div>
 
-          <div className="mt-4 flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500">
             <button
               type="button"
               onClick={() => {
-                setStep('DETAILS');
+                setCurrentStep(2);
                 setError(null);
               }}
-              className="font-medium text-slate-500 hover:text-slate-800 underline"
+              className="underline hover:text-slate-800"
             >
               ← Edit details
             </button>
 
             {countdown > 0 ? (
-              <span className="text-slate-400">
-                Resend in <strong className="text-slate-700">{countdown}s</strong>
-              </span>
+              <span>Resend in {countdown}s</span>
             ) : (
               <button
                 type="button"
                 disabled={loading}
-                onClick={() => handleSendOtp()}
-                className="flex items-center gap-1 font-bold text-[#0B5FA5] hover:underline"
+                onClick={(e) => handleSendOtp(e as any)}
+                className="flex items-center gap-1 font-bold text-[#073B6F] hover:underline"
               >
                 <RotateCcw className="h-3 w-3" /> Resend OTP
               </button>
@@ -550,34 +575,29 @@ function CustomerRegisterForm() {
             type="button"
             onClick={() => handleVerifyOtp()}
             disabled={loading || otp.length !== 6}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[#0B5FA5] disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
           >
-            {loading ? 'Verifying & Creating Account...' : 'Verify & Complete Registration'}
-            <CheckCircle2 className="h-4 w-4" />
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-white" />
+                <span>Verifying &amp; Creating Account...</span>
+              </>
+            ) : (
+              <>
+                <span>Verify &amp; Create Account</span>
+                <CheckCircle2 className="h-4 w-4" />
+              </>
+            )}
           </button>
         </div>
       )}
 
-      <div className="mt-6 pt-6 text-center text-xs text-slate-500 border-t border-slate-100 flex flex-col gap-2">
-        <p>
-          Already have an account?{' '}
-          <Link
-            href={
-              redirectUrl !== '/dashboard/customer'
-                ? `/login/customer?redirect=${encodeURIComponent(redirectUrl)}`
-                : '/login/customer'
-            }
-            className="font-bold text-[#0B5FA5] hover:underline"
-          >
-            Login Here
-          </Link>
-        </p>
-        <p>
-          Are you a shopkeeper/retailer?{' '}
-          <Link href="/register/seller" className="font-bold text-emerald-700 hover:underline">
-            Register as Seller
-          </Link>
-        </p>
+      {/* Footer link to login */}
+      <div className="mt-5 border-t border-slate-100 pt-3 text-center text-xs text-slate-500">
+        <span>Already have an account? </span>
+        <Link href="/login" className="font-bold text-[#073B6F] hover:underline">
+          Sign In Here
+        </Link>
       </div>
     </div>
   );
@@ -585,10 +605,12 @@ function CustomerRegisterForm() {
 
 export default function CustomerRegisterPage() {
   return (
-    <main className="flex min-h-[85vh] items-center justify-center px-4 py-12">
+    <main className="flex min-h-[82vh] items-center justify-center px-4 py-8 sm:py-12 bg-gradient-to-b from-slate-50/50 via-white to-blue-50/20">
       <Suspense
         fallback={
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#073B6F] border-t-transparent" />
+          <div className="flex h-64 w-full max-w-md items-center justify-center rounded-3xl border border-slate-200 bg-white p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-[#073B6F]" />
+          </div>
         }
       >
         <CustomerRegisterForm />

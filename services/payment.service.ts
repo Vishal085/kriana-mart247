@@ -202,7 +202,7 @@ export class PaymentService {
     const now = new Date();
 
     // Atomic transaction to update order and status log
-    const updatedOrder = await prisma.$transaction(async (tx) => {
+    const updatedOrder = await prisma.$transaction(async (tx: any) => {
       const ord = await tx.order.update({
         where: { id: order.id },
         data: {
@@ -295,7 +295,7 @@ export class PaymentService {
       ? `Payment attempt failed: ${details.errorDescription} (${details.errorCode || 'UNKNOWN'})`
       : 'Payment cancelled or incomplete';
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx: any) => {
       const res = await tx.order.update({
         where: { id: orderId },
         data: {
@@ -351,7 +351,7 @@ export class PaymentService {
 
         if (order && order.paymentStatus !== PaymentStatus.PAID) {
           const now = new Date();
-          await prisma.$transaction(async (tx) => {
+          await prisma.$transaction(async (tx: any) => {
             await tx.order.update({
               where: { id: order.id },
               data: {

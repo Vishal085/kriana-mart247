@@ -706,3 +706,138 @@ model OtpVerification {
   @@index([mobile])
   @@index([expiresAt])
 }
+
+// ==========================================
+// AI SOCIAL AUTO-PUBLISHING SYSTEM
+// ==========================================
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  YOUTUBE
+}
+
+enum SocialAccountStatus {
+  NOT_CONNECTED
+  READY
+  CONFIGURATION_REQUIRED
+  TOKEN_EXPIRED
+  PUBLISH_FAILED
+}
+
+enum PublishContentType {
+  DAILY_MANDI_UPDATE
+  TOP_RISING_RATES
+  TOP_FALLING_RATES
+  MARKET_SPOTLIGHT
+  COMMODITY_SPOTLIGHT
+  WEEKLY_MARKET_RECAP
+}
+
+enum PublishTargetType {
+  INSTAGRAM_POST
+  INSTAGRAM_REEL
+  FACEBOOK_POST
+  YOUTUBE_VIDEO
+  YOUTUBE_SHORT
+}
+
+enum PublishJobStatus {
+  QUEUED
+  GENERATING
+  READY
+  PUBLISHING
+  PARTIALLY_PUBLISHED
+  PUBLISHED
+  FAILED
+}
+
+model SocialAccount {
+  id              String              @id @default(cuid())
+  platform        SocialPlatform      @unique
+  accountName     String?
+  accountId       String?
+  pageId          String?
+  channelId       String?
+  accessToken     String?
+  refreshToken    String?
+  tokenExpiresAt  DateTime?
+  status          SocialAccountStatus @default(NOT_CONNECTED)
+  statusDetails   String?
+  lastPublishAt   DateTime?
+  metadata        Json?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  publishedItems  SocialPublishedItem[]
+
+  @@index([platform])
+  @@index([status])
+}
+
+model SocialPublishJob {
+  id               String             @id @default(cuid())
+  fingerprint      String             @unique
+  contentType      PublishContentType @default(DAILY_MANDI_UPDATE)
+  status           PublishJobStatus   @default(QUEUED)
+  mandiId          String?
+  mandiName        String?
+  language         String             @default("Hinglish")
+  selectedData     Json
+  validationPassed Boolean            @default(false)
+  validationLog    String?
+  createdBy        String?
+  scheduledFor     DateTime?
+  completedAt      DateTime?
+  errorMessage     String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  publishedItems   SocialPublishedItem[]
+
+  @@index([fingerprint])
+  @@index([status])
+  @@index([createdAt])
+  @@index([contentType])
+}
+
+model SocialPublishedItem {
+  id           String            @id @default(cuid())
+  jobId        String
+  job          SocialPublishJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  platform     SocialPlatform
+  targetType   PublishTargetType
+  status       String            @default("READY")
+  title        String?
+  caption      String?           @db.Text
+  description  String?           @db.Text
+  hashtags     String?
+  mediaUrl     String?
+  thumbnailUrl String?
+  externalId   String?
+  externalUrl  String?
+  errorMessage String?
+  publishedAt  DateTime?
+  accountId    String?
+  account      SocialAccount?    @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([jobId])
+  @@index([platform])
+  @@index([status])
+}
+
+model SocialScheduleConfig {
+  id          String   @id @default(cuid())
+  enabled     Boolean  @default(false)
+  frequency   String   @default("DAILY")
+  publishTime String   @default("09:00")
+  mandiId     String?
+  language    String   @default("Hinglish")
+  platforms   String[]
+  targetTypes String[]
+  lastRunAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -23,6 +23,8 @@ import {
   ChevronRight,
   ArrowLeft,
   ChevronDown,
+  BarChart3,
+  Bookmark,
 } from 'lucide-react';
 import { BrandMark } from './brand-mark';
 import { useAuth } from '@/context/AuthContext';
@@ -99,7 +101,11 @@ export function SiteHeader() {
 
   const navLinks = [
     { label: 'Mandi Rates', shortLabel: 'Mandi Rates', href: '/mandi-rates', badge: 'Live', icon: TrendingUp },
-    { label: 'Daily Grocery', shortLabel: 'Grocery', href: '/shop', icon: ShoppingBag },
+    { label: 'Markets', shortLabel: 'Markets', href: '/mandis', icon: Store },
+    { label: 'Trends', shortLabel: 'Trends', href: '/trends', icon: BarChart3 },
+    { label: 'Compare', shortLabel: 'Compare', href: '/compare', icon: Scale },
+    { label: 'Watchlist', shortLabel: 'Watchlist', href: '/watchlist', icon: Bookmark },
+    { label: 'Grocery', shortLabel: 'Grocery', href: '/shop', icon: ShoppingBag },
   ];
 
   return (
@@ -485,7 +491,7 @@ export function SiteHeader() {
                   </Link>
                 ) : (
                   <Link
-                    href="/login/seller"
+                    href="/login?redirect=/dashboard/seller"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#073B6F]/30 bg-[#EAF5FC] py-2.5 text-xs font-bold text-[#073B6F]"
                   >

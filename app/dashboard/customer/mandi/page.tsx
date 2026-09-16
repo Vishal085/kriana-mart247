@@ -27,7 +27,7 @@ export default async function CustomerKiranaMandiPage({
   try {
     user = await requireCustomer();
   } catch {
-    redirect('/login/customer');
+    redirect('/login?redirect=/dashboard/customer/mandi');
   }
 
   const { mandiId, category } = await searchParams;
@@ -55,7 +55,7 @@ export default async function CustomerKiranaMandiPage({
 
   // 4. Default to Ghaziabad Mandi if still unset
   if (!effectiveMandiId) {
-    const gzb = mandis.find((m) => m.slug === 'ghaziabad-mandi');
+    const gzb = mandis.find((m: any) => m.slug === 'ghaziabad-mandi');
     if (gzb) effectiveMandiId = gzb.id;
   }
 
@@ -97,7 +97,7 @@ export default async function CustomerKiranaMandiPage({
     }),
   ]);
 
-  const activeMandi = effectiveMandiId ? mandis.find((m) => m.id === effectiveMandiId) : null;
+  const activeMandi = effectiveMandiId ? mandis.find((m: any) => m.id === effectiveMandiId) : null;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
@@ -160,7 +160,7 @@ export default async function CustomerKiranaMandiPage({
           >
             All Commodities ({rates.length})
           </Link>
-          {commodityCategories.map((c) => {
+          {commodityCategories.map((c: any) => {
             const isCatActive = category === c.slug;
             return (
               <Link
@@ -193,7 +193,7 @@ export default async function CustomerKiranaMandiPage({
           >
             All Mandis
           </Link>
-          {mandis.map((m) => {
+          {mandis.map((m: any) => {
             const isMandiActive = (mandiId || effectiveMandiId) === m.id;
             const isGhaziabad = m.slug === 'ghaziabad-mandi';
             return (
@@ -246,7 +246,7 @@ export default async function CustomerKiranaMandiPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {rates.map((row) => (
+              {rates.map((row: any) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition">
                   <td className="px-4 py-3.5 font-bold text-[#073B6F]">
                     <Link href={`/products/${row.product.slug}`} className="hover:underline">

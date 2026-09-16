@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   ShieldCheck,
   AlertCircle,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import { useMandi } from '@/context/MandiContext';
 import { RateTrendBadge } from '@/components/RateTrendBadge';
@@ -38,6 +40,7 @@ export default function MandiRatesPage() {
   });
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [alertItem, setAlertItem] = useState<{
     commodityName: string;
     mandiName: string;
@@ -46,6 +49,13 @@ export default function MandiRatesPage() {
     productId?: string;
     mandiId?: string;
   } | null>(null);
+
+  // Auto-detect mobile screen to default to card view
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      setViewMode('cards');
+    }
+  }, []);
 
   // Filters
   const [selectedState, setSelectedState] = useState<string>('');
@@ -443,185 +453,365 @@ export default function MandiRatesPage() {
         </div>
       </div>
 
-      {/* Main Rates Table */}
-      <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-xs">
-            <thead className="bg-[#EAF5FC] text-[#073B6F] font-black uppercase tracking-wider">
-              <tr>
-                <th className="px-4 py-3.5">Commodity & Variety</th>
-                <th className="px-4 py-3.5">Mandi / State</th>
-                <th className="px-4 py-3.5">Market Type</th>
-                <th className="px-4 py-3.5">Wholesale Rate (Lot Unit)</th>
-                <th className="px-4 py-3.5">Normalized Equivalent</th>
-                <th className="px-4 py-3.5">Previous</th>
-                <th className="px-4 py-3.5">Movement</th>
-                <th className="px-4 py-3.5">Source & Verification</th>
-                <th className="px-4 py-3.5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading && rates.length === 0 && (
-                <>
-                  <MandiRateRowSkeleton />
-                  <MandiRateRowSkeleton />
-                  <MandiRateRowSkeleton />
-                  <MandiRateRowSkeleton />
-                  <MandiRateRowSkeleton />
-                </>
-              )}
-              {rates.map((row) => {
-                const norm = normalizeRate(row.currentRate, row.unit);
-                const sourceMeta = getRateSourceMeta(row);
-                const marketType = getMarketTypeBadge(row.mandi.name);
+      {/* View Mode & Results Count Bar */}
+      <div className="mt-6 flex items-center justify-between px-1">
+        <div className="text-xs font-bold text-slate-600">
+          Showing <span className="text-[#073B6F] font-black">{rates.length}</span> Verified Mandi Quotes
+        </div>
+        <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
+          <button
+            onClick={() => setViewMode('table')}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+              viewMode === 'table'
+                ? 'bg-[#073B6F] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+            aria-label="Table View"
+          >
+            <List className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Table View</span>
+          </button>
+          <button
+            onClick={() => setViewMode('cards')}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+              viewMode === 'cards'
+                ? 'bg-[#073B6F] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+            aria-label="Card View"
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Card View</span>
+          </button>
+        </div>
+      </div>
 
-                return (
-                  <tr key={row.id} className="hover:bg-slate-50/80 transition">
-                    {/* Commodity */}
-                    <td className="px-4 py-3.5">
+      {/* Main Rates Display: Table View */}
+      {viewMode === 'table' ? (
+        <div className="mt-3 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-xs">
+              <thead className="bg-[#EAF5FC] text-[#073B6F] font-black uppercase tracking-wider">
+                <tr>
+                  <th className="px-4 py-3.5">Commodity & Variety</th>
+                  <th className="px-4 py-3.5">Mandi / State</th>
+                  <th className="px-4 py-3.5">Market Type</th>
+                  <th className="px-4 py-3.5">Wholesale Rate (Lot Unit)</th>
+                  <th className="px-4 py-3.5">Normalized Equivalent</th>
+                  <th className="px-4 py-3.5">Previous</th>
+                  <th className="px-4 py-3.5">Movement</th>
+                  <th className="px-4 py-3.5">Source & Verification</th>
+                  <th className="px-4 py-3.5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {loading && rates.length === 0 && (
+                  <>
+                    <MandiRateRowSkeleton />
+                    <MandiRateRowSkeleton />
+                    <MandiRateRowSkeleton />
+                    <MandiRateRowSkeleton />
+                    <MandiRateRowSkeleton />
+                  </>
+                )}
+                {rates.map((row) => {
+                  const norm = normalizeRate(row.currentRate, row.unit);
+                  const sourceMeta = getRateSourceMeta(row);
+                  const marketType = getMarketTypeBadge(row.mandi.name);
+
+                  return (
+                    <tr key={row.id} className="hover:bg-slate-50/80 transition">
+                      {/* Commodity */}
+                      <td className="px-4 py-3.5">
+                        <Link
+                          href={`/products/${row.product.slug}`}
+                          className="font-bold text-[#073B6F] hover:underline flex flex-col"
+                        >
+                          <span>{row.product.name}</span>
+                          <span className="text-[11px] font-medium text-slate-500">
+                            {row.product.category?.name || 'Kirana Commodity'}
+                          </span>
+                        </Link>
+                      </td>
+
+                      {/* Mandi / State */}
+                      <td className="px-4 py-3.5">
+                        <div className="font-bold text-slate-800">{row.mandi.name}</div>
+                        <div className="text-[11px] font-semibold text-slate-500">
+                          {row.mandi.city}, {row.mandi.state}
+                        </div>
+                      </td>
+
+                      {/* Market Type */}
+                      <td className="px-4 py-3.5">
+                        <span className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-bold ${marketType.bg}`}>
+                          {marketType.label}
+                        </span>
+                      </td>
+
+                      {/* Wholesale Rate (Lot Unit) */}
+                      <td className="px-4 py-3.5">
+                        <div className="font-black text-slate-900 text-sm font-mono tabular-nums">
+                          ₹{Number(row.currentRate).toFixed(2)}
+                        </div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase">
+                          per {row.unit}
+                        </div>
+                      </td>
+
+                      {/* Normalized Equivalent */}
+                      <td className="px-4 py-3.5">
+                        {norm.displayText ? (
+                          <span className="inline-flex rounded-lg bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-800 font-mono tabular-nums">
+                            {norm.displayText}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
+
+                      {/* Previous Rate */}
+                      <td className="px-4 py-3.5 text-slate-500 font-medium font-mono tabular-nums">
+                        ₹{Number(row.previousRate).toFixed(2)}
+                      </td>
+
+                      {/* Movement */}
+                      <td className="px-4 py-3.5">
+                        <RateTrendBadge
+                          direction={row.direction}
+                          percentage={Number(row.percentageChange)}
+                          size="sm"
+                        />
+                      </td>
+
+                      {/* Source & Verification Status */}
+                      <td className="px-4 py-3.5">
+                        <div className="flex flex-col gap-0.5">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+                              sourceMeta.statusColor === 'emerald'
+                                ? 'bg-emerald-50 text-emerald-700'
+                                : sourceMeta.statusColor === 'blue'
+                                ? 'bg-sky-50 text-sky-700'
+                                : 'bg-amber-50 text-amber-700'
+                            }`}
+                          >
+                            <ShieldCheck className="h-3 w-3" />
+                            {sourceMeta.statusLabel}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            {sourceMeta.freshnessLabel}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Action */}
+                      <td className="px-4 py-3.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() =>
+                              setAlertItem({
+                                commodityName: row.product.name,
+                                mandiName: row.mandi.name,
+                                currentPrice: Number(row.currentRate),
+                                unit: row.unit,
+                                productId: row.productId,
+                                mandiId: row.mandiId,
+                              })
+                            }
+                            className="rounded-lg p-1.5 text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition"
+                            title="Set Mandi Price Alert"
+                            aria-label="Set Mandi Price Alert"
+                          >
+                            <Bell className="h-4 w-4" />
+                          </button>
+                          <MandiCommodityRowAction
+                            product={row.product}
+                            mandiRate={Number(row.currentRate)}
+                            unit={row.unit}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {rates.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-12 text-center">
+                      <div className="mx-auto flex max-w-md flex-col items-center">
+                        <AlertCircle className="h-8 w-8 text-amber-500 mb-2" />
+                        <p className="text-sm font-bold text-slate-700">
+                          Data currently unavailable for selected mandi & filter
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          KiranaMart247 never generates synthetic or fake prices. Rates appear once authentic APMC or trade chamber market reports are verified.
+                        </p>
+                        <button
+                          onClick={() => {
+                            setSelectedState('');
+                            setSelectedMandiId('');
+                            setCategoryId('');
+                            setSearch('');
+                            setUnitFilter('');
+                          }}
+                          className="mt-4 rounded-xl bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5]"
+                        >
+                          Clear Filters
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        /* Main Rates Display: Card View (Mobile & Tablet Optimized) */
+        <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {rates.map((row) => {
+            const norm = normalizeRate(row.currentRate, row.unit);
+            const sourceMeta = getRateSourceMeta(row);
+            const marketType = getMarketTypeBadge(row.mandi.name);
+
+            return (
+              <div
+                key={row.id}
+                className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-[#39A9E8] transition flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
                       <Link
                         href={`/products/${row.product.slug}`}
-                        className="font-bold text-[#073B6F] hover:underline flex flex-col"
+                        className="font-bold text-base text-[#073B6F] hover:underline block"
                       >
-                        <span>{row.product.name}</span>
-                        <span className="text-[11px] font-medium text-slate-500">
-                          {row.product.category?.name || 'Kirana Commodity'}
-                        </span>
+                        {row.product.name}
                       </Link>
-                    </td>
-
-                    {/* Mandi / State */}
-                    <td className="px-4 py-3.5">
-                      <div className="font-bold text-slate-800">{row.mandi.name}</div>
-                      <div className="text-[11px] font-semibold text-slate-500">
-                        {row.mandi.city}, {row.mandi.state}
-                      </div>
-                    </td>
-
-                    {/* Market Type */}
-                    <td className="px-4 py-3.5">
-                      <span className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-bold ${marketType.bg}`}>
-                        {marketType.label}
+                      <span className="text-xs font-medium text-slate-500">
+                        {row.product.category?.name || 'Kirana Commodity'}
                       </span>
-                    </td>
+                    </div>
+                    <span className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-bold shrink-0 ${marketType.bg}`}>
+                      {marketType.label}
+                    </span>
+                  </div>
 
-                    {/* Wholesale Rate (Lot Unit) */}
-                    <td className="px-4 py-3.5">
-                      <div className="font-black text-slate-900 text-sm">
+                  {/* Mandi & State */}
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-600">
+                    <MapPin className="h-3.5 w-3.5 text-[#0B5FA5] shrink-0" />
+                    <span className="font-semibold">{row.mandi.name}</span>
+                    <span className="text-slate-400">({row.mandi.city}, {row.mandi.state})</span>
+                  </div>
+
+                  {/* Price & Unit Display */}
+                  <div className="mt-4 rounded-2xl bg-[#F7FAFC] border border-slate-100 p-3.5 flex items-center justify-between">
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Spot Wholesale Rate
+                      </div>
+                      <div className="text-xl font-black text-slate-900 font-mono tabular-nums mt-0.5">
                         ₹{Number(row.currentRate).toFixed(2)}
+                        <span className="text-xs font-bold text-slate-500 ml-1 font-sans">
+                          /{row.unit}
+                        </span>
                       </div>
-                      <div className="text-[10px] font-bold text-slate-500 uppercase">
-                        per {row.unit}
-                      </div>
-                    </td>
-
-                    {/* Normalized Equivalent */}
-                    <td className="px-4 py-3.5">
-                      {norm.displayText ? (
-                        <span className="inline-flex rounded-lg bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-800">
+                    </div>
+                    {norm.displayText && (
+                      <div className="text-right">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          Equivalent
+                        </div>
+                        <span className="inline-flex rounded-md bg-sky-50 px-2 py-0.5 text-xs font-bold text-sky-800 font-mono tabular-nums mt-0.5">
                           {norm.displayText}
                         </span>
-                      ) : (
-                        <span className="text-slate-400">—</span>
-                      )}
-                    </td>
+                      </div>
+                    )}
+                  </div>
 
-                    {/* Previous Rate */}
-                    <td className="px-4 py-3.5 text-slate-500 font-medium">
-                      ₹{Number(row.previousRate).toFixed(2)}
-                    </td>
-
-                    {/* Movement */}
-                    <td className="px-4 py-3.5">
+                  {/* Previous & Movement Spread */}
+                  <div className="mt-3 flex items-center justify-between text-xs pt-1">
+                    <div className="text-slate-500">
+                      Prev: <span className="font-mono tabular-nums font-semibold">₹{Number(row.previousRate).toFixed(2)}</span>
+                    </div>
+                    <div>
                       <RateTrendBadge
                         direction={row.direction}
                         percentage={Number(row.percentageChange)}
                         size="sm"
                       />
-                    </td>
-
-                    {/* Source & Verification Status */}
-                    <td className="px-4 py-3.5">
-                      <div className="flex flex-col gap-0.5">
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
-                            sourceMeta.statusColor === 'emerald'
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : sourceMeta.statusColor === 'blue'
-                              ? 'bg-sky-50 text-sky-700'
-                              : 'bg-amber-50 text-amber-700'
-                          }`}
-                        >
-                          <ShieldCheck className="h-3 w-3" />
-                          {sourceMeta.statusLabel}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          {sourceMeta.freshnessLabel}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Action */}
-                    <td className="px-4 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() =>
-                            setAlertItem({
-                              commodityName: row.product.name,
-                              mandiName: row.mandi.name,
-                              currentPrice: Number(row.currentRate),
-                              unit: row.unit,
-                              productId: row.productId,
-                              mandiId: row.mandiId,
-                            })
-                          }
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition"
-                          title="Set Mandi Price Alert"
-                          aria-label="Set Mandi Price Alert"
-                        >
-                          <Bell className="h-4 w-4" />
-                        </button>
-                        <MandiCommodityRowAction
-                          product={row.product}
-                          mandiRate={Number(row.currentRate)}
-                          unit={row.unit}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {rates.length === 0 && !loading && (
-                <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center">
-                    <div className="mx-auto flex max-w-md flex-col items-center">
-                      <AlertCircle className="h-8 w-8 text-amber-500 mb-2" />
-                      <p className="text-sm font-bold text-slate-700">
-                        Data currently unavailable for selected mandi & filter
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        KiranaMart247 never generates synthetic or fake prices. Rates appear once authentic APMC or trade chamber market reports are verified.
-                      </p>
-                      <button
-                        onClick={() => {
-                          setSelectedState('');
-                          setSelectedMandiId('');
-                          setCategoryId('');
-                          setSearch('');
-                          setUnitFilter('');
-                        }}
-                        className="mt-4 rounded-xl bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5]"
-                      >
-                        Clear Filters
-                      </button>
                     </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+
+                {/* Card Footer: Source & Actions */}
+                <div className="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+                      sourceMeta.statusColor === 'emerald'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : sourceMeta.statusColor === 'blue'
+                        ? 'bg-sky-50 text-sky-700'
+                        : 'bg-amber-50 text-amber-700'
+                    }`}
+                  >
+                    <ShieldCheck className="h-3 w-3" />
+                    {sourceMeta.statusLabel}
+                  </span>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() =>
+                        setAlertItem({
+                          commodityName: row.product.name,
+                          mandiName: row.mandi.name,
+                          currentPrice: Number(row.currentRate),
+                          unit: row.unit,
+                          productId: row.productId,
+                          mandiId: row.mandiId,
+                        })
+                      }
+                      className="rounded-lg p-1.5 text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition"
+                      title="Set Mandi Price Alert"
+                      aria-label="Set Mandi Price Alert"
+                    >
+                      <Bell className="h-4 w-4" />
+                    </button>
+                    <MandiCommodityRowAction
+                      product={row.product}
+                      mandiRate={Number(row.currentRate)}
+                      unit={row.unit}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {rates.length === 0 && !loading && (
+            <div className="col-span-full rounded-3xl border border-slate-200 bg-white p-12 text-center">
+              <AlertCircle className="mx-auto h-8 w-8 text-amber-500 mb-2" />
+              <p className="text-sm font-bold text-slate-700">
+                Data currently unavailable for selected mandi & filter
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                KiranaMart247 never generates synthetic or fake prices. Rates appear once authentic APMC reports are verified.
+              </p>
+              <button
+                onClick={() => {
+                  setSelectedState('');
+                  setSelectedMandiId('');
+                  setCategoryId('');
+                  setSearch('');
+                  setUnitFilter('');
+                }}
+                className="mt-4 rounded-xl bg-[#073B6F] px-4 py-2 text-xs font-bold text-white hover:bg-[#0B5FA5]"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Compare Mandis Floating CTA Banner */}
       <div className="compare-banner mt-8 rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">

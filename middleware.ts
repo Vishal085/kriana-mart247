@@ -42,7 +42,7 @@ export function middleware(request: NextRequest) {
   // 1. Protect Admin Dashboard Routes
   if (pathname.startsWith('/dashboard/admin')) {
     if (!session || session.role !== 'ADMIN' || !session.active) {
-      const redirectUrl = new URL('/login/admin', request.url);
+      const redirectUrl = new URL('/login', request.url);
       redirectUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(redirectUrl);
     }
@@ -51,7 +51,7 @@ export function middleware(request: NextRequest) {
   // 2. Protect Seller / Shopkeeper Dashboard Routes
   if (pathname.startsWith('/dashboard/seller')) {
     if (!session || (session.role !== 'SHOPKEEPER' && session.role !== 'ADMIN') || !session.active) {
-      const redirectUrl = new URL('/login/seller', request.url);
+      const redirectUrl = new URL('/login', request.url);
       redirectUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(redirectUrl);
     }
@@ -60,7 +60,7 @@ export function middleware(request: NextRequest) {
   // 3. Protect Customer Dashboard Routes
   if (pathname.startsWith('/dashboard/customer')) {
     if (!session || !session.active) {
-      const redirectUrl = new URL('/login/customer', request.url);
+      const redirectUrl = new URL('/login', request.url);
       redirectUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(redirectUrl);
     }
@@ -69,7 +69,7 @@ export function middleware(request: NextRequest) {
   // 4. Protect Checkout Route
   if (pathname === '/checkout' || pathname.startsWith('/checkout/')) {
     if (!session || !session.active) {
-      const redirectUrl = new URL('/login/customer', request.url);
+      const redirectUrl = new URL('/login', request.url);
       redirectUrl.searchParams.set('redirect', '/checkout');
       return NextResponse.redirect(redirectUrl);
     }
@@ -80,8 +80,11 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/dashboard/admin',
     '/dashboard/admin/:path*',
+    '/dashboard/seller',
     '/dashboard/seller/:path*',
+    '/dashboard/customer',
     '/dashboard/customer/:path*',
     '/checkout',
     '/checkout/:path*',

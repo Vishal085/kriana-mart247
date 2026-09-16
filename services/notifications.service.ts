@@ -28,7 +28,7 @@ export class NotificationService {
       if (admins.length === 0) return;
 
       await prisma.notification.createMany({
-        data: admins.map((admin) => ({
+        data: admins.map((admin: any) => ({
           userId: admin.id,
           type,
           title,

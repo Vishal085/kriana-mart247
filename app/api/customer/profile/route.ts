@@ -36,7 +36,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx: any) => {
       await tx.user.update({
         where: { id: user.id },
         data: {

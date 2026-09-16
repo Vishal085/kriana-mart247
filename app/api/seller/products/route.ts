@@ -46,11 +46,11 @@ export async function GET(request: Request) {
     // Compute tab counters
     const counts = {
       ALL: allSellerProducts.length,
-      DRAFT: allSellerProducts.filter((p) => p.status === 'DRAFT').length,
-      PENDING_REVIEW: allSellerProducts.filter((p) => p.status === 'PENDING_REVIEW').length,
-      NEEDS_CHANGES: allSellerProducts.filter((p) => p.status === 'NEEDS_CHANGES').length,
-      PUBLISHED: allSellerProducts.filter((p) => p.status === 'PUBLISHED').length,
-      REJECTED: allSellerProducts.filter((p) => p.status === 'REJECTED').length,
+      DRAFT: allSellerProducts.filter((p: any) => p.status === 'DRAFT').length,
+      PENDING_REVIEW: allSellerProducts.filter((p: any) => p.status === 'PENDING_REVIEW').length,
+      NEEDS_CHANGES: allSellerProducts.filter((p: any) => p.status === 'NEEDS_CHANGES').length,
+      PUBLISHED: allSellerProducts.filter((p: any) => p.status === 'PUBLISHED').length,
+      REJECTED: allSellerProducts.filter((p: any) => p.status === 'REJECTED').length,
     };
 
     return NextResponse.json({

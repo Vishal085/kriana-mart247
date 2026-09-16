@@ -18,8 +18,8 @@ export class RateImportService {
       prisma.mandi.findMany({ select: { id: true, slug: true, name: true } }),
     ]);
 
-    const productMap = new Map(products.map((p) => [p.sku.toLowerCase(), p]));
-    const mandiMap = new Map(mandis.map((m) => [m.slug.toLowerCase(), m]));
+    const productMap = new Map<string, any>(products.map((p: any) => [p.sku.toLowerCase(), p]));
+    const mandiMap = new Map<string, any>(mandis.map((m: any) => [m.slug.toLowerCase(), m]));
 
     for (let i = 0; i < input.rates.length; i++) {
       const item = input.rates[i];

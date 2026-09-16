@@ -17,6 +17,7 @@ import {
   Shield,
   ShieldCheck,
   Milk,
+  Share2,
 } from 'lucide-react';
 import { AiRateUpdaterCard } from '@/components/admin/AiRateUpdaterCard';
 
@@ -25,7 +26,7 @@ export default async function AdminDashboardPage() {
   try {
     admin = await requireAdmin();
   } catch {
-    redirect('/login/admin');
+    redirect('/login?redirect=/dashboard/admin');
   }
 
   const [
@@ -165,6 +166,13 @@ export default async function AdminDashboardPage() {
               )}
             </Link>
             <Link
+              href="/dashboard/admin/social"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-emerald-700 hover:to-teal-700 transition"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              AI Social Auto-Publish
+            </Link>
+            <Link
               href="/dashboard/admin/rates"
               className="rounded-full bg-[#073B6F] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#0B5FA5] transition"
             >
@@ -250,6 +258,12 @@ export default async function AdminDashboardPage() {
           className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
         >
           <Users className="h-4 w-4 text-[#0B5FA5]" /> Customers
+        </Link>
+        <Link
+          href="/dashboard/admin/social"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-300 bg-emerald-50/70 p-3 hover:border-emerald-500 hover:text-emerald-950 transition"
+        >
+          <Share2 className="h-4 w-4 text-emerald-600" /> AI Social
         </Link>
       </div>
 

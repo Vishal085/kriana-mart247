@@ -6,14 +6,23 @@ import { useAuth } from '@/context/AuthContext';
 import { Shield, ArrowRight } from 'lucide-react';
 import { BrandMark } from '@/components/brand-mark';
 
+import { useRouter } from 'next/navigation';
+
 export default function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const { user, loading } = useAuth();
 
-  if (loading) {
+  React.useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = '/login?redirect=/dashboard/admin';
+    }
+  }, [loading, user]);
+
+  if (loading || !user) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center bg-slate-950">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
@@ -21,8 +30,8 @@ export default function AdminDashboardLayout({
     );
   }
 
-  // Enforce admin role strictly
-  if (!user || user.role !== 'ADMIN') {
+  // If user is logged in but not an Admin
+  if (user.role !== 'ADMIN') {
     return (
       <main className="flex min-h-[75vh] items-center justify-center px-4 py-12 bg-slate-950 text-white">
         <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-8 text-center shadow-2xl">
@@ -38,7 +47,7 @@ export default function AdminDashboardLayout({
           </p>
           <div className="mt-6 flex flex-col gap-2">
             <Link
-              href="/login/admin?redirect=/dashboard/admin"
+              href="/login?redirect=/dashboard/admin"
               className="flex items-center justify-center gap-2 rounded-xl bg-sky-600 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-sky-500"
             >
               Authenticate as Admin <ArrowRight className="h-4 w-4" />

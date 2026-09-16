@@ -9,7 +9,7 @@ export default async function CustomerWatchlistPage() {
   try {
     user = await requireCustomer();
   } catch {
-    redirect('/login/customer');
+    redirect('/login?redirect=/dashboard/customer/watchlist');
   }
 
   const items = await prisma.mandiWatchlistItem.findMany({
@@ -38,7 +38,7 @@ export default async function CustomerWatchlistPage() {
       </p>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
+        {items.map((item: any) => (
           <div
             key={item.id}
             className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"

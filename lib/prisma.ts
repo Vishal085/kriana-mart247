@@ -518,8 +518,8 @@ function handleMockQuery(model: string, action: string, args: any[]): any {
 
     
     case "otpVerification": {
-      if (!globalThis._mockOtps) globalThis._mockOtps = new Map();
-      const mockOtps = globalThis._mockOtps;
+      if (!(globalThis as any)._mockOtps) (globalThis as any)._mockOtps = new Map();
+      const mockOtps = (globalThis as any)._mockOtps;
       if (action === "deleteMany") {
         const cond = arg?.where?.OR;
         if (Array.isArray(cond)) {
