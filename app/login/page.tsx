@@ -129,23 +129,23 @@ function UnifiedLoginForm() {
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           {/* Customer Demo */}
           <button
             type="button"
             onClick={() => handleDemoLogin('customer@kiranamart247.com', 'Test@123')}
             disabled={loading || Boolean(successRole)}
-            className="group flex flex-col items-center justify-center rounded-xl border border-blue-200/80 bg-white p-2.5 text-center shadow-xs transition hover:border-[#073B6F] hover:bg-blue-50/60 hover:shadow-md cursor-pointer disabled:opacity-50"
+            className="group flex flex-col items-center justify-center rounded-xl border border-blue-200/80 bg-white p-3 text-center shadow-xs transition hover:border-[#073B6F] hover:bg-blue-50/60 hover:shadow-md cursor-pointer disabled:opacity-50"
             title="Login as Demo Customer"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-[#073B6F] group-hover:scale-110 group-hover:bg-[#073B6F] group-hover:text-white transition">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-[#073B6F] group-hover:scale-110 group-hover:bg-[#073B6F] group-hover:text-white transition">
               <ShoppingBag className="h-4 w-4" />
             </div>
             <span className="mt-1.5 text-xs font-bold text-slate-800 group-hover:text-[#073B6F]">
-              Customer
+              Customer Demo
             </span>
             <span className="text-[10px] text-emerald-600 font-semibold mt-0.5">
-              Shop Store
+              1-Click Store Access
             </span>
           </button>
 
@@ -154,36 +154,17 @@ function UnifiedLoginForm() {
             type="button"
             onClick={() => handleDemoLogin('shopkeeper@kiranamart247.com', 'shopkeeper123')}
             disabled={loading || Boolean(successRole)}
-            className="group flex flex-col items-center justify-center rounded-xl border border-amber-200/80 bg-white p-2.5 text-center shadow-xs transition hover:border-amber-600 hover:bg-amber-50/60 hover:shadow-md cursor-pointer disabled:opacity-50"
+            className="group flex flex-col items-center justify-center rounded-xl border border-amber-200/80 bg-white p-3 text-center shadow-xs transition hover:border-amber-600 hover:bg-amber-50/60 hover:shadow-md cursor-pointer disabled:opacity-50"
             title="Login as Demo Shopkeeper"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-50 text-amber-700 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-50 text-amber-700 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition">
               <Store className="h-4 w-4" />
             </div>
             <span className="mt-1.5 text-xs font-bold text-slate-800 group-hover:text-amber-800">
-              Shopkeeper
+              Shopkeeper Demo
             </span>
             <span className="text-[10px] text-amber-600 font-semibold mt-0.5">
-              Seller Hub
-            </span>
-          </button>
-
-          {/* Admin Demo */}
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('admin@kiranamart247.com', 'Admin@123')}
-            disabled={loading || Boolean(successRole)}
-            className="group flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-2.5 text-center shadow-xs transition hover:border-slate-800 hover:bg-slate-100/70 hover:shadow-md cursor-pointer disabled:opacity-50"
-            title="Login as Super Admin"
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 group-hover:scale-110 group-hover:bg-slate-800 group-hover:text-white transition">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
-            <span className="mt-1.5 text-xs font-bold text-slate-800 group-hover:text-slate-900">
-              Admin
-            </span>
-            <span className="text-[10px] text-indigo-600 font-semibold mt-0.5">
-              Full Portal
+              1-Click Seller Hub
             </span>
           </button>
         </div>
