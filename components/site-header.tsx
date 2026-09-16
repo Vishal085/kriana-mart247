@@ -154,11 +154,11 @@ export function SiteHeader() {
             {/* Admin shortcut if logged in */}
             {user?.role === 'ADMIN' && (
               <Link
-                href="/dashboard/admin/approvals"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-black text-white shadow-xs hover:bg-amber-600 transition"
+                href="/dashboard/admin"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#073B6F] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-[#0B5FA5] transition"
               >
                 <Shield className="h-3.5 w-3.5" />
-                <span>Approvals</span>
+                <span>Admin Console</span>
               </Link>
             )}
 
@@ -176,20 +176,22 @@ export function SiteHeader() {
               </kbd>
             </button>
 
-            {/* Cart Drawer Trigger Button */}
-            <button
-              onClick={openDrawer}
-              aria-label="Open Cart Drawer"
-              className="relative flex h-9 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 sm:px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F] shrink-0"
-            >
-              <ShoppingCart className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline text-xs font-bold font-heading">Cart</span>
-              {itemCount > 0 && (
-                <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#073B6F] px-1 text-[10px] font-black text-white shadow-xs">
-                  {itemCount}
-                </span>
-              )}
-            </button>
+            {/* Cart Drawer Trigger Button - Hidden on Admin Dashboard pages */}
+            {!pathname.startsWith('/dashboard/admin') && (
+              <button
+                onClick={openDrawer}
+                aria-label="Open Cart Drawer"
+                className="relative flex h-9 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 sm:px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F] shrink-0"
+              >
+                <ShoppingCart className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline text-xs font-bold font-heading">Cart</span>
+                {itemCount > 0 && (
+                  <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#073B6F] px-1 text-[10px] font-black text-white shadow-xs">
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Profile Dropdown - Desktop Only (Mobile uses Hamburger drawer) */}
             <div className="relative hidden md:block" ref={dropdownRef}>
@@ -281,24 +283,14 @@ export function SiteHeader() {
                         )}
 
                         {user && user.role === 'ADMIN' && (
-                          <>
-                            <Link
-                              href="/dashboard/admin"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50 transition"
-                            >
-                              <Shield className="h-4 w-4 text-[#39A9E8]" />
-                              <span>Admin Console</span>
-                            </Link>
-                            <Link
-                              href="/dashboard/admin/approvals"
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-bold text-amber-700 hover:bg-amber-50 transition"
-                            >
-                              <Check className="h-4 w-4 text-amber-600" />
-                              <span>Product Approvals</span>
-                            </Link>
-                          </>
+                          <Link
+                            href="/dashboard/admin"
+                            onClick={() => setProfileDropdownOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-bold text-[#073B6F] hover:bg-slate-50 transition"
+                          >
+                            <Shield className="h-4 w-4 text-[#39A9E8]" />
+                            <span>Admin Console</span>
+                          </Link>
                         )}
 
                         {user && user.role === 'CUSTOMER' && (
@@ -482,12 +474,12 @@ export function SiteHeader() {
                   </Link>
                 ) : user?.role === 'ADMIN' ? (
                   <Link
-                    href="/dashboard/admin/approvals"
+                    href="/dashboard/admin"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-2.5 text-xs font-black text-white shadow-xs"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-2.5 text-xs font-bold text-white shadow-xs"
                   >
                     <Shield className="h-4 w-4" />
-                    <span>Product Approvals</span>
+                    <span>Admin Console</span>
                   </Link>
                 ) : (
                   <Link

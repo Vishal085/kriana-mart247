@@ -42,7 +42,6 @@ export default async function AdminDashboardPage() {
     ordersDelivered,
     ordersPaid,
     recentOrders,
-    pendingApprovalsCount,
     demandsNewCount,
     demandsProcessingCount,
     demandsTotalCount,
@@ -68,7 +67,6 @@ export default async function AdminDashboardPage() {
       orderBy: { createdAt: 'desc' },
       include: { user: { select: { fullName: true, mobile: true } } },
     }),
-    prisma.product.count({ where: { status: 'PENDING_REVIEW' } }),
     prisma.demand.count({ where: { status: 'NEW' } }),
     prisma.demand.count({ where: { status: 'PROCESSING' } }),
     prisma.demand.count(),
@@ -154,18 +152,6 @@ export default async function AdminDashboardPage() {
               )}
             </Link>
             <Link
-              href="/dashboard/admin/approvals"
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-600 transition"
-            >
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Product Approvals
-              {pendingApprovalsCount > 0 && (
-                <span className="rounded-full bg-white px-1.5 py-0.2 text-[10px] font-black text-amber-600">
-                  {pendingApprovalsCount}
-                </span>
-              )}
-            </Link>
-            <Link
               href="/dashboard/admin/social"
               className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-emerald-700 hover:to-teal-700 transition"
             >
@@ -194,7 +180,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Admin Modules Navigation */}
-      <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-9 text-xs font-bold text-slate-700">
+      <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-8 text-xs font-bold text-slate-700">
         <Link
           href="/dashboard/admin/demands"
           className="flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50/70 p-3 hover:border-blue-400 hover:text-blue-900 transition relative"
@@ -203,17 +189,6 @@ export default async function AdminDashboardPage() {
           {demandsNewCount > 0 && (
             <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-black text-white">
               {demandsNewCount}
-            </span>
-          )}
-        </Link>
-        <Link
-          href="/dashboard/admin/approvals"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50/60 p-3 hover:border-amber-400 hover:text-amber-900 transition relative"
-        >
-          <ShieldCheck className="h-4 w-4 text-amber-600" /> Approvals
-          {pendingApprovalsCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-black text-white">
-              {pendingApprovalsCount}
             </span>
           )}
         </Link>

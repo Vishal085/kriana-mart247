@@ -132,6 +132,10 @@ export default function AdminProductReviewPage() {
     loadDetails();
   }, [productId]);
 
+  useEffect(() => {
+    window.location.replace('/dashboard/admin');
+  }, []);
+
   const checkDuplicates = async (id: string) => {
     setCheckingDuplicates(true);
     try {

@@ -55,8 +55,8 @@ export default function AdminApprovalsPage() {
   };
 
   useEffect(() => {
-    fetchApprovals();
-  }, [activeTab]);
+    window.location.replace('/dashboard/admin');
+  }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
