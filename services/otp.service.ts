@@ -103,13 +103,15 @@ export class OtpService {
       console.error('[OTP DISPATCH WARNING]', err.message);
     }
 
+    const hasLiveEmail = Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD);
+
     return {
       verificationId: verification.id,
       email: cleanEmail,
       mobile: cleanMobile,
       expiresAt: verification.expiresAt,
-      // Dev helper: provide OTP in development for instant 1-second testing
-      devOtp: process.env.NODE_ENV !== 'production' ? otp : undefined,
+      // Provide OTP fallback directly when live email credentials are not configured or in dev
+      devOtp: !hasLiveEmail || process.env.NODE_ENV !== 'production' ? otp : undefined,
     };
   }
 

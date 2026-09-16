@@ -169,10 +169,12 @@ function SellerRegisterForm() {
       setVerificationId(data.verificationId);
       if (data.devOtp) {
         setDevOtp(data.devOtp);
+        setOtp(data.devOtp);
+      } else {
+        setOtp('');
       }
       setCurrentStep(3);
       setCountdown(60);
-      setOtp('');
     } catch (err: any) {
       setError(err.message || 'Failed to send verification code');
     } finally {
@@ -539,17 +541,17 @@ function SellerRegisterForm() {
           </div>
 
           {devOtp && (
-            <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-              <span>⚡ Dev Code: <strong>{devOtp}</strong></span>
+            <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs text-emerald-900 shadow-sm">
+              <span>⚡ Verification OTP: <strong className="text-base font-black text-emerald-800 tracking-wider ml-1">{devOtp}</strong></span>
               <button
                 type="button"
                 onClick={() => {
                   setOtp(devOtp);
                   handleVerifyOtp(devOtp);
                 }}
-                className="font-bold underline text-[#073B6F]"
+                className="font-bold text-emerald-950 bg-emerald-200/80 hover:bg-emerald-300 px-2.5 py-1 rounded transition cursor-pointer"
               >
-                Auto-Fill
+                Auto-Fill &amp; Verify
               </button>
             </div>
           )}
