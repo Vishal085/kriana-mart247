@@ -115,7 +115,7 @@ export function PublishingHistoryTable({
           <Calendar className="mx-auto h-8 w-8 text-slate-300 mb-2" />
           <p className="text-xs font-bold text-slate-600">No publishing jobs recorded yet</p>
           <p className="text-[11px] text-slate-400 mt-0.5">
-            Click "AI Auto Publish" above to create your first multi-platform broadcast.
+            Click &quot;AI Auto Publish&quot; above to create your first multi-platform broadcast.
           </p>
         </div>
       ) : (

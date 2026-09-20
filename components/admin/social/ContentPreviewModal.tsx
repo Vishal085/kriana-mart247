@@ -226,7 +226,7 @@ export function ContentPreviewModal({
                           <span>Scene {idx + 1} ({scene.timeSec}s)</span>
                           <span className="text-slate-500">{scene.visual}</span>
                         </div>
-                        <p className="text-slate-200 italic leading-relaxed">"{scene.voiceover}"</p>
+                        <p className="text-slate-200 italic leading-relaxed">&quot;{scene.voiceover}&quot;</p>
                       </div>
                     ))}
                   </div>

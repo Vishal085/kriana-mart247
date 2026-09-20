@@ -625,6 +625,14 @@ function createModelProxy(modelName: string, rawModel: any) {
     get(target, propKey) {
       const action = String(propKey);
       return async (...args: any[]) => {
+        // Fast-path: If running on Vercel/production with localhost or missing DB URL, avoid 5s connection timeouts
+        const dbUrl = process.env.DATABASE_URL || '';
+        const isLocalDb = !dbUrl || dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1');
+        const isVercelEnv = process.env.VERCEL === '1' || Boolean(process.env.NEXT_PUBLIC_VERCEL_ENV);
+        if (isVercelEnv && isLocalDb) {
+          return handleMockQuery(modelName, action, args);
+        }
+
         try {
           if (typeof target[action] === 'function') {
             return await target[action](...args);
