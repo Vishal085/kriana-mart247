@@ -150,8 +150,12 @@ export function ProductCard({
       ? (brand?.name as any).name
       : 'Kirana';
 
+  const formatPrice = (val: number) => {
+    return Number.isInteger(val) ? val.toLocaleString('en-IN') : val.toFixed(2);
+  };
+
   return (
-    <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#39A9E8]/60 hover:shadow-lg">
+    <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-3.5 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#39A9E8]/60 hover:shadow-[0_16px_32px_-8px_rgba(7,59,111,0.12)]">
       <div>
         {/* Badges & Wishlist Header */}
         <div className="flex items-start justify-between gap-1 mb-2">
@@ -166,10 +170,10 @@ export function ProductCard({
           <button
             onClick={handleToggleWishlist}
             aria-label="Wishlist"
-            className={`rounded-full p-1.5 transition ${
+            className={`rounded-full p-1.5 transition-all duration-200 ${
               wishlisted
-                ? 'bg-rose-50 text-rose-500'
-                : 'text-slate-300 hover:bg-slate-100 hover:text-rose-500'
+                ? 'bg-rose-50 text-rose-500 scale-110'
+                : 'text-slate-300 hover:bg-slate-100 hover:text-rose-500 hover:scale-105'
             }`}
           >
             <Heart className={`h-3.5 w-3.5 ${wishlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -178,7 +182,7 @@ export function ProductCard({
 
         {/* Product Image */}
         <Link href={`/products/${slug}`} className="block">
-          <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-slate-50/70 p-2.5 border border-slate-100/80 transition-transform duration-300 group-hover:scale-102">
+          <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-50/90 to-slate-100/50 p-2.5 border border-slate-100 transition-all duration-300 group-hover:bg-sky-50/30">
             <img
               src={images[0]?.url || '/products/placeholder.svg'}
               alt={name}
@@ -191,11 +195,11 @@ export function ProductCard({
                   target.src = '/products/placeholder.svg';
                 }
               }}
-              className="h-full w-full object-contain mix-blend-multiply"
+              className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105"
             />
 
             {discountPercent > 0 && (
-              <span className="absolute top-2 left-2 rounded-md bg-[#073B6F] text-white text-[10px] font-bold px-1.5 py-0.5 shadow-xs">
+              <span className="absolute top-2 left-2 rounded-lg bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] text-white text-[10px] font-black px-2 py-0.5 shadow-xs tracking-tight">
                 {discountPercent}% OFF
               </span>
             )}
@@ -226,11 +230,11 @@ export function ProductCard({
           <div className="min-w-0">
             <div className="flex items-baseline gap-1 sm:gap-1.5 flex-wrap">
               <span className="text-sm sm:text-base font-black text-slate-900 leading-none">
-                ₹{price.toFixed(2)}
+                ₹{formatPrice(price)}
               </span>
               {hasAuthenticDiscount && (
                 <span className="text-[10px] sm:text-xs text-slate-400 line-through">
-                  ₹{numericMrp!.toFixed(2)}
+                  ₹{formatPrice(numericMrp!)}
                 </span>
               )}
             </div>
@@ -251,10 +255,10 @@ export function ProductCard({
               <button
                 onClick={handleAddToCart}
                 disabled={adding}
-                className="inline-flex items-center gap-1 rounded-xl bg-white hover:bg-[#EAF5FC] border-2 border-[#073B6F] px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-black text-[#073B6F] shadow-xs hover:shadow-sm transition active:scale-95"
+                className="inline-flex items-center gap-1 rounded-xl bg-emerald-50 hover:bg-emerald-600 border-2 border-emerald-600 hover:border-emerald-600 px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-black text-emerald-700 hover:text-white shadow-xs hover:shadow-emerald-600/20 transition-all duration-200 active:scale-95 cursor-pointer"
               >
                 {adding ? (
-                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#073B6F] border-t-transparent" />
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
                 ) : (
                   <>
                     <span>ADD</span>
@@ -263,11 +267,11 @@ export function ProductCard({
                 )}
               </button>
             ) : (
-              <div className="flex items-center rounded-xl bg-[#073B6F] text-white shadow-xs">
+              <div className="flex items-center rounded-xl bg-emerald-600 text-white shadow-xs">
                 <button
                   onClick={handleDecrease}
                   disabled={updating}
-                  className="px-1.5 sm:px-2 py-1 sm:py-1.5 hover:bg-[#0B5FA5] rounded-l-xl transition text-white"
+                  className="px-1.5 sm:px-2 py-1 sm:py-1.5 hover:bg-emerald-700 rounded-l-xl transition text-white cursor-pointer"
                   aria-label="Decrease quantity"
                 >
                   <Minus className="h-3 w-3 stroke-[2.5]" />
@@ -278,7 +282,7 @@ export function ProductCard({
                 <button
                   onClick={handleIncrease}
                   disabled={updating}
-                  className="px-1.5 sm:px-2 py-1 sm:py-1.5 hover:bg-[#0B5FA5] rounded-r-xl transition text-white"
+                  className="px-1.5 sm:px-2 py-1 sm:py-1.5 hover:bg-emerald-700 rounded-r-xl transition text-white cursor-pointer"
                   aria-label="Increase quantity"
                 >
                   <Plus className="h-3 w-3 stroke-[2.5]" />

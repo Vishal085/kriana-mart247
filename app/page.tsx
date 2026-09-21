@@ -106,23 +106,33 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-[#F7FAFC] text-slate-800">
       {/* 1. HERO SECTION — WHOLESALE MANDI INTELLIGENCE TERMINAL */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#EAF5FC]/80 via-[#F7FAFC] to-[#F7FAFC] py-10 lg:py-14 border-b border-slate-200/60">
-        <div className="mx-auto max-w-7xl px-4 lg:px-6">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#EAF5FC]/90 via-[#F7FAFC] to-[#F7FAFC] py-10 lg:py-16 border-b border-slate-200/60">
+        {/* Ambient decorative glow orbs */}
+        <div className="ambient-orb -top-20 -left-20 h-96 w-96 bg-sky-300/30 animate-float-slow" />
+        <div className="ambient-orb top-10 right-0 h-80 w-80 bg-emerald-300/25 animate-pulse-subtle" />
+        <div className="ambient-orb -bottom-20 left-1/3 h-72 w-72 bg-blue-300/20 animate-float-slow" />
+
+        <div className="relative mx-auto max-w-7xl px-4 lg:px-6">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
               {/* Primary Identity Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#0B5FA5]/30 bg-[#EAF5FC] px-3.5 py-1 text-xs font-bold text-[#073B6F] shadow-2xs">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#0B5FA5]/30 bg-white/80 backdrop-blur-md px-3.5 py-1 text-xs font-bold text-[#073B6F] shadow-xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
                 <span>Wholesale Mandi Spot Rate & Price Intelligence Terminal</span>
               </div>
 
               {/* Primary Headline & Supporting Subtitle */}
               <h1 className="hero-heading mt-4 text-3xl font-black tracking-tight text-[#073B6F] sm:text-5xl lg:text-6xl">
                 Live Wholesale Mandi Rates.{' '}
-                <span className="block text-[#0B5FA5]">Spot Intelligence & Spreads.</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#0B5FA5] via-[#39A9E8] to-[#073B6F]">
+                  Spot Intelligence & Spreads.
+                </span>
               </h1>
 
-              <p className="mt-4 max-w-2xl text-sm sm:text-base text-slate-600 leading-relaxed">
+              <p className="mt-4 max-w-2xl text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
                 Track physical mandi spot prices, APMC auction movements, inter-mandi spreads, and verified market intelligence across Delhi-NCR, Uttar Pradesh, and Haryana.
               </p>
 
@@ -138,7 +148,7 @@ export default async function HomePage() {
                   <Link
                     key={st.name}
                     href={st.href}
-                    className="rounded-full bg-white border border-slate-200 px-3 py-1 font-bold text-slate-700 hover:border-[#39A9E8] hover:text-[#073B6F] transition shadow-2xs"
+                    className="rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/90 px-3 py-1 font-bold text-slate-700 hover:border-[#39A9E8] hover:text-[#073B6F] hover:shadow-xs transition-all duration-200"
                   >
                     {st.name}
                   </Link>
@@ -150,7 +160,7 @@ export default async function HomePage() {
                 <form
                   action="/mandi-rates"
                   method="GET"
-                  className="relative flex items-center shadow-xs rounded-2xl bg-white border border-slate-300 p-1.5 focus-within:border-[#0B5FA5] transition"
+                  className="relative flex items-center shadow-[0_4px_24px_-4px_rgba(7,59,111,0.08)] rounded-2xl bg-white border border-slate-200/90 p-1.5 focus-within:border-[#39A9E8] focus-within:ring-3 focus-within:ring-[#39A9E8]/20 transition-all duration-200"
                 >
                   <Search className="h-5 w-5 text-slate-400 ml-3 shrink-0" />
                   <input
@@ -161,7 +171,7 @@ export default async function HomePage() {
                   />
                   <button
                     type="submit"
-                    className="rounded-xl bg-[#073B6F] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#0B5FA5] transition shrink-0"
+                    className="rounded-xl bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:shadow-md hover:brightness-105 transition-all duration-200 shrink-0 cursor-pointer active:scale-95"
                   >
                     Track Rate
                   </button>
@@ -182,7 +192,7 @@ export default async function HomePage() {
                   <Link
                     key={pill.name}
                     href={pill.href}
-                    className="rounded-full bg-white border border-slate-200 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 hover:border-[#39A9E8] hover:text-[#073B6F] transition"
+                    className="rounded-full bg-white/90 border border-slate-200/80 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 hover:border-[#39A9E8] hover:text-[#073B6F] hover:bg-sky-50/50 transition-all duration-200"
                   >
                     {pill.name}
                   </Link>
@@ -193,21 +203,21 @@ export default async function HomePage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/mandi-rates"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#073B6F] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#0B5FA5]"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#073B6F] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#0B5FA5] hover:-translate-y-0.5 active:scale-95 cursor-pointer"
                 >
                   <TrendingUp className="h-4 w-4 text-[#39A9E8]" />
                   Open Live Rate Board
                 </Link>
                 <Link
                   href="/compare"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#073B6F] shadow-2xs transition hover:border-[#39A9E8]"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300/80 bg-white/90 px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#073B6F] shadow-2xs transition-all duration-200 hover:border-[#39A9E8] hover:-translate-y-0.5 active:scale-95 cursor-pointer"
                 >
                   <Scale className="h-4 w-4 text-[#0B5FA5]" />
                   Compare Mandis
                 </Link>
                 <Link
                   href="/trends"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs transition hover:border-[#39A9E8]"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300/80 bg-white/90 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs transition-all duration-200 hover:border-[#39A9E8] hover:-translate-y-0.5 active:scale-95 cursor-pointer"
                 >
                   <BarChart3 className="h-4 w-4 text-[#0B5FA5]" />
                   Price Trends
@@ -216,7 +226,7 @@ export default async function HomePage() {
             </div>
 
             {/* Market Snapshot Terminal Card (Right Column) */}
-            <div className="market-card rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-lg">
+            <div className="market-card rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-xl p-6 sm:p-7 shadow-[0_12px_32px_-6px_rgba(7,59,111,0.08)] hover:shadow-[0_16px_40px_-6px_rgba(7,59,111,0.12)] transition-all duration-300">
               <div className="market-card-header flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -224,7 +234,7 @@ export default async function HomePage() {
                   </span>
                   <h2 className="text-xl font-black text-[#073B6F]">APMC Market Pulse</h2>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF5FC] text-[#0B5FA5]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#EAF5FC] to-sky-100 text-[#0B5FA5] shadow-2xs">
                   <BarChart3 className="h-5 w-5" />
                 </div>
               </div>
@@ -550,22 +560,23 @@ export default async function HomePage() {
           {mandis.map((m: any) => (
             <div
               key={m.id}
-              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#39A9E8] hover:shadow-md flex flex-col justify-between"
+              className="group rounded-3xl border border-slate-200/70 bg-white/95 backdrop-blur-md p-5.5 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#39A9E8]/60 hover:shadow-[0_16px_32px_-8px_rgba(7,59,111,0.12)] flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#EAF5FC] text-[#073B6F]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EAF5FC] to-sky-100 text-[#073B6F] shadow-2xs group-hover:scale-105 transition-transform duration-200">
                     <Store className="h-5 w-5" />
                   </div>
-                  <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                  <span className="flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 shadow-2xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     {m._count?.rates || 16} Commodities
                   </span>
                 </div>
-                <h3 className="mt-3 font-bold text-base text-[#073B6F]">{m.name}</h3>
+                <h3 className="mt-3.5 font-bold text-base text-[#073B6F] group-hover:text-[#0B5FA5] transition-colors">{m.name}</h3>
                 <p className="mt-1 text-xs text-slate-500 line-clamp-1">{m.address || `${m.city}, ${m.state}`}</p>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs">
                 <Link
                   href={`/mandis/${m.slug}`}
                   className="font-bold text-[#0B5FA5] hover:underline flex items-center gap-1"
@@ -574,7 +585,7 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href={`/mandi-rates?mandiId=${m.id}`}
-                  className="rounded-full bg-[#EAF5FC] px-3 py-1 font-bold text-[#073B6F] hover:bg-[#073B6F] hover:text-white transition"
+                  className="rounded-full bg-[#EAF5FC] px-3.5 py-1.5 font-bold text-[#073B6F] hover:bg-[#073B6F] hover:text-white transition-all duration-200 shadow-2xs cursor-pointer"
                 >
                   View Quotes →
                 </Link>
@@ -629,30 +640,34 @@ export default async function HomePage() {
 
       {/* 8. XYON AI ASSISTANT PROMO */}
       <section className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
-        <div className="rounded-3xl border border-[#39A9E8]/30 bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] p-8 sm:p-10 text-white shadow-xl">
-          <div className="ai-promo-grid grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+        <div className="relative overflow-hidden rounded-3xl border border-[#39A9E8]/40 bg-gradient-to-br from-[#05284D] via-[#073B6F] to-[#0B5FA5] p-8 sm:p-10 text-white shadow-xl">
+          {/* Internal ambient orbs */}
+          <div className="ambient-orb -right-10 -bottom-10 h-64 w-64 bg-cyan-400/20 animate-pulse-subtle" />
+          <div className="ambient-orb -left-10 -top-10 h-64 w-64 bg-emerald-400/15 animate-float-slow" />
+
+          <div className="relative z-10 ai-promo-grid grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-[#39A9E8]">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-md px-3.5 py-1 text-xs font-bold text-[#39A9E8] border border-white/20">
                 <Bot className="h-4 w-4 text-[#72B82A]" /> Meet Xyon
               </div>
               <h2 className="mt-4 text-2xl sm:text-3xl font-black">
                 Instant Mandi Rate Intelligence at your Fingertips
               </h2>
-              <p className="mt-3 text-sm text-slate-200 leading-relaxed max-w-xl">
+              <p className="mt-3 text-sm text-slate-200 leading-relaxed max-w-xl font-normal">
                 Ask questions in Hindi, English, or Hinglish like &quot;What is today&apos;s Basmati rice rate in Delhi?&quot; or &quot;Which mandi has cheapest mustard oil?&quot; — powered by live verified PostgreSQL market data.
               </p>
               <div className="mt-5 flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-white/10 px-3 py-1 text-slate-200">🔍 Real-time Rate Verification</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-slate-200">📊 Mandi Comparisons</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-slate-200">🛒 Optional Grocery Orders</span>
+                <span className="rounded-full bg-white/10 backdrop-blur-xs px-3 py-1 text-slate-200 border border-white/10">🔍 Real-time Rate Verification</span>
+                <span className="rounded-full bg-white/10 backdrop-blur-xs px-3 py-1 text-slate-200 border border-white/10">📊 Mandi Comparisons</span>
+                <span className="rounded-full bg-white/10 backdrop-blur-xs px-3 py-1 text-slate-200 border border-white/10">🛒 Optional Grocery Orders</span>
               </div>
             </div>
-            <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-md border border-white/20">
+            <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-md border border-white/20 shadow-lg">
               <div className="text-xs font-bold uppercase tracking-wider text-[#39A9E8]">Try Asking:</div>
               <div className="mt-3 space-y-2 text-xs">
-                <div className="rounded-xl bg-white/10 p-2.5">💬 &quot;What is today&apos;s wheat rate in Azadpur?&quot;</div>
-                <div className="rounded-xl bg-white/10 p-2.5">💬 &quot;Which commodities are rising today?&quot;</div>
-                <div className="rounded-xl bg-white/10 p-2.5">💬 &quot;Show me Mustard oil quotes in Naya Bazar&quot;</div>
+                <div className="rounded-xl bg-white/15 p-2.5 border border-white/10 hover:bg-white/20 transition-all cursor-pointer">💬 &quot;What is today&apos;s wheat rate in Azadpur?&quot;</div>
+                <div className="rounded-xl bg-white/15 p-2.5 border border-white/10 hover:bg-white/20 transition-all cursor-pointer">💬 &quot;Which commodities are rising today?&quot;</div>
+                <div className="rounded-xl bg-white/15 p-2.5 border border-white/10 hover:bg-white/20 transition-all cursor-pointer">💬 &quot;Show me Mustard oil quotes in Naya Bazar&quot;</div>
               </div>
             </div>
           </div>

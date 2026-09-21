@@ -103,7 +103,14 @@ interface StoreData {
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'seller-store.json');
 
+// In-memory cache to avoid repeated synchronous disk reads
+let memoryStoreCache: StoreData | null = null;
+
 function ensureDataFile(): StoreData {
+  if (memoryStoreCache) {
+    return memoryStoreCache;
+  }
+
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -160,10 +167,13 @@ function ensureDataFile(): StoreData {
         ],
       };
       fs.writeFileSync(DATA_FILE, JSON.stringify(initial, null, 2), 'utf8');
+      memoryStoreCache = initial;
       return initial;
     }
     const raw = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    memoryStoreCache = parsed;
+    return parsed;
   } catch (err) {
     console.error('Failed reading seller store file, fallback to empty:', err);
     return { products: [], auditLogs: [], users: [] };
@@ -171,6 +181,7 @@ function ensureDataFile(): StoreData {
 }
 
 function saveStoreData(data: StoreData) {
+  memoryStoreCache = data;
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });

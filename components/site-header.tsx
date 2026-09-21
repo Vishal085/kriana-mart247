@@ -105,11 +105,11 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 lg:px-6">
+      <header className="sticky top-0 z-40 border-b border-slate-200/60 bg-white/85 backdrop-blur-xl shadow-[0_4px_20px_-4px_rgba(7,59,111,0.05)] transition-all">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 lg:px-6">
           {/* Left: Brand Logo + Mandi Selector + Desktop Nav */}
           <div className="flex items-center gap-2.5 xl:gap-4 shrink-0">
-            <Link href="/" className="shrink-0 flex items-center">
+            <Link href="/" className="shrink-0 flex items-center group transition-transform duration-200 hover:scale-[1.02]">
               <BrandMark />
             </Link>
 
@@ -119,22 +119,23 @@ export function SiteHeader() {
             </div>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1 text-xs font-bold text-slate-700">
+            <nav className="hidden lg:flex items-center gap-1.5 text-xs font-bold text-slate-700">
               {navLinks.map((item) => {
                 const isActive = pathname === item.href || (item.href === '/mandi-rates' && pathname === '/kirana-mandi');
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`whitespace-nowrap transition py-1.5 px-2.5 rounded-xl flex items-center gap-1.5 ${
+                    className={`whitespace-nowrap transition-all duration-200 py-1.5 px-3 rounded-full flex items-center gap-1.5 ${
                       isActive
-                        ? 'text-[#073B6F] bg-[#EAF5FC] font-black shadow-2xs border border-blue-200/50'
-                        : 'hover:text-[#0B5FA5] hover:bg-slate-100/80'
+                        ? 'text-[#073B6F] bg-gradient-to-r from-[#EAF5FC] to-sky-50 font-black shadow-xs border border-sky-200/70 ring-1 ring-sky-300/30'
+                        : 'hover:text-[#0B5FA5] hover:bg-slate-100/70'
                     }`}
                   >
                     <span>{item.label}</span>
                     {item.badge && (
-                      <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-black text-emerald-700 uppercase tracking-wider">
+                      <span className="flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-500/20 px-1.5 py-0.5 text-[9px] font-black text-emerald-600 uppercase tracking-wider">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         {item.badge}
                       </span>
                     )}
@@ -147,17 +148,16 @@ export function SiteHeader() {
           {/* Right Section: Role CTA, Smart Search, Cart Drawer Button, Profile, Mobile Menu */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
 
-
             {/* Search Trigger Button with Cmd+K */}
             <button
               onClick={() => setSearchModalOpen(true)}
               aria-label="Open Search (Cmd+K)"
-              className="flex h-9 w-9 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-2 sm:px-3 text-xs text-slate-500 hover:border-[#39A9E8] hover:bg-white transition shrink-0"
+              className="group flex h-9 w-9 sm:w-auto items-center justify-center sm:justify-start gap-2 rounded-full border border-slate-200/80 bg-slate-50/80 px-2 sm:px-3 text-xs text-slate-500 hover:border-[#39A9E8]/60 hover:bg-white hover:shadow-xs transition-all shrink-0 cursor-pointer"
             >
-              <Search className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+              <Search className="h-3.5 w-3.5 text-slate-400 group-hover:text-[#0B5FA5] transition-colors shrink-0" />
               <span className="hidden sm:inline 2xl:hidden font-medium">Search...</span>
               <span className="hidden 2xl:inline font-medium">Search mandis, commodities...</span>
-              <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
+              <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded-md border border-slate-200/80 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 shadow-2xs">
                 ⌘K
               </kbd>
             </button>
@@ -167,12 +167,12 @@ export function SiteHeader() {
               <button
                 onClick={openDrawer}
                 aria-label="Open Cart Drawer"
-                className="relative flex h-9 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 sm:px-3 text-slate-700 transition hover:border-[#39A9E8] hover:bg-white hover:text-[#073B6F] shrink-0"
+                className="relative group flex h-9 items-center gap-1.5 sm:gap-2 rounded-full border border-slate-200/80 bg-slate-50/80 px-2.5 sm:px-3.5 text-slate-700 transition-all hover:border-[#39A9E8]/60 hover:bg-white hover:text-[#073B6F] hover:shadow-xs shrink-0 cursor-pointer"
               >
-                <ShoppingCart className="h-4 w-4 shrink-0" />
+                <ShoppingCart className="h-4 w-4 shrink-0 transition-transform group-hover:scale-110" />
                 <span className="hidden sm:inline text-xs font-bold font-heading">Cart</span>
                 {itemCount > 0 && (
-                  <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#073B6F] px-1 text-[10px] font-black text-white shadow-xs">
+                  <span className="flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-gradient-to-r from-[#073B6F] to-[#0B5FA5] px-1.5 text-[10px] font-black text-white shadow-xs animate-pulse-subtle">
                     {itemCount}
                   </span>
                 )}

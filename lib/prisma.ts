@@ -16,7 +16,7 @@ declare global {
 const rawPrisma =
   globalThis.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+    log: [],
   });
 
 if (process.env.NODE_ENV !== 'production') {
@@ -620,6 +620,9 @@ function handleMockQuery(model: string, action: string, args: any[]): any {
   return [];
 }
 
+let isPostgresOffline = false;
+let lastOfflineCheckTime = 0;
+
 function createModelProxy(modelName: string, rawModel: any) {
   return new Proxy(rawModel || {}, {
     get(target, propKey) {
@@ -633,9 +636,16 @@ function createModelProxy(modelName: string, rawModel: any) {
           return handleMockQuery(modelName, action, args);
         }
 
+        // Fast-path for localhost: if Postgres was unreachable recently, don't wait for TCP connection timeout
+        if (isPostgresOffline && Date.now() - lastOfflineCheckTime < 30000) {
+          return handleMockQuery(modelName, action, args);
+        }
+
         try {
           if (typeof target[action] === 'function') {
-            return await target[action](...args);
+            const res = await target[action](...args);
+            isPostgresOffline = false;
+            return res;
           }
         } catch (error: any) {
           // If the DB server is unreachable or offline, provide realistic fallback data
@@ -646,6 +656,8 @@ function createModelProxy(modelName: string, rawModel: any) {
             msg.includes('P1001') ||
             msg.includes('timed out')
           ) {
+            isPostgresOffline = true;
+            lastOfflineCheckTime = Date.now();
             return handleMockQuery(modelName, action, args);
           }
           // Also handle for any query error during local demo

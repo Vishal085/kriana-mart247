@@ -80,12 +80,12 @@ export function LiveMandiTicker() {
 
   return (
     <div
-      className="relative bg-[#073B6F] text-white border-b border-white/10 text-xs overflow-hidden select-none z-50"
+      className="relative bg-gradient-to-r from-[#041F3D] via-[#073B6F] to-[#041F3D] text-white border-b border-white/10 text-xs overflow-hidden select-none z-50 shadow-inner"
       aria-label="Live Mandi Price Ticker"
     >
       <div className="flex items-center">
         {/* Static Badge Left */}
-        <div className="shrink-0 z-10 flex items-center gap-1.5 bg-[#05284D] px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-[#39A9E8] shadow-md">
+        <div className="shrink-0 z-10 flex items-center gap-2 bg-[#031529] px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-[#39A9E8] shadow-md border-r border-white/10">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -94,8 +94,8 @@ export function LiveMandiTicker() {
           <span className="sm:hidden">Live</span>
         </div>
 
-        {/* Marquee Track Container */}
-        <div className="flex-1 overflow-hidden py-1.5">
+        {/* Marquee Track Container with smooth fade mask */}
+        <div className="flex-1 overflow-hidden py-1.5 marquee-mask">
           <div className="animate-marquee flex items-center whitespace-nowrap">
             {/* Repeated twice for continuous loop */}
             {[...tickerItems, ...tickerItems].map((item, idx) => {

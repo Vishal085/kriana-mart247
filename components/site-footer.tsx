@@ -10,7 +10,7 @@ export function SiteFooter() {
   const facebookUrl = process.env.NEXT_PUBLIC_FACEBOOK_URL || 'https://facebook.com';
 
   return (
-    <footer className="border-t border-slate-200 bg-white pt-12 pb-8 text-slate-600">
+    <footer className="border-t border-slate-200/80 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/60 pt-12 pb-8 text-slate-600">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Horizontal & Vertical Multi-Column Arrangement */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
