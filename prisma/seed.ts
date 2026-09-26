@@ -1614,7 +1614,7 @@ async function seed() {
   // 8. Admin & Customer Users
   console.log('👤 Seeding Admin & Customer Accounts...');
   const salt = await bcrypt.genSalt(10);
-  const adminPass = await bcrypt.hash('Admin@123', salt);
+  const adminPass = await bcrypt.hash('Vishal@9625', salt);
   const testPass = await bcrypt.hash('Test@123', salt);
 
   const admin = await prisma.user.create({

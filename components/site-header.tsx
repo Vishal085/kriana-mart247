@@ -22,6 +22,7 @@ import {
   ArrowLeft,
   ChevronDown,
   BarChart3,
+  UserPlus,
 } from 'lucide-react';
 import { BrandMark } from './brand-mark';
 import { useAuth } from '@/context/AuthContext';
@@ -278,14 +279,45 @@ export function SiteHeader() {
                         )}
 
                         {user && user.role === 'ADMIN' && (
-                          <Link
-                            href="/dashboard/admin"
-                            onClick={() => setProfileDropdownOpen(false)}
-                            className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-bold text-[#073B6F] hover:bg-slate-50 transition"
-                          >
-                            <Shield className="h-4 w-4 text-[#39A9E8]" />
-                            <span>Admin Console</span>
-                          </Link>
+                          <>
+                            <Link
+                              href="/dashboard/admin"
+                              onClick={() => setProfileDropdownOpen(false)}
+                              className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-bold text-[#073B6F] hover:bg-slate-50 transition"
+                            >
+                              <Shield className="h-4 w-4 text-[#39A9E8]" />
+                              <span>Admin Console</span>
+                            </Link>
+                            <Link
+                              href="/profile"
+                              onClick={() => setProfileDropdownOpen(false)}
+                              className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50 transition"
+                            >
+                              <User className="h-4 w-4 text-slate-500" />
+                              <span>Admin Profile</span>
+                            </Link>
+                            <Link
+                              href="/profile?tab=add-customer"
+                              onClick={() => setProfileDropdownOpen(false)}
+                              className="flex items-center justify-between rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50 transition"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <UserPlus className="h-4 w-4 text-emerald-600" />
+                                <span>Add Customer</span>
+                              </div>
+                              <span className="rounded-full bg-emerald-100 px-1.5 py-0.2 text-[9px] font-black text-emerald-800">
+                                New
+                              </span>
+                            </Link>
+                            <Link
+                              href="/dashboard/admin/users"
+                              onClick={() => setProfileDropdownOpen(false)}
+                              className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-medium text-slate-700 hover:bg-slate-50 transition"
+                            >
+                              <Store className="h-4 w-4 text-slate-500" />
+                              <span>Customer Accounts</span>
+                            </Link>
+                          </>
                         )}
 
                         {user && user.role === 'CUSTOMER' && (
@@ -470,14 +502,24 @@ export function SiteHeader() {
                     <span>List Your Product</span>
                   </Link>
                 ) : user?.role === 'ADMIN' ? (
-                  <Link
-                    href="/dashboard/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-2.5 text-xs font-bold text-white shadow-xs"
-                  >
-                    <Shield className="h-4 w-4" />
-                    <span>Admin Console</span>
-                  </Link>
+                  <div className="flex flex-col gap-2 w-full">
+                    <Link
+                      href="/dashboard/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#073B6F] py-2.5 text-xs font-bold text-white shadow-xs"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin Console</span>
+                    </Link>
+                    <Link
+                      href="/profile?tab=add-customer"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 py-2 text-xs font-bold text-emerald-800 shadow-xs"
+                    >
+                      <UserPlus className="h-4 w-4 text-emerald-600" />
+                      <span>Add Customer Store</span>
+                    </Link>
+                  </div>
                 ) : (
                   <Link
                     href="/login?redirect=/dashboard/seller"

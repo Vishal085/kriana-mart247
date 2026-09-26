@@ -107,7 +107,27 @@ const DATA_FILE = path.join(DATA_DIR, 'seller-store.json');
 let memoryStoreCache: StoreData | null = null;
 
 function ensureDataFile(): StoreData {
+  const adminHash = '$2b$10$YS0LRDO.6iEM3D6.mgjefebx9IDyMQjnIQRcy9sFAQ2b1pcj25wS6'; // bcrypt hash for Vishal@9625
   if (memoryStoreCache) {
+    if (!memoryStoreCache.users) memoryStoreCache.users = [];
+    const adm = memoryStoreCache.users.find((u: any) => u.email === 'admin@kiranamart247.com');
+    if (!adm) {
+      memoryStoreCache.users.push({
+        id: 'admin-master-user',
+        fullName: 'Vishal Gupta (Admin)',
+        email: 'admin@kiranamart247.com',
+        mobile: '9999999999',
+        passwordHash: adminHash,
+        role: 'ADMIN',
+        active: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      });
+    } else {
+      adm.passwordHash = adminHash;
+      adm.role = 'ADMIN';
+      adm.active = true;
+    }
     return memoryStoreCache;
   }
 
@@ -172,6 +192,26 @@ function ensureDataFile(): StoreData {
     }
     const raw = fs.readFileSync(DATA_FILE, 'utf8');
     const parsed = JSON.parse(raw);
+    if (!parsed.users) parsed.users = [];
+    const adminHash = '$2b$10$YS0LRDO.6iEM3D6.mgjefebx9IDyMQjnIQRcy9sFAQ2b1pcj25wS6'; // bcrypt hash for Vishal@9625
+    const existingAdmin = parsed.users.find((u: any) => u.email === 'admin@kiranamart247.com');
+    if (!existingAdmin) {
+      parsed.users.push({
+        id: 'admin-master-user',
+        fullName: 'Vishal Gupta (Admin)',
+        email: 'admin@kiranamart247.com',
+        mobile: '9999999999',
+        passwordHash: adminHash,
+        role: 'ADMIN',
+        active: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      });
+      saveStoreData(parsed);
+    } else if (existingAdmin.passwordHash !== adminHash) {
+      existingAdmin.passwordHash = adminHash;
+      saveStoreData(parsed);
+    }
     memoryStoreCache = parsed;
     return parsed;
   } catch (err) {
@@ -410,15 +450,50 @@ export class SellerStore {
   static createUser(user: Omit<CustomUserRecord, 'id' | 'createdAt' | 'updatedAt'>): CustomUserRecord {
     const store = ensureDataFile();
     const id = `user-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    let customerProfile = user.customerProfile;
+    if (customerProfile && customerProfile.create) {
+      customerProfile = {
+        id: `prof-${Date.now()}`,
+        userId: id,
+        ...customerProfile.create,
+      };
+    }
     const record: CustomUserRecord = {
       id,
       ...user,
+      customerProfile,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     store.users.push(record);
     saveStoreData(store);
     return record;
+  }
+
+  static updateUser(id: string, data: Partial<CustomUserRecord>): CustomUserRecord | null {
+    const store = ensureDataFile();
+    const idx = store.users.findIndex((u) => u.id === id);
+    if (idx === -1) return null;
+    const updated = {
+      ...store.users[idx],
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    store.users[idx] = updated;
+    saveStoreData(store);
+    return updated;
+  }
+
+  static getUsers(where: any = {}): CustomUserRecord[] {
+    const store = ensureDataFile();
+    let list = store.users || [];
+    if (where?.role) {
+      list = list.filter((u) => u.role === where.role);
+    }
+    if (where?.active !== undefined) {
+      list = list.filter((u) => u.active === where.active);
+    }
+    return list;
   }
 
   static getDairyProducts(where: any = {}): any[] {

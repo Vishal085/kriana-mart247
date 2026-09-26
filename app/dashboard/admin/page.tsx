@@ -159,6 +159,13 @@ export default async function AdminDashboardPage() {
               AI Social Auto-Publish
             </Link>
             <Link
+              href="/profile?tab=add-customer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+            >
+              <Users className="h-3.5 w-3.5" />
+              Add Customer
+            </Link>
+            <Link
               href="/dashboard/admin/rates"
               className="rounded-full bg-[#073B6F] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#0B5FA5] transition"
             >

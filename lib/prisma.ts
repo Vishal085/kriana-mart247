@@ -118,7 +118,7 @@ function filterMockProducts(where: any = {}): any[] {
 
   return list;
 }
-
+89
 export function filterMockRates(where: any = {}): any[] {
   let list = [...MOCK_MANDI_RATES];
 
@@ -566,7 +566,7 @@ function handleMockQuery(model: string, action: string, args: any[]): any {
       if (action === 'findMany') return [];
       break;
 
-    
+
     case "otpVerification": {
       if (!(globalThis as any)._mockOtps) (globalThis as any)._mockOtps = new Map();
       const mockOtps = (globalThis as any)._mockOtps;
@@ -701,7 +701,7 @@ export const prisma: any = new Proxy(rawPrisma, {
     }
 
     if (key === '$connect' || key === '$disconnect') {
-      return async () => {};
+      return async () => { };
     }
 
     if (key.startsWith('$')) {

@@ -96,24 +96,45 @@ function UnifiedLoginForm() {
         </p>
       </div>
 
-      {/* Role Pill Badges Indicator */}
+      {/* Role Pill Badges Indicator (Clickable quick selects) */}
       <div className="mt-4 flex items-center justify-center gap-1.5 sm:gap-2">
-        <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-[#073B6F] border border-blue-100">
+        <button
+          type="button"
+          onClick={() => {
+            setIdentifier('customer@kiranamart247.com');
+            setPassword('Test@123');
+          }}
+          className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-[#073B6F] border border-blue-100 hover:bg-blue-100 transition cursor-pointer"
+        >
           <ShoppingBag className="h-3 w-3 text-[#39A9E8]" />
           Customer
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-100">
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setIdentifier('shopkeeper@kiranamart247.com');
+            setPassword('shopkeeper123');
+          }}
+          className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-100 hover:bg-amber-100 transition cursor-pointer"
+        >
           <Store className="h-3 w-3 text-amber-600" />
           Shopkeeper
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 border border-slate-200">
-          <ShieldCheck className="h-3 w-3 text-slate-600" />
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setIdentifier('admin@kiranamart247.com');
+            setPassword('Vishal@9625');
+          }}
+          className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 border border-slate-200 hover:bg-slate-200 transition cursor-pointer"
+        >
+          <ShieldCheck className="h-3 w-3 text-[#073B6F]" />
           Admin
-        </span>
+        </button>
       </div>
 
       {/* 1-Click Instant Demo Login Selector */}
-      <div className="mt-5 rounded-2xl border border-blue-100 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/30 p-3.5 sm:p-4 shadow-xs">
+      <div className="mt-5 rounded-2xl border border-blue-100 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/30 p-3 sm:p-4 shadow-xs">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
@@ -129,23 +150,23 @@ function UnifiedLoginForm() {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-3 gap-2">
           {/* Customer Demo */}
           <button
             type="button"
             onClick={() => handleDemoLogin('customer@kiranamart247.com', 'Test@123')}
             disabled={loading || Boolean(successRole)}
-            className="group flex flex-col items-center justify-center rounded-xl border border-blue-200/80 bg-white p-3 text-center shadow-xs transition hover:border-[#073B6F] hover:bg-blue-50/60 hover:shadow-md cursor-pointer disabled:opacity-50"
+            className="group flex flex-col items-center justify-center rounded-xl border border-blue-200/80 bg-white p-2.5 text-center shadow-xs transition hover:border-[#073B6F] hover:bg-blue-50/60 hover:shadow-md cursor-pointer disabled:opacity-50"
             title="Login as Demo Customer"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-[#073B6F] group-hover:scale-110 group-hover:bg-[#073B6F] group-hover:text-white transition">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-[#073B6F] group-hover:scale-110 group-hover:bg-[#073B6F] group-hover:text-white transition">
               <ShoppingBag className="h-4 w-4" />
             </div>
-            <span className="mt-1.5 text-xs font-bold text-slate-800 group-hover:text-[#073B6F]">
-              Customer Demo
+            <span className="mt-1.5 text-[11px] font-bold text-slate-800 group-hover:text-[#073B6F] leading-tight">
+              Customer
             </span>
-            <span className="text-[10px] text-emerald-600 font-semibold mt-0.5">
-              1-Click Store Access
+            <span className="text-[9px] text-emerald-600 font-semibold mt-0.5">
+              Buyer Portal
             </span>
           </button>
 
@@ -154,17 +175,36 @@ function UnifiedLoginForm() {
             type="button"
             onClick={() => handleDemoLogin('shopkeeper@kiranamart247.com', 'shopkeeper123')}
             disabled={loading || Boolean(successRole)}
-            className="group flex flex-col items-center justify-center rounded-xl border border-amber-200/80 bg-white p-3 text-center shadow-xs transition hover:border-amber-600 hover:bg-amber-50/60 hover:shadow-md cursor-pointer disabled:opacity-50"
+            className="group flex flex-col items-center justify-center rounded-xl border border-amber-200/80 bg-white p-2.5 text-center shadow-xs transition hover:border-amber-600 hover:bg-amber-50/60 hover:shadow-md cursor-pointer disabled:opacity-50"
             title="Login as Demo Shopkeeper"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-50 text-amber-700 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-50 text-amber-700 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition">
               <Store className="h-4 w-4" />
             </div>
-            <span className="mt-1.5 text-xs font-bold text-slate-800 group-hover:text-amber-800">
-              Shopkeeper Demo
+            <span className="mt-1.5 text-[11px] font-bold text-slate-800 group-hover:text-amber-800 leading-tight">
+              Shopkeeper
             </span>
-            <span className="text-[10px] text-amber-600 font-semibold mt-0.5">
-              1-Click Seller Hub
+            <span className="text-[9px] text-amber-600 font-semibold mt-0.5">
+              Seller Hub
+            </span>
+          </button>
+
+          {/* Admin Demo */}
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('admin@kiranamart247.com', 'Vishal@9625')}
+            disabled={loading || Boolean(successRole)}
+            className="group flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-2.5 text-center shadow-xs transition hover:border-[#073B6F] hover:bg-slate-50 hover:shadow-md cursor-pointer disabled:opacity-50"
+            title="Login as Super Admin"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-[#073B6F] group-hover:scale-110 group-hover:bg-[#073B6F] group-hover:text-white transition">
+              <ShieldCheck className="h-4 w-4 text-[#073B6F] group-hover:text-white" />
+            </div>
+            <span className="mt-1.5 text-[11px] font-bold text-slate-800 group-hover:text-[#073B6F] leading-tight">
+              Admin
+            </span>
+            <span className="text-[9px] text-[#0B5FA5] font-semibold mt-0.5">
+              Full Console
             </span>
           </button>
         </div>
